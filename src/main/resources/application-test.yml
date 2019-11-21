@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: utf-8
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  thymeleaf:
+    cache: false
+  aop:
+    proxy-target-class: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+logging:
+  level:
+    org:
+      springframework:
+        boot:
+          autoconfigure: ERROR
+alibaba:
+  oss:
+    accessKeyId:
+    accessKeySecret:
+    endpoint:
+    bucketName:
+    httpPrefix: http://
+  ots:
+    endPoint:
+    accessKeyId:
+    accessKeySecret:
+    instanceName:

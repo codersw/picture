@@ -1,0 +1,8 @@
+alibaba:
+  acm:
+    file-extension: yml
+    endpoint: acm.aliyun.com
+    namespace: 65ed613c-6db8-48dc-9990-a95ed23b764a
+    accessKey: f1683ebaa76e467dbc4d017ac8b3a257
+    secretKey: 1ju360RY/lHE0QBrOqqPn4tpXHc=
+    group: picture

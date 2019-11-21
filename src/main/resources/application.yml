@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: acm
+  application:
+    name: picture
+    group: com.alibaba.cloud.acm
