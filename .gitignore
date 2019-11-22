@@ -29,3 +29,5 @@ build/
 
 ### VS Code ###
 .vscode/
+src/main/java/com/mango/picture/dao/
+src/main/java/com/mango/picture/service/
