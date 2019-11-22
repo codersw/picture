@@ -31,3 +31,7 @@ alibaba:
     accessKeyId:
     accessKeySecret:
     instanceName:
+  mns:
+    endpoint:
+    accessKeyId:
+    accessKeySecret:
