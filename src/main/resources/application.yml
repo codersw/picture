@@ -3,4 +3,3 @@ spring:
     active: dev
   application:
     name: picture
-#    group: com.alibaba.cloud.acm
