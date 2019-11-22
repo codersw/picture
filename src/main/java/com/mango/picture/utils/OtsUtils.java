@@ -4,13 +4,13 @@ import com.alicloud.openservices.tablestore.ClientException;
 import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.TableStoreException;
 import com.alicloud.openservices.tablestore.model.*;
+import com.alicloud.openservices.tablestore.model.search.*;
 import com.mango.picture.model.ots.TableStore;
 import com.mango.picture.model.ots.TableStoreRow;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import java.util.*;
 
 /**
@@ -47,9 +47,9 @@ public class OtsUtils {
         OtsUtils.endpoint = endpoint;
     }
 
-    @Value("${alibaba.ots.instanceName }")
+    @Value("${alibaba.ots.instanceName}")
     public void setInstanceName (String instanceName) {
-        OtsUtils.instanceName  = instanceName ;
+        OtsUtils.instanceName  = instanceName;
     }
 
     /**
@@ -138,6 +138,102 @@ public class OtsUtils {
             log.error("判断表格是否存在失败!请求失败详情：{}",e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * 创建索引
+     * @param tableName
+     * @param indexName
+     * @param columnName
+     */
+    public void createIndex(String tableName, String indexName, String columnName) {
+        log.info("创建索引开始:表{}索引{}列{}", tableName, indexName, columnName);
+        IndexMeta indexMeta = new IndexMeta(indexName); // 要创建的索引表名称。
+        indexMeta.addPrimaryKeyColumn(columnName); // 为索引表添加主键列。
+        CreateIndexRequest request = new CreateIndexRequest(tableName, indexMeta, true);
+        try {
+            client.createIndex(request);
+            log.info("创建索引成功:表{}索引{}列{}", tableName, indexName, columnName);
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.info("创建索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("创建索引失败!请求失败详情：{}",e.getMessage());
+        }
+    }
+
+    /**
+     * 删除索引
+     * @param tableName
+     * @param indexName
+     */
+    public void deleteIndex(String tableName, String indexName) {
+        log.info("删除索引开始:表{}索引{}", tableName, indexName);
+        DeleteIndexRequest request = new DeleteIndexRequest(tableName, indexName); // 要删除的索引表及主表名
+        try {
+            client.deleteIndex(request);
+            log.info("删除索引成功:表{}索引{}", tableName, indexName);
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.info("删除索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("删除索引失败!请求失败详情：{}",e.getMessage());
+        }
+    }
+
+    /**
+     * 创建联合索引
+     * @param tableName
+     * @param searchIndexName
+     * @param columnName
+     */
+    public static void createSearchIndex(String tableName, String searchIndexName, Map<String, FieldType> columnName){
+        log.info("创建联合索引开始:表{}索引{}", tableName, searchIndexName);
+        CreateSearchIndexRequest request = new CreateSearchIndexRequest();
+        request.setTableName(tableName);
+        request.setIndexName(searchIndexName);
+        IndexSchema indexSchema = new IndexSchema();
+        List<FieldSchema> fieldSchemas = new ArrayList<>();
+        //需要添加的列
+        columnName.keySet().forEach(key ->{
+            fieldSchemas.add(new FieldSchema(key, columnName.get(key)).setIndex(true).setEnableSortAndAgg(true));
+        });
+        indexSchema.setFieldSchemas(fieldSchemas);
+        request.setIndexSchema(indexSchema);
+        try {
+            client.createSearchIndex(request);
+            log.info("创建联合成功:表{}索引{}", tableName, searchIndexName);
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.info("创建联合失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("创建联合失败!请求失败详情：{}",e.getMessage());
+        }
+    }
+
+    /**
+     * 删除联合索引
+     * @param tableName
+     * @param searchIndexName
+     */
+    public static void deleteSearchIndex(String tableName, String searchIndexName) {
+        log.info("删除联合索引开始:表{}索引{}", tableName, searchIndexName);
+        DeleteSearchIndexRequest request = new DeleteSearchIndexRequest();
+        request.setTableName(tableName);
+        request.setIndexName(searchIndexName);
+        try {
+            client.deleteSearchIndex(request);
+            log.info("删除联合成功:表{}索引{}", tableName, searchIndexName);
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.info("删除联合失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("删除联合失败!请求失败详情：{}",e.getMessage());
+        }
     }
 
     /**

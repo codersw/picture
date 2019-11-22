@@ -3,11 +3,13 @@ package com.mango.picture.model.ots;
 import com.alicloud.openservices.tablestore.model.DefinedColumnSchema;
 import com.alicloud.openservices.tablestore.model.PrimaryKeySchema;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
+
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
