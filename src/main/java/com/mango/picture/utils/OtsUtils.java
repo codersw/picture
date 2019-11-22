@@ -5,6 +5,9 @@ import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.TableStoreException;
 import com.alicloud.openservices.tablestore.model.*;
 import com.alicloud.openservices.tablestore.model.search.*;
+import com.alicloud.openservices.tablestore.model.search.query.BoolQuery;
+import com.alicloud.openservices.tablestore.model.search.query.Query;
+import com.alicloud.openservices.tablestore.model.search.query.RangeQuery;
 import com.mango.picture.model.ots.TableStore;
 import com.mango.picture.model.ots.TableStoreRow;
 import lombok.Data;
@@ -335,6 +338,39 @@ public class OtsUtils {
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("查找数据失败!请求失败详情：{}",e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 多条件查找数据
+     * @param tableName
+     * @param searchIndexName
+     * @param searchQuery
+     */
+    public List<TableStoreRow> searchQuery(String tableName, String searchIndexName,SearchQuery searchQuery){
+        log.info("开始多条件查找数据{}", tableName);
+        searchQuery.setGetTotalCount(true);
+        SearchRequest searchRequest = new SearchRequest(tableName, searchIndexName, searchQuery);
+        try {
+            SearchResponse resp = client.search(searchRequest);
+            List<Row> rows = resp.getRows();
+            if(rows.isEmpty()) {
+                log.info("查找数据结果集为空!");
+                return null;
+            }
+            log.info("多条件查找数据成功{}", tableName);
+            List<TableStoreRow> tableStoreRows = new ArrayList<>();
+            rows.forEach(row ->{
+                tableStoreRows.add(formatTableStoreRow(row));
+            });
+            return tableStoreRows;
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.error("多条件查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("多条件查找失败!请求失败详情：{}",e.getMessage());
         }
         return null;
     }
