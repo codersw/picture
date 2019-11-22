@@ -6,11 +6,13 @@ import lombok.*;
 
 import java.util.Map;
 
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class TableStoreRow extends TableStore {
 
     private Map<String, PrimaryKeyValue> primaryKeyValue;

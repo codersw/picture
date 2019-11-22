@@ -53,7 +53,7 @@ public class UploadFileController {
         }catch (Exception e){
             e.printStackTrace();
             log.error("上传图片发生异常{}", e.getMessage());
-            return  ResultGenerator.genFailResult("上传图片发生异常");
+            return ResultGenerator.genFailResult("上传图片发生异常");
         }
     }
 }

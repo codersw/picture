@@ -2,6 +2,7 @@ package com.mango.picture.enums;
 
 /**
  * 响应值枚举
+ * @author swen
  */
 public enum ResultCodeEnum  implements BaseEnum {
 

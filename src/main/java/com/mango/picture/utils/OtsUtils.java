@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+/**
+ * ots工具类
+ *@Author swen
+ */
 @Slf4j
 @Data
 @Component
@@ -65,7 +69,7 @@ public class OtsUtils {
      * 创建表格
      * @param tableStore
      */
-    public static void creatTable(TableStore tableStore){
+    public void creatTable(TableStore tableStore){
         log.info("开始创建表格{}", tableStore.getTableName());
         //描述表的结构信息
         TableMeta tableMeta = new TableMeta(tableStore.getTableName());
@@ -93,10 +97,54 @@ public class OtsUtils {
     }
 
     /**
+     * 删除表格
+     * @param tableName
+     */
+    public void deleteTable(String tableName){
+        log.info("删除表格开始:{}", tableName);
+        DeleteTableRequest request = new DeleteTableRequest(tableName);
+        try {
+            client.deleteTable(request);
+            log.info("删除表格成功:{}", tableName);
+        } catch (TableStoreException e) {
+            System.err.println("操作失败，详情：" + e.getMessage());
+            log.error("删除表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("删除表格失败!请求失败详情：{}",e.getMessage());
+        }
+    }
+
+    /**
+     * 判断表格是否存在
+     * @param tableName
+     * @return
+     */
+    public boolean existTable(String tableName) {
+        log.info("判断表格是否存在开始:{}", tableName);
+        DescribeTableRequest request = new DescribeTableRequest(tableName);
+        try {
+            DescribeTableResponse response = client.describeTable(request);
+            TableMeta tableMeta = response.getTableMeta();
+            if (tableMeta != null && tableMeta.getTableName() != null) {
+                log.info("判断表格是否存在成功:{}", tableName);
+                return true;
+            }
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.error("判断表格是否存在失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("判断表格是否存在失败!请求失败详情：{}",e.getMessage());
+        }
+        return false;
+    }
+
+    /**
      * 添加数据
      * @param row
      */
-    public static void creatRow(TableStoreRow row){
+    public void creatRow(TableStoreRow row){
         log.info("开始添加数据{}", row.getTableName());
         //主键信息
         PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
@@ -124,7 +172,7 @@ public class OtsUtils {
      * @param row
      * @return
      */
-    public static TableStoreRow retrieveRow(TableStoreRow row) {
+    public TableStoreRow retrieveRow(TableStoreRow row) {
         log.info("开始查找数据{}", row.getTableName());
         //主键信息
         PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
@@ -159,7 +207,7 @@ public class OtsUtils {
      * @param direction
      * @return
      */
-    public static List<TableStoreRow> retrieveRow(TableStoreRow startRow, TableStoreRow endRow, Integer limit, Direction direction) {
+    public List<TableStoreRow> retrieveRow(TableStoreRow startRow, TableStoreRow endRow, Integer limit, Direction direction) {
         log.info("开始查找数据{}", startRow.getTableName());
         //构建start主键
         PrimaryKey primaryStartKey = creatPrimaryKey(startRow.getPrimaryKeyValue());
@@ -196,11 +244,57 @@ public class OtsUtils {
     }
 
     /**
+     * 更新数据
+     * @param row
+     */
+    public void updataRow(TableStoreRow row){
+        //构建主键
+        PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
+        RowUpdateChange rowUpdateChange = new RowUpdateChange(row.getTableName(), primaryKey);
+        //构建属性列
+        Map<String, ColumnValue> columnValue = row.getColumnValue();
+        columnValue.keySet().forEach(key ->{
+            rowUpdateChange.put(key, columnValue.get(key));
+        });
+        //添加新数据到表格
+        try {
+            client.updateRow(new UpdateRowRequest(rowUpdateChange));
+            log.info("更新数据成功{}", row.getTableName());
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.error("更新数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("更新数据失败!请求失败详情：{}",e.getMessage());
+        }
+    }
+
+    /**
+     * 删除数据
+     * @param row
+     */
+    private void deleteRow(TableStoreRow row) {
+        //构建主键
+        PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
+        RowDeleteChange rowDeleteChange = new RowDeleteChange(row.getTableName(), primaryKey);
+        //删除数据
+        try {
+            client.deleteRow(new DeleteRowRequest(rowDeleteChange));
+            log.info("删除数据成功{}", row.getTableName());
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.error("删除数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            log.error("删除数据失败!请求失败详情：{}",e.getMessage());
+        }
+    }
+
+    /**
      * 构造主键信息
      * @param primaryKeyValue
      * @return
      */
-    private static PrimaryKey creatPrimaryKey(Map<String, PrimaryKeyValue> primaryKeyValue){
+    private PrimaryKey creatPrimaryKey(Map<String, PrimaryKeyValue> primaryKeyValue){
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
         primaryKeyValue.keySet().forEach(key ->{
             primaryKeyBuilder.addPrimaryKeyColumn(key, primaryKeyValue.get(key));
@@ -213,7 +307,7 @@ public class OtsUtils {
      * @param row
      * @return
      */
-    private static TableStoreRow formatTableStoreRow(Row row){
+    private TableStoreRow formatTableStoreRow(Row row){
         //处理主键信息
         Map<String, PrimaryKeyValue> primaryKeyValueMap = new HashMap<>();
         Map<String, PrimaryKeyColumn> primaryKeyColumnsMap = row.getPrimaryKey().getPrimaryKeyColumnsMap();

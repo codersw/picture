@@ -33,7 +33,7 @@ public class Swagger2Config {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("贷款信息平台 API文档")
+                .title("相册 API文档")
                 .description("API 描述")
                 .version("1.0")
                 .build();

@@ -7,7 +7,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * 文件工具类
+ * file工具类
+ * @Author swen
  */
 public class FileUtils extends org.apache.commons.io.FileUtils{
 

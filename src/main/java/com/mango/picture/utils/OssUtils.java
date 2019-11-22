@@ -1,5 +1,6 @@
 package com.mango.picture.utils;
 
+import com.alicloud.openservices.tablestore.core.utils.Base64;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.OSSObject;
@@ -9,11 +10,12 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
-
+/**
+ * oss工具类
+ *@Author swen
+ */
 @Slf4j
 @Data
 @Component
@@ -79,6 +81,16 @@ public class OssUtils {
     }
 
     /**
+     * 保存文件
+     * @param base64String
+     * @param targetPath
+     * @throws IOException
+     */
+    public void save(String base64String, String targetPath) throws IOException {
+        oss.putObject(bucketName, targetPath, new ByteArrayInputStream(getStringImage(base64String)));
+    }
+
+    /**
      * 复制文件
      * @param sourcePath
      * @param targetPath
@@ -127,5 +139,15 @@ public class OssUtils {
      */
     public String getViewUrl(String path) {
         return httpPrefix + bucketName + "." + endpoint + "/" + path;
+    }
+
+    /**
+     * base码转流
+     * @param base64String
+     * @return
+     * @throws IOException
+     */
+    private byte[] getStringImage(String base64String) throws IOException {
+        return Base64.fromBase64String(base64String);
     }
 }

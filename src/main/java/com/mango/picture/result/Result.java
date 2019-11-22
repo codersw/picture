@@ -3,16 +3,12 @@ package com.mango.picture.result;
 import com.alibaba.fastjson.JSON;
 import com.mango.picture.enums.ResultCodeEnum;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 
 /**
  * 统一返回类
- * @Author: swen
+ * @Author swen
  */
 @Data
 public class Result<T> implements Serializable {
