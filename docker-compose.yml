@@ -1,0 +1,18 @@
+# docker-compose.yml文件的版本
+version: "3.7"
+# 管理的服务
+services:
+  picture:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: /target/picture.jar
+    ports:
+      - "8080:8080"
+    environment:
+      - "JAVA_OPTS=-Dserver.port=8080 -Dspring.profiles.active=acm"
+    volumes:
+      - "${LOAN_DIR}:/tmp/picture"
+      - "${LOAN_DIR}/logs:/tmp/picture/logs/"
+    restart: always
