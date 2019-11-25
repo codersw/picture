@@ -4,6 +4,9 @@ package com.mango.photoalbum.model.pojo;
 import lombok.*;
 import java.util.Date;
 
+/**
+ * 文件实体
+ */
 @Data
 @Builder
 @ToString
@@ -40,6 +43,11 @@ public class UploadFile {
      * 文件名字
      */
     private String fileName;
+
+    /**
+     * 相册id
+     */
+    private String albumId;
 
     /**
      * 上传日期

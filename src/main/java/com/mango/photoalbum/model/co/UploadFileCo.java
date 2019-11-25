@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.NotNull;
 
 @Data
-@ApiModel("上传文件实体")
+@ApiModel("上传文件")
 public class UploadFileCo {
 
     @ApiModelProperty(value = "文件id")

@@ -1,6 +1,7 @@
 package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.model.co.UploadFileCo;
+import com.mango.photoalbum.model.co.UploadFileMultiCo;
 import com.mango.photoalbum.model.pojo.UploadFile;
 import com.mango.photoalbum.result.Result;
 import com.mango.photoalbum.result.ResultGenerator;
@@ -78,16 +79,15 @@ public class UploadFileController {
 
     /**
      * 上传图片
-     * @param uploadFileCos
+     * @param uploadFileMultiCo
      * @return
      */
     @ApiOperation(value = "文件批量上传接口", notes = "文件批量上传接口")
-    @ApiImplicitParams({@ApiImplicitParam(name = "uploadFileCos", value = "文件批量上传列表",
-            paramType = "query", allowMultiple = true, dataType = "UploadFileCo")})
     @PostMapping(value = "/files", headers = "content-type=multipart/form-data")
-    public Result files(@ModelAttribute List<UploadFileCo> uploadFileCos) {
+    public Result files(@ModelAttribute UploadFileMultiCo uploadFileMultiCo) {
         try {
             List<UploadFile> result = new ArrayList<>();
+            List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
             uploadFileCos.forEach(uploadFileCo ->{
                 if(Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
                     String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
