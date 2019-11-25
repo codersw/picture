@@ -1,8 +1,14 @@
 package com.mango.photoalbum.model.pojo;
 
+import com.alicloud.openservices.tablestore.model.DefinedColumnSchema;
+import com.alicloud.openservices.tablestore.model.DefinedColumnType;
+import com.alicloud.openservices.tablestore.model.PrimaryKeySchema;
+import com.alicloud.openservices.tablestore.model.PrimaryKeyType;
+import com.mango.photoalbum.model.ots.TableStore;
 import lombok.*;
-
+import java.util.ArrayList;
 import java.util.Date;
+
 
 /**
  * 相册实体
@@ -58,4 +64,5 @@ public class PhotoAlbum {
      * 拍摄地点
      */
     private String shootLocation;
+
 }

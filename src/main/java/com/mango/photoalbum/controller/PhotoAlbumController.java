@@ -1,5 +1,6 @@
 package com.mango.photoalbum.controller;
 
+import com.mango.photoalbum.model.co.PhotoAlbumCo;
 import com.mango.photoalbum.result.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,7 +46,7 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "保存相册", notes = "保存相册")
     @PostMapping
-    public Result save(){
+    public Result save(@RequestBody PhotoAlbumCo photoAlbumCo){
         return null;
     }
 

@@ -3,13 +3,11 @@ package com.mango.photoalbum.model.ots;
 import com.alicloud.openservices.tablestore.model.DefinedColumnSchema;
 import com.alicloud.openservices.tablestore.model.PrimaryKeySchema;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.util.List;
 
 
 @Data
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
@@ -20,4 +18,5 @@ public class TableStore {
     private List<PrimaryKeySchema> primaryKeySchemas;
 
     private List<DefinedColumnSchema> definedColumnSchemas;
+
 }

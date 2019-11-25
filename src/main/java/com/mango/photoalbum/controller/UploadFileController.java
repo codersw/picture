@@ -82,7 +82,7 @@ public class UploadFileController {
      * @param uploadFileMultiCo
      * @return
      */
-    @ApiOperation(value = "文件批量上传接口", notes = "文件批量上传接口")
+    @ApiOperation(value = "文件批量上传接口", notes = "swagger批量文件上传不好用请用postman等工具测试")
     @PostMapping(value = "/files", headers = "content-type=multipart/form-data")
     public Result files(@ModelAttribute UploadFileMultiCo uploadFileMultiCo) {
         try {

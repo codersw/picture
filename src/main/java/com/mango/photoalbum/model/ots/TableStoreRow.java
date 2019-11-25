@@ -2,15 +2,19 @@ package com.mango.photoalbum.model.ots;
 
 import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.PrimaryKeyValue;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
+
 import java.util.Map;
 
-@EqualsAndHashCode(callSuper = true)
+
 @Data
-@SuperBuilder
-public class TableStoreRow extends TableStore {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class TableStoreRow {
+
+    private String tableName;
 
     private Map<String, PrimaryKeyValue> primaryKeyValue;
 

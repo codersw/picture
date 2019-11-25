@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -440,5 +441,41 @@ public class OtsUtils {
                 .primaryKeyValue(primaryKeyValueMap)
                 .columnValue(columnValueMap)
                 .build();
+    }
+
+    public TableStore toTableStore(String tableName, Class<?> c, String... primaryKey){
+        List<Field> fields = Arrays.asList(c.getDeclaredFields());
+        List<String> pkList = Arrays.asList(primaryKey);
+        List<PrimaryKeySchema> primaryKeySchemas = new ArrayList<PrimaryKeySchema>();
+        List<DefinedColumnSchema> definedColumnSchemas = new ArrayList<DefinedColumnSchema>();
+        fields.forEach(field -> {
+            String name = field.getName(); // 获取属性的名字
+            String type = field.getGenericType().toString(); // 获取属性的类型
+            if(pkList.contains(name)){
+                PrimaryKeySchema primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.STRING);
+                if (type.equals("class java.lang.Integer")){
+                    primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.INTEGER);
+                }
+                primaryKeySchemas.add(primaryKeySchema);
+            } else {
+                DefinedColumnSchema definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.STRING);
+                if (type.equals("class java.lang.Integer")){
+                    definedColumnSchema= new DefinedColumnSchema(name, DefinedColumnType.INTEGER);
+                }
+                if (type.equals("class java.lang.Boolean")){
+                    definedColumnSchema= new DefinedColumnSchema(name, DefinedColumnType.BOOLEAN);
+                }
+                if (type.equals("class java.lang.Double")){
+                    definedColumnSchema= new DefinedColumnSchema(name, DefinedColumnType.DOUBLE);
+                }
+                definedColumnSchemas.add(definedColumnSchema);
+            }
+        });
+        return TableStore.builder()
+                .tableName(tableName)
+                .primaryKeySchemas(primaryKeySchemas)
+                .definedColumnSchemas(definedColumnSchemas)
+                .build();
+
     }
 }

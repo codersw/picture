@@ -29,7 +29,7 @@ alibaba:
   ots:
     accessKeyId: LTAI4Fd66vvuVj31seQ2YbQQ
     accessKeySecret: AgUkSMWtlICI7lY2oBFM0aD94ZlqYt
-    endPoint: https://sun.cn-hangzhou.ots.aliyuncs.com
+    endPoint: https://table-mango.cn-hangzhou.ots.aliyuncs.com
     instanceName: table-mango
   mns:
     accessKeyId: LTAI4Fd66vvuVj31seQ2YbQQ
