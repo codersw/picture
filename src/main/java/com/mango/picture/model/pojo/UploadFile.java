@@ -1,8 +1,7 @@
-package com.mango.picture.model;
+package com.mango.picture.model.pojo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.*;
-
 import java.util.Date;
 
 @Data
@@ -13,6 +12,11 @@ import java.util.Date;
 public class UploadFile {
 
     /**
+     * 文件id
+     */
+    private String fileId;
+
+    /**
      * 文件类型
      */
     private String fileType;
@@ -21,6 +25,11 @@ public class UploadFile {
      * 文件路径
      */
     private String filePath;
+
+    /**
+     * 备注
+     */
+    private String remark;
 
     /**
      * 文件大小
@@ -35,7 +44,21 @@ public class UploadFile {
     /**
      * 上传日期
      */
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
-    private Date createDate;
+    private Date createTime;
+
+    /**
+     * 修改时间
+     */
+    private Date modifyTime;
+
+    /**
+     * 上传人id
+     */
+    private Integer userId;
+
+    /**
+     * 是否删除
+     */
+    private Integer isDel;
 
 }

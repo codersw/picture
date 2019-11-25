@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**
@@ -25,40 +27,25 @@ import java.util.*;
 @Component
 public class OtsUtils {
 
-    private static String accessKeyId;
-
-    private static String accessKeySecret;
-
-    private static String endpoint;
-
-    private static String instanceName ;
-
-    private static SyncClient client;
-
     @Value("${alibaba.ots.accessKeyId}")
-    public void setAccessKeyId(String accessKeyId) {
-        OtsUtils.accessKeyId = accessKeyId;
-    }
+    private String accessKeyId;
 
     @Value("${alibaba.ots.accessKeySecret}")
-    public void setAccessKeySecret(String accessKeySecret) {
-        OtsUtils.accessKeySecret = accessKeySecret;
-    }
+    private String accessKeySecret;
 
     @Value("${alibaba.ots.endpoint}")
-    public void setEndpoint(String endpoint) {
-        OtsUtils.endpoint = endpoint;
-    }
+    private String endpoint;
 
     @Value("${alibaba.ots.instanceName}")
-    public void setInstanceName (String instanceName) {
-        OtsUtils.instanceName  = instanceName;
-    }
+    private String instanceName ;
+
+    private SyncClient client;
 
     /**
      * 初始化OTS访问对象
      */
-    static {
+    @PostConstruct
+    private void init(){
         try {
             client = new SyncClient(endpoint, accessKeyId, accessKeySecret, instanceName);
         } catch (Exception e){
@@ -192,7 +179,7 @@ public class OtsUtils {
      * @param searchIndexName
      * @param columnName
      */
-    public static void createSearchIndex(String tableName, String searchIndexName, Map<String, FieldType> columnName){
+    public void createSearchIndex(String tableName, String searchIndexName, Map<String, FieldType> columnName){
         log.info("创建联合索引开始:表{}索引{}", tableName, searchIndexName);
         CreateSearchIndexRequest request = new CreateSearchIndexRequest();
         request.setTableName(tableName);
@@ -222,7 +209,7 @@ public class OtsUtils {
      * @param tableName
      * @param searchIndexName
      */
-    public static void deleteSearchIndex(String tableName, String searchIndexName) {
+    public void deleteSearchIndex(String tableName, String searchIndexName) {
         log.info("删除联合索引开始:表{}索引{}", tableName, searchIndexName);
         DeleteSearchIndexRequest request = new DeleteSearchIndexRequest();
         request.setTableName(tableName);

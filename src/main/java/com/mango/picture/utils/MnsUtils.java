@@ -20,44 +20,29 @@ import javax.annotation.PostConstruct;
 @Data
 public class MnsUtils {
 
-    private static String accessKeyId;
-
-    private static String accessKeySecret;
-
-    private static String endpoint;
-
-    private static MNSClient client;
-
     @Value("${alibaba.mns.accessKeyId}")
-    public void setAccessKeyId(String accessKeyId) {
-        MnsUtils.accessKeyId = accessKeyId;
-    }
+    private String accessKeyId;
 
     @Value("${alibaba.mns.accessKeySecret}")
-    public void setAccessKeySecret(String accessKeySecret) {
-        MnsUtils.accessKeySecret = accessKeySecret;
-    }
+    private String accessKeySecret;
 
     @Value("${alibaba.mns.endpoint}")
-    public void setEndpoint(String endpoint) {
-        MnsUtils.endpoint = endpoint;
-    }
+    private String endpoint;
 
-    static {
+    private MNSClient client;
+
+    //@PostConstruct
+    private void init() {
         try {
             CloudAccount account = new CloudAccount(accessKeyId, accessKeySecret, endpoint);
             client = account.getMNSClient();
+            ThreadPoolHelper pool = new ThreadPoolHelper();
+            pool.Executor(this::ThreadWork);
         } catch (Exception e){
-          e.printStackTrace();
-          client = null;
-          log.error("创建client失败:{}", e.getMessage());
+            e.printStackTrace();
+            client = null;
+            log.error("创建mns client失败:{}", e.getMessage());
         }
-    }
-
-    //@PostConstruct
-    public void Work() {
-        ThreadPoolHelper pool = new ThreadPoolHelper();
-        pool.Executor(this::ThreadWork);
     }
 
     /**

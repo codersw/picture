@@ -1,21 +1,23 @@
 package com.mango.picture.controller;
 
-import com.mango.picture.model.UploadFile;
+import com.mango.picture.model.co.UploadFileCo;
+import com.mango.picture.model.pojo.UploadFile;
 import com.mango.picture.result.Result;
 import com.mango.picture.result.ResultGenerator;
 import com.mango.picture.utils.CommonUtils;
 import com.mango.picture.utils.FileUtils;
 import com.mango.picture.utils.OssUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,25 +35,35 @@ public class UploadFileController {
 
     /**
      * 上传图片
-     * @param file
+     * @param uploadFileCo
      * @return
      */
     @ApiOperation(value = "文件上传接口", notes = "文件上传接口")
+    @ApiImplicitParams({@ApiImplicitParam(paramType = "form", dataType="__file", name = "file",
+            value = "文件", required = true)})
     @PostMapping(value = "/file", headers = "content-type=multipart/form-data")
-    public Result file(@ApiParam(value = "文件", required = true) MultipartFile file) {
+    public Result file(@ModelAttribute UploadFileCo uploadFileCo) {
         try {
-            if(!CommonUtils.isNullOrEmpty(file)){
-                if(!Objects.requireNonNull(file.getContentType()).contains("image")){
+            if(!CommonUtils.isNullOrEmpty(uploadFileCo.getFile())){
+                if(!Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
                     return ResultGenerator.genFailResult("上传文件类型只可以是图片");
                 }
-                String ossFileName = CommonUtils.UUID();
-                oss.save(file.getInputStream(), ossFileName);
+                String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
+                if(StringUtils.isBlank(uploadFileCo.getFileId())){
+                    uploadFileCo.setFileId(CommonUtils.UUID());
+                }
+                String ossFileName = uploadFileCo.getFileId() + fileType;
+                oss.save(uploadFileCo.getFile().getInputStream(), ossFileName );
                 UploadFile uploadFile = UploadFile.builder()
-                        .fileName(file.getOriginalFilename())
+                        .fileId(uploadFileCo.getFileId())
+                        .fileName(uploadFileCo.getFile().getOriginalFilename())
                         .filePath(oss.getViewUrl(ossFileName))
-                        .fileSize(file.getSize())
-                        .fileType(FileUtils.getFileType(file.getOriginalFilename()))
-                        .createDate(new Date())
+                        .fileSize(uploadFileCo.getFile().getSize())
+                        .fileType(fileType)
+                        .createTime(new Date())
+                        .modifyTime(new Date())
+                        .remark(uploadFileCo.getRemark())
+                        .userId(uploadFileCo.getUserId())
                         .build();
                 return ResultGenerator.genSuccessResult(uploadFile);
             }else{
@@ -64,25 +76,46 @@ public class UploadFileController {
         }
     }
 
+
     /**
      * 上传图片
-     * @param base64String
+     * @param uploadFileCos
      * @return
      */
-    @ApiOperation(value = "文件上传接口", notes = "文件上传接口")
-    @PostMapping(value = "/file_base64", headers = "content-type=multipart/form-data")
-    public Result fileBase64(@ApiParam(value = "base64字符串", required = true) String base64String) {
+    @ApiOperation(value = "文件批量上传接口", notes = "文件批量上传接口")
+    @ApiImplicitParams({@ApiImplicitParam(name = "uploadFileCos", value = "文件批量上传列表",
+            paramType = "query", allowMultiple = true, dataType = "UploadFileCo")})
+    @PostMapping(value = "/files", headers = "content-type=multipart/form-data")
+    public Result files(@ModelAttribute List<UploadFileCo> uploadFileCos) {
         try {
-            String ossFileName = CommonUtils.UUID();
-            oss.save(base64String, ossFileName);
-            UploadFile uploadFile = UploadFile.builder()
-                    .fileName("图片")
-                    .filePath(oss.getViewUrl(ossFileName))
-                    .fileSize((long) base64String.length())
-                    .fileType("jpg")
-                    .createDate(new Date())
-                    .build();
-            return ResultGenerator.genSuccessResult(uploadFile);
+            List<UploadFile> result = new ArrayList<>();
+            uploadFileCos.forEach(uploadFileCo ->{
+                if(Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
+                    String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
+                    if(StringUtils.isBlank(uploadFileCo.getFileId())){
+                        uploadFileCo.setFileId(CommonUtils.UUID());
+                    }
+                    String ossFileName = uploadFileCo.getFileId() + fileType;
+                    try {
+                        oss.save(uploadFileCo.getFile().getInputStream(), ossFileName );
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        log.error("上传图片发生异常{}", e.getMessage());
+                    }
+                    result.add(UploadFile.builder()
+                            .fileId(uploadFileCo.getFileId())
+                            .fileName(uploadFileCo.getFile().getOriginalFilename())
+                            .filePath(oss.getViewUrl(ossFileName))
+                            .fileSize(uploadFileCo.getFile().getSize())
+                            .fileType(fileType)
+                            .createTime(new Date())
+                            .modifyTime(new Date())
+                            .remark(uploadFileCo.getRemark())
+                            .userId(uploadFileCo.getUserId())
+                            .build());
+                }
+            });
+            return ResultGenerator.genSuccessResult(result);
         }catch (Exception e){
             e.printStackTrace();
             log.error("上传图片发生异常{}", e.getMessage());

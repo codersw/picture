@@ -64,4 +64,38 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
             file.createNewFile();
         }
     }
+
+    /**
+     * 通过文件名判断并获取文件的contentType
+     * @param fileName 文件名
+     * @return 文件的contentType
+     */
+    public static String getContentType(String fileName)
+    {
+        String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+        if (".bmp".equalsIgnoreCase(fileExtension))
+            return "image/bmp";
+        if (".gif".equalsIgnoreCase(fileExtension))
+            return "image/gif";
+        if (".jpeg".equalsIgnoreCase(fileExtension))
+            return "image/jpeg";
+        if (".jpg".equalsIgnoreCase(fileExtension))
+            return "image/jpg";
+        if (".png".equalsIgnoreCase(fileExtension))
+            return "image/png";
+        if (".html".equalsIgnoreCase(fileExtension))
+            return "text/html";
+        if (".txt".equalsIgnoreCase(fileExtension))
+            return "text/plain";
+        if (".vsd".equalsIgnoreCase(fileExtension))
+            return "application/vnd.visio";
+        if (".ppt".equalsIgnoreCase(fileExtension) || "pptx".equalsIgnoreCase(fileExtension))
+            return "application/vnd.ms-powerpoint";
+        if (".doc".equalsIgnoreCase(fileExtension) || "docx".equalsIgnoreCase(fileExtension))
+            return "application/msword";
+        if (".xml".equalsIgnoreCase(fileExtension))
+            return "text/xml";
+        return "text/html";
+    }
+
 }

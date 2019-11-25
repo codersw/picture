@@ -1,16 +1,18 @@
 package com.mango.picture.utils;
 
 import com.alicloud.openservices.tablestore.core.utils.Base64;
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.*;
+import com.aliyun.oss.model.CannedAccessControlList;
+import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import com.aliyun.oss.model.OSSObject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
+import javax.annotation.PostConstruct;
 import java.io.*;
+import java.util.Date;
 
 /**
  * oss工具类
@@ -21,47 +23,28 @@ import java.io.*;
 @Component
 public class OssUtils {
 
-    private static String accessKeyId;
-
-    private static String accessKeySecret;
-
-    private static String endpoint;
-
-    private static String bucketName;
-
-    private static String httpPrefix;
-
-    private static OSS oss;
-
     @Value("${alibaba.oss.accessKeyId}")
-    public void setAccessKeyId(String accessKeyId) {
-        OssUtils.accessKeyId = accessKeyId;
-    }
+    private String accessKeyId;
 
     @Value("${alibaba.oss.accessKeySecret}")
-    public void setAccessKeySecret(String accessKeySecret) {
-        OssUtils.accessKeySecret = accessKeySecret;
-    }
+    private String accessKeySecret;
 
     @Value("${alibaba.oss.endpoint}")
-    public void setEndpoint(String endpoint) {
-        OssUtils.endpoint = endpoint;
-    }
+    private String endpoint;
 
     @Value("${alibaba.oss.bucketName}")
-    public void setBucketName(String bucketName) {
-        OssUtils.bucketName = bucketName;
-    }
+    private String bucketName;
 
     @Value("${alibaba.oss.httpPrefix}")
-    public void setHttpPrefix(String httpPrefix) {
-        OssUtils.httpPrefix = httpPrefix;
-    }
+    private String httpPrefix;
+
+    private OSS oss;
 
     /**
      * 初始化OSS访问对象
      */
-    static {
+    @PostConstruct
+    private void init() {
         try {
             oss = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
         } catch (Exception e){
@@ -82,12 +65,13 @@ public class OssUtils {
 
     /**
      * 保存文件
-     * @param base64String
+     * @param input
      * @param targetPath
      * @throws IOException
      */
-    public void save(String base64String, String targetPath) throws IOException {
-        oss.putObject(bucketName, targetPath, new ByteArrayInputStream(getStringImage(base64String)));
+    public void saveAcl(InputStream input, String targetPath) throws IOException {
+        oss.putObject(bucketName, targetPath, input);
+        oss.setBucketAcl(bucketName, CannedAccessControlList.Private);
     }
 
     /**
@@ -142,12 +126,17 @@ public class OssUtils {
     }
 
     /**
-     * base码转流
-     * @param base64String
+     * OSS的外部链接拼接规则
+     * @param key
+     * @param failureTime
      * @return
-     * @throws IOException
+     * @throws OSSException
+     * @throws ClientException
      */
-    private byte[] getStringImage(String base64String) throws IOException {
-        return Base64.fromBase64String(base64String);
+    public String getViewUrlAcl(String key, Integer failureTime)  throws OSSException, ClientException{
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * failureTime);
+        GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(bucketName, key, HttpMethod.GET);
+        req.setExpiration(expiration);
+        return oss.generatePresignedUrl(req).toString();
     }
 }
