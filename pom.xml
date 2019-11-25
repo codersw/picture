@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mango</groupId>
-    <artifactId>picture</artifactId>
+    <artifactId>photoalbum</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>picture</name>
     <description>Picture project for Spring Boot</description>
@@ -140,7 +140,7 @@
     </dependencies>
 
     <build>
-        <finalName>picture</finalName>
+        <finalName>photoalbum</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
