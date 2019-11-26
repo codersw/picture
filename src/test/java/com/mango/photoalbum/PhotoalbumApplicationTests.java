@@ -1,5 +1,6 @@
 package com.mango.photoalbum;
 
+import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.pojo.PhotoAlbum;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.utils.OtsUtils;
@@ -47,7 +48,7 @@ public class PhotoalbumApplicationTests {
                 .createTime(new Date())
                 .modifyTime(new Date())
                 .shootLocation("asdasdasdasd")
-                .isDel(0)
+                .isDel(IsDelEnum.FALSE.getValue())
                 .title("sadasdd")
                 .userId(131312)
                 .build();
