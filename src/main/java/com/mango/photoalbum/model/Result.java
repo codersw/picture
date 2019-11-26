@@ -1,4 +1,4 @@
-package com.mango.photoalbum.result;
+package com.mango.photoalbum.model;
 
 import com.alibaba.fastjson.JSON;
 import com.mango.photoalbum.enums.ResultCodeEnum;

@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @ApiModel("上传文件")
 public class UploadFileCo {
 
-    @ApiModelProperty(value = "文件id")
+    @ApiModelProperty(value = "文件id,不传随机生成")
     private String fileId;
 
     @ApiModelProperty(value = "文件备注")

@@ -1,14 +1,23 @@
 package com.mango.photoalbum.service.impl;
 
+import com.alicloud.openservices.tablestore.model.Row;
+import com.alicloud.openservices.tablestore.model.search.SearchQuery;
+import com.alicloud.openservices.tablestore.model.search.SearchRequest;
+import com.alicloud.openservices.tablestore.model.search.SearchResponse;
+import com.alicloud.openservices.tablestore.model.search.agg.AggregationBuilders;
+import com.alicloud.openservices.tablestore.model.search.query.Query;
+import com.alicloud.openservices.tablestore.model.search.query.QueryBuilders;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.PhotoAlbumCo;
 import com.mango.photoalbum.model.PhotoAlbum;
+import com.mango.photoalbum.model.PhotoAlbumListCo;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -57,7 +66,47 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
     }
 
     @Override
-    public List<PhotoAlbum> list() {
-        return null;
+    public Integer total(PhotoAlbumListCo photoAlbumListCo) {
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(PhotoAlbum.class))
+                .indexName(ots.getTableName(PhotoAlbum.class))
+                .searchQuery(
+                        SearchQuery.newBuilder()
+                                .limit(0)   // 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+                                .getTotalCount(true) // 设置返回总条数
+                                .build())
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        return (int) searchResponse.getTotalCount();
     }
+
+    @Override
+    public List<PhotoAlbum> list(PhotoAlbumListCo photoAlbumListCo) {
+        int offset = (photoAlbumListCo.getPageIndex() - 1) * photoAlbumListCo.getPageSize();
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(PhotoAlbum.class))
+                .indexName(ots.getTableName(PhotoAlbum.class))
+                .searchQuery(
+                        SearchQuery.newBuilder()
+                                .offset(offset)
+                                .limit(photoAlbumListCo.getPageSize())
+                                .getTotalCount(true) // 设置返回总条数
+                                .build())
+                .returnAllColumns(true) // 设置返回所有列
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        List<Row> rows = searchResponse.getRows();
+        List<PhotoAlbum> result = new ArrayList<>();
+        if(rows.size() > 0){
+            rows.forEach(row -> {
+                try {
+                    result.add(ots.formatRow(row, PhotoAlbum.class));
+                } catch (IllegalAccessException | InstantiationException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return result;
+    }
+
 }

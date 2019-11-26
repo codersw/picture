@@ -1,8 +1,8 @@
 package com.mango.photoalbum.handler;
 
 
-import com.mango.photoalbum.result.Result;
-import com.mango.photoalbum.result.ResultGenerator;
+import com.mango.photoalbum.model.Result;
+import com.mango.photoalbum.model.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.Ordered;

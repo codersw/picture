@@ -318,7 +318,6 @@ public class OtsUtils {
      */
     public SearchResponse searchQuery(SearchRequest request){
         try {
-            request.getSearchQuery().setGetTotalCount(true);
             log.info("多条件查找数据成功{}", request.getTableName());
             return client.search(request);
         } catch (TableStoreException e) {
@@ -336,9 +335,6 @@ public class OtsUtils {
 
         SearchRequest searchRequest = new SearchRequest(tableName, indexName, searchQuery);
         SearchResponse resp = client.search(searchRequest);
-        System.out.println("TotalCount: " + resp.getTotalCount()); // 匹配到的总行数，非返回行数
-        System.out.println("Row: " + resp.getRows());
-        resp = client.search(searchRequest);
         System.out.println("TotalCount: " + resp.getTotalCount()); // 匹配到的总行数，非返回行数
         System.out.println("Row: " + resp.getRows());
     }
@@ -613,7 +609,7 @@ public class OtsUtils {
      * @param c
      * @return
      */
-    private <T> T formatRow(Row row, Class<?> c) throws IllegalAccessException, InstantiationException {
+    public <T> T formatRow(Row row, Class<?> c) throws IllegalAccessException, InstantiationException {
         T result = (T) c.newInstance();
         List<Field> fields = Arrays.asList(c.getDeclaredFields());
         fields.forEach(field -> {

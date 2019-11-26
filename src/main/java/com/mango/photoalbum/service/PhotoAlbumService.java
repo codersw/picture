@@ -2,6 +2,7 @@ package com.mango.photoalbum.service;
 
 import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.model.PhotoAlbumCo;
+import com.mango.photoalbum.model.PhotoAlbumListCo;
 
 import java.util.List;
 
@@ -13,5 +14,7 @@ public interface PhotoAlbumService {
 
     PhotoAlbum get(String albumId);
 
-    List<PhotoAlbum> list();
+    Integer total(PhotoAlbumListCo photoAlbumListCo);
+
+    List<PhotoAlbum> list(PhotoAlbumListCo photoAlbumListCo);
 }

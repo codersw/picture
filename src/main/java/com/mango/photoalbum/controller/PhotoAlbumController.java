@@ -1,8 +1,6 @@
 package com.mango.photoalbum.controller;
 
-import com.mango.photoalbum.model.PhotoAlbumCo;
-import com.mango.photoalbum.result.Result;
-import com.mango.photoalbum.result.ResultGenerator;
+import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -63,7 +61,10 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "相册列表", notes = "相册列表")
     @GetMapping("/list")
-    public Result list(){
-        return null;
+    public Result list(PhotoAlbumListCo photoAlbumListCo){
+        return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
+                .total(photoAlbumService.total(photoAlbumListCo))
+                .list(photoAlbumService.list(photoAlbumListCo))
+                .build());
     }
 }
