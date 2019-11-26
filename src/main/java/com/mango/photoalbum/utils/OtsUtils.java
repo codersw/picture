@@ -3,11 +3,15 @@ package com.mango.photoalbum.utils;
 import com.alicloud.openservices.tablestore.ClientException;
 import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.TableStoreException;
+import com.alicloud.openservices.tablestore.core.utils.Preconditions;
 import com.alicloud.openservices.tablestore.model.*;
 import com.alicloud.openservices.tablestore.model.search.*;
+import com.alicloud.openservices.tablestore.model.search.query.RangeQuery;
+import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import javafx.util.Pair;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -131,11 +136,12 @@ public class OtsUtils {
      * @param columnName
      */
     public void createIndex(String tableName, String indexName, String columnName) {
-        log.info("创建索引开始:表{}索引{}列{}", tableName, indexName, columnName);
-        IndexMeta indexMeta = new IndexMeta(indexName); // 要创建的索引表名称。
-        indexMeta.addPrimaryKeyColumn(columnName); // 为索引表添加主键列。
-        CreateIndexRequest request = new CreateIndexRequest(tableName, indexMeta, true);
+
         try {
+            log.info("创建索引开始:表{}索引{}列{}", tableName, indexName, columnName);
+            IndexMeta indexMeta = new IndexMeta(indexName); // 要创建的索引表名称。
+            indexMeta.addPrimaryKeyColumn(columnName); // 为索引表添加主键列。
+            CreateIndexRequest request = new CreateIndexRequest(tableName, indexMeta, true);
             client.createIndex(request);
             log.info("创建索引成功:表{}索引{}列{}", tableName, indexName, columnName);
         } catch (TableStoreException e) {
@@ -153,9 +159,9 @@ public class OtsUtils {
      * @param indexName
      */
     public void deleteIndex(String tableName, String indexName) {
-        log.info("删除索引开始:表{}索引{}", tableName, indexName);
-        DeleteIndexRequest request = new DeleteIndexRequest(tableName, indexName); // 要删除的索引表及主表名
         try {
+            log.info("删除索引开始:表{}索引{}", tableName, indexName);
+            DeleteIndexRequest request = new DeleteIndexRequest(tableName, indexName); // 要删除的索引表及主表名
             client.deleteIndex(request);
             log.info("删除索引成功:表{}索引{}", tableName, indexName);
         } catch (TableStoreException e) {
@@ -174,19 +180,20 @@ public class OtsUtils {
      * @param columnName
      */
     public void createSearchIndex(String tableName, String searchIndexName, Map<String, FieldType> columnName){
-        log.info("创建联合索引开始:表{}索引{}", tableName, searchIndexName);
-        CreateSearchIndexRequest request = new CreateSearchIndexRequest();
-        request.setTableName(tableName);
-        request.setIndexName(searchIndexName);
-        IndexSchema indexSchema = new IndexSchema();
-        List<FieldSchema> fieldSchemas = new ArrayList<>();
-        //需要添加的列
-        columnName.keySet().forEach(key ->{
-            fieldSchemas.add(new FieldSchema(key, columnName.get(key)).setIndex(true).setEnableSortAndAgg(true));
-        });
-        indexSchema.setFieldSchemas(fieldSchemas);
-        request.setIndexSchema(indexSchema);
+
         try {
+            log.info("创建联合索引开始:表{}索引{}", tableName, searchIndexName);
+            CreateSearchIndexRequest request = new CreateSearchIndexRequest();
+            request.setTableName(tableName);
+            request.setIndexName(searchIndexName);
+            IndexSchema indexSchema = new IndexSchema();
+            List<FieldSchema> fieldSchemas = new ArrayList<>();
+            //需要添加的列
+            columnName.keySet().forEach(key ->{
+                fieldSchemas.add(new FieldSchema(key, columnName.get(key)).setIndex(true).setEnableSortAndAgg(true));
+            });
+            indexSchema.setFieldSchemas(fieldSchemas);
+            request.setIndexSchema(indexSchema);
             client.createSearchIndex(request);
             log.info("创建联合成功:表{}索引{}", tableName, searchIndexName);
         } catch (TableStoreException e) {
@@ -204,11 +211,11 @@ public class OtsUtils {
      * @param searchIndexName
      */
     public void deleteSearchIndex(String tableName, String searchIndexName) {
-        log.info("删除联合索引开始:表{}索引{}", tableName, searchIndexName);
-        DeleteSearchIndexRequest request = new DeleteSearchIndexRequest();
-        request.setTableName(tableName);
-        request.setIndexName(searchIndexName);
         try {
+            log.info("删除联合索引开始:表{}索引{}", tableName, searchIndexName);
+            DeleteSearchIndexRequest request = new DeleteSearchIndexRequest();
+            request.setTableName(tableName);
+            request.setIndexName(searchIndexName);
             client.deleteSearchIndex(request);
             log.info("删除联合成功:表{}索引{}", tableName, searchIndexName);
         } catch (TableStoreException e) {
@@ -241,9 +248,10 @@ public class OtsUtils {
     /**
      * 通过主键获取数据
      * @param t
+     * @param c
      * @return
      */
-    public <T> Row retrieveRow(T t) {
+    public <T> T retrieveRow(T t, Class<?> c) {
         try {
             RowPutChange row = toRow(t);
             //读取一行
@@ -252,11 +260,14 @@ public class OtsUtils {
             rowQueryCriteria.setMaxVersions(1);
             GetRowResponse getRowResponse = client.getRow(new GetRowRequest(rowQueryCriteria));
             log.info("查找数据成功{}", row.getTableName());
-            return getRowResponse.getRow();
+            Row responseRow = getRowResponse.getRow();
+            if(responseRow != null){
+                return formatRow(responseRow, c);
+            }
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
-        } catch (ClientException e) {
+        } catch (ClientException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
             log.error("查找数据失败!请求失败详情：{}",e.getMessage());
         }
@@ -271,7 +282,7 @@ public class OtsUtils {
      * @param direction
      * @return
      */
-    public <T> List<Row> retrieveRow(T startT, T endT, Integer limit, Direction direction) {
+    public <T> List<T> retrieveRow(T startT, T endT, Integer limit, Direction direction, Class<?> c) {
         try {
             RowPutChange startRow = toRow(startT);
             RowPutChange entRow = toRow(endT);
@@ -284,8 +295,19 @@ public class OtsUtils {
             rangeRowQueryCriteria.setMaxVersions(1);
             GetRangeResponse getRangeResponse = client.getRange(new GetRangeRequest(rangeRowQueryCriteria));
             log.info("查找数据成功{}", startRow.getTableName());
-
-            return getRangeResponse.getRows();
+            List<Row> rows = getRangeResponse.getRows();
+            if(!rows.isEmpty()){
+                List<T> result = new ArrayList<>();
+                rows.forEach(row -> {
+                    try {
+                        result.add(formatRow(row, c));
+                    } catch (IllegalAccessException | InstantiationException e) {
+                        log.error("格式化数据失败!详情:{}", e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+                return result;
+            }
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -298,18 +320,13 @@ public class OtsUtils {
 
     /**
      * 多条件查找数据
-     * @param tableName
-     * @param searchIndexName
-     * @param searchQuery
+     * @param request
      */
-    public List<Row> searchQuery(String tableName, String searchIndexName, SearchQuery searchQuery){
-        log.info("开始多条件查找数据{}", tableName);
-        searchQuery.setGetTotalCount(true);
-        SearchRequest searchRequest = new SearchRequest(tableName, searchIndexName, searchQuery);
+    public SearchResponse searchQuery(SearchRequest request){
         try {
-            SearchResponse resp = client.search(searchRequest);
-            log.info("多条件查找数据成功{}", tableName);
-            return  resp.getRows();
+            request.getSearchQuery().setGetTotalCount(true);
+            log.info("多条件查找数据成功{}", request.getTableName());
+            return client.search(request);
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("多条件查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -318,6 +335,62 @@ public class OtsUtils {
             log.error("多条件查找失败!请求失败详情：{}",e.getMessage());
         }
         return null;
+    }
+
+    public void rangeQuery(String tableName, String indexName) {
+        SearchQuery searchQuery = new SearchQuery();
+
+        SearchRequest searchRequest = new SearchRequest(tableName, indexName, searchQuery);
+        SearchResponse resp = client.search(searchRequest);
+        System.out.println("TotalCount: " + resp.getTotalCount()); // 匹配到的总行数，非返回行数
+        System.out.println("Row: " + resp.getRows());
+        resp = client.search(searchRequest);
+        System.out.println("TotalCount: " + resp.getTotalCount()); // 匹配到的总行数，非返回行数
+        System.out.println("Row: " + resp.getRows());
+    }
+
+    /**
+     * 范围查询指定范围内的数据，返回指定页数大小的数据，并能根据offset跳过部分行
+     * @param tableName
+     * @param startKey
+     * @param endKey
+     * @param offset
+     * @param pageSize
+     * @return
+     */
+    public Pair<List<Row>, PrimaryKey> readByPage(String tableName,
+                                                   PrimaryKey startKey, PrimaryKey endKey, int offset, int pageSize) {
+        Preconditions.checkArgument(offset >= 0, "Offset should not be negative.");
+        Preconditions.checkArgument(pageSize > 0, "Page size should be greater than 0.");
+        List<Row> rows = new ArrayList<Row>(pageSize);
+        int limit = pageSize;
+        int skip = offset;
+        PrimaryKey nextStart = startKey;
+        // 若查询的数据量很大，则一次请求有可能不会返回所有的数据，需要流式查询所有需要的数据。
+        while (limit > 0 && nextStart != null) {
+            // 构造GetRange的查询参数。
+            // 注意：startPrimaryKey需要设置为上一次读到的位点，从上一次未读完的地方继续往下读，实现流式的范围查询。
+            RangeRowQueryCriteria criteria = new RangeRowQueryCriteria(tableName);
+            criteria.setInclusiveStartPrimaryKey(nextStart);
+            criteria.setExclusiveEndPrimaryKey(endKey);
+            // 需要设置正确的limit，这里期望读出的数据行数最多为完整的一页数据以及需要过滤(offset)的数据
+            criteria.setLimit(skip + limit);
+            criteria.setMaxVersions(1);
+            GetRangeRequest request = new GetRangeRequest();
+            request.setRangeRowQueryCriteria(criteria);
+            GetRangeResponse response = client.getRange(request);
+            for (Row row : response.getRows()) {
+                if (skip > 0) {
+                    skip--; // 对于offset之前的数据，需要过滤掉，采用的策略是读出来后在客户端进行过滤。
+                } else {
+                    rows.add(row);
+                    limit--;
+                }
+            }
+            // 设置下一次查询的起始位点
+            nextStart = response.getNextStartPrimaryKey();
+        }
+        return new Pair<>(rows, nextStart);
     }
 
     /**
@@ -393,7 +466,7 @@ public class OtsUtils {
                    }
                    PrimaryKeySchema primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.STRING);
                    if (type.equals("class java.lang.Integer")){
-                       primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.INTEGER);
+                       primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.INTEGER, PrimaryKeyOption.AUTO_INCREMENT);
                    }
                    primaryKeySchemas.add(primaryKeySchema);
                }
@@ -431,7 +504,7 @@ public class OtsUtils {
      * @param <T>
      * @return
      */
-    private <T> RowPutChange toRow(T t) {
+    public <T> RowPutChange toRow(T t) {
         Class<T> c = (Class<T>) t.getClass();
         List<Field> fields = Arrays.asList(c.getDeclaredFields());
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
@@ -454,7 +527,7 @@ public class OtsUtils {
                                 primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
                             }
                             if (type.equals("class java.lang.Integer")){
-                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromLong((Integer) value));
+                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.AUTO_INCREMENT);
                             }
                         }
                         if(annotation.annotationType() ==  OTSColumn.class){
@@ -491,11 +564,66 @@ public class OtsUtils {
     }
 
     /**
+     * 格式化返回值
+     * @param row
+     * @param c
+     * @param <T>
+     * @return
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+    private <T> T formatRow(Row row, Class<?> c) throws IllegalAccessException, InstantiationException {
+        T result = (T) c.newInstance();
+        List<Field> fields = Arrays.asList(c.getDeclaredFields());
+        fields.forEach(field -> {
+            field.setAccessible(true);
+            String name = field.getName(); // 获取属性的名字
+            String type = field.getGenericType().toString(); // 获取属性的类型
+            try{
+                PrimaryKeyColumn primaryKeyColumn = row.getPrimaryKey().getPrimaryKeyColumnsMap().get(name);
+                if(primaryKeyColumn != null) {
+                    if (type.equals("class java.lang.String")){
+                        field.set(result, primaryKeyColumn.getValue().asString());
+                    }
+                    if (type.equals("class java.lang.Integer")){
+                        long value = primaryKeyColumn.getValue().asLong();
+                        field.set(result, (int) value);
+                    }
+                }
+                NavigableMap<Long, ColumnValue> columnMap = row.getColumnsMap().get(name);
+                if(columnMap != null && !columnMap.isEmpty()) {
+                    ColumnValue columnValue = columnMap.firstEntry().getValue();
+                    if (columnValue != null) {
+                        if (type.equals("class java.lang.String")){
+                            field.set(result, columnValue.asString());
+                        }
+                        if (type.equals("class java.lang.Boolean")){
+                            field.set(result, columnValue.asBoolean());
+                        }
+                        if (type.equals("class java.lang.Integer")){
+                            long value = columnValue.asLong();
+                            field.set(result, (int) value);
+                        }
+                        if (type.equals("class java.util.Date")){
+                            String value = columnValue.asString();
+                            field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd HH:mm:ss"));
+                        }
+                    }
+                }
+            }catch (IllegalAccessException | ParseException e){
+                log.error("格式化返回值异常{}", e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        return result;
+    }
+
+    /**
      * 获取自定义表名字
      * @param c
      * @return
      */
-    private String getTableName(Class<?> c){
+    public String getTableName(Class<?> c){
         String name = c.getAnnotation(OTSClass.class).name();
         if(StringUtils.isBlank(name)){
             name = c.getName();

@@ -3,6 +3,7 @@ package com.mango.photoalbum.model.pojo;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import io.swagger.models.auth.In;
 import lombok.*;
 import java.util.Date;
 
@@ -22,7 +23,7 @@ public class PhotoAlbum {
      * 主键相册id
      */
     @OTSPrimaryKey
-    private String albumId;
+    private Integer albumId;
 
     /**
      * 标题
