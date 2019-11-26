@@ -6,8 +6,8 @@ package com.mango.photoalbum.enums;
  */
 public enum IsDelEnum implements BaseEnum {
 
-    TRUE(0,"未删除"),
-    FALSE(1,"已删除");
+    FALSE(0,"未删除"),
+    TRUE(1,"已删除");
 
     private Integer value;
     private String name;

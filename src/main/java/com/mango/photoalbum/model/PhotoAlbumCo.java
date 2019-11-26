@@ -1,8 +1,10 @@
-package com.mango.photoalbum.model.co;
+package com.mango.photoalbum.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -11,6 +13,9 @@ import java.util.Date;
 @Data
 @ApiModel("相册")
 public class PhotoAlbumCo {
+
+    @ApiModelProperty(value = "相册id,新建可以不传")
+    private String albumId;
 
     @ApiModelProperty(value = "相册标题", required = true)
     @NotBlank(message = "相册标题不能为空")
@@ -24,6 +29,8 @@ public class PhotoAlbumCo {
     private String cover;
 
     @ApiModelProperty(value = "拍摄时间")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date shootTime;
 
     @ApiModelProperty(value = "拍摄地点")

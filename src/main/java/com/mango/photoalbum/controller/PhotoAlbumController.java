@@ -1,11 +1,15 @@
 package com.mango.photoalbum.controller;
 
-import com.mango.photoalbum.model.co.PhotoAlbumCo;
+import com.mango.photoalbum.model.PhotoAlbumCo;
 import com.mango.photoalbum.result.Result;
+import com.mango.photoalbum.result.ResultGenerator;
+import com.mango.photoalbum.service.PhotoAlbumService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * 文件接口
@@ -17,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/album")
 public class PhotoAlbumController {
 
+    @Resource
+    private PhotoAlbumService photoAlbumService;
 
     /**
      * 相册详情
@@ -25,8 +31,8 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "相册详情", notes = "相册详情")
     @GetMapping("/{albumId}")
-    public Result get(@PathVariable String albumId){
-        return null;
+    public Result get(@PathVariable String albumId) {
+        return ResultGenerator.genSuccessResult(photoAlbumService.get(albumId));
     }
 
     /**
@@ -36,8 +42,9 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "删除相册", notes = "删除相册")
     @DeleteMapping("/{albumId}")
-    public Result delete(@PathVariable String albumId){
-        return null;
+    public Result delete(@PathVariable String albumId) {
+        photoAlbumService.delete(albumId);
+        return ResultGenerator.genSuccessResult();
     }
 
     /**
@@ -46,8 +53,8 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "保存相册", notes = "保存相册")
     @PostMapping
-    public Result save(@RequestBody PhotoAlbumCo photoAlbumCo){
-        return null;
+    public Result save(PhotoAlbumCo photoAlbumCo) {
+        return ResultGenerator.genSuccessResult(photoAlbumService.save(photoAlbumCo));
     }
 
     /**

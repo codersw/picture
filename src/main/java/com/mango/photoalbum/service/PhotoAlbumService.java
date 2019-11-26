@@ -1,17 +1,17 @@
 package com.mango.photoalbum.service;
 
-import com.mango.photoalbum.model.co.PhotoAlbumCo;
-import com.mango.photoalbum.model.vo.PhotoAlbumVo;
+import com.mango.photoalbum.model.PhotoAlbum;
+import com.mango.photoalbum.model.PhotoAlbumCo;
 
 import java.util.List;
 
 public interface PhotoAlbumService {
 
-    PhotoAlbumVo save(PhotoAlbumCo PhotoAlbumCo);
+    PhotoAlbum save(PhotoAlbumCo PhotoAlbumCo);
 
     void delete(String albumId);
 
-    PhotoAlbumVo get(String albumId);
+    PhotoAlbum get(String albumId);
 
-    List<PhotoAlbumVo> list();
+    List<PhotoAlbum> list();
 }

@@ -1,4 +1,4 @@
-package com.mango.photoalbum.model.pojo;
+package com.mango.photoalbum.model;
 
 
 import lombok.*;

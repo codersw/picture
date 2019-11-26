@@ -1,13 +1,11 @@
 package com.mango.photoalbum;
 
 import com.alicloud.openservices.tablestore.model.*;
-import com.alicloud.openservices.tablestore.model.search.FieldType;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
 import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
 import com.mango.photoalbum.enums.IsDelEnum;
-import com.mango.photoalbum.model.pojo.PhotoAlbum;
-import com.mango.photoalbum.service.PhotoAlbumService;
+import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.utils.OtsUtils;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -67,8 +65,9 @@ public class PhotoalbumApplicationTests {
     @Test
     public void getRow() {
         PhotoAlbum photoAlbum = PhotoAlbum.builder()
+                .albumId("31fed80c0435448b983f1b28ea6f2d45")
                 .build();
-        photoAlbum = ots.retrieveRow(photoAlbum, PhotoAlbum.class);
+        photoAlbum = ots.retrieveRow(photoAlbum);
         log.info(photoAlbum.toString());
     }
 
@@ -82,9 +81,7 @@ public class PhotoalbumApplicationTests {
 
     @Test
     public void createSearchIndex() {
-        Map<String, FieldType> columnName = new HashMap<>();
-        columnName.put("albumId",FieldType.LONG);
-        ots.createSearchIndex(ots.getTableName(PhotoAlbum.class), "z_albumId", columnName);
+        ots.createSearchIndex(PhotoAlbum.class);
     }
 
     /**

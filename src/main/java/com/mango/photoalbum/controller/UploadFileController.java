@@ -1,8 +1,8 @@
 package com.mango.photoalbum.controller;
 
-import com.mango.photoalbum.model.co.UploadFileCo;
-import com.mango.photoalbum.model.co.UploadFileMultiCo;
-import com.mango.photoalbum.model.pojo.UploadFile;
+import com.mango.photoalbum.model.UploadFileCo;
+import com.mango.photoalbum.model.UploadFileMultiCo;
+import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.result.Result;
 import com.mango.photoalbum.result.ResultGenerator;
 import com.mango.photoalbum.utils.CommonUtils;

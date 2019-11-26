@@ -6,8 +6,9 @@ import com.alicloud.openservices.tablestore.TableStoreException;
 import com.alicloud.openservices.tablestore.core.utils.Preconditions;
 import com.alicloud.openservices.tablestore.model.*;
 import com.alicloud.openservices.tablestore.model.search.*;
-import com.alicloud.openservices.tablestore.model.search.query.RangeQuery;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
+import com.alicloud.openservices.tablestore.model.search.sort.Sort;
+import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.*;
 
@@ -75,6 +77,8 @@ public class OtsUtils {
             CreateTableRequest request = new CreateTableRequest(toTable(c), tableOptions);
             //创建表格
             client.createTable(request);
+            //创建多元索引
+            createSearchIndex(c);
             log.info("创建表格成功:{}", request.getTableMeta().getTableName());
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -174,28 +178,19 @@ public class OtsUtils {
     }
 
     /**
-     * 创建联合索引
-     * @param tableName
-     * @param searchIndexName
-     * @param columnName
+     * 创建多元索引
+     * @param c
      */
-    public void createSearchIndex(String tableName, String searchIndexName, Map<String, FieldType> columnName){
-
+    public void createSearchIndex(Class<?> c){
         try {
-            log.info("创建联合索引开始:表{}索引{}", tableName, searchIndexName);
+            String tableName = getTableName(c);
+            log.info("创建联合索引开始:表{}索引{}", tableName, tableName);
             CreateSearchIndexRequest request = new CreateSearchIndexRequest();
             request.setTableName(tableName);
-            request.setIndexName(searchIndexName);
-            IndexSchema indexSchema = new IndexSchema();
-            List<FieldSchema> fieldSchemas = new ArrayList<>();
-            //需要添加的列
-            columnName.keySet().forEach(key ->{
-                fieldSchemas.add(new FieldSchema(key, columnName.get(key)).setIndex(true).setEnableSortAndAgg(true));
-            });
-            indexSchema.setFieldSchemas(fieldSchemas);
-            request.setIndexSchema(indexSchema);
+            request.setIndexName(tableName);
+            request.setIndexSchema(toIndex(c));
             client.createSearchIndex(request);
-            log.info("创建联合成功:表{}索引{}", tableName, searchIndexName);
+            log.info("创建联合成功:表{}索引{}", tableName, tableName);
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.info("创建联合失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -248,10 +243,9 @@ public class OtsUtils {
     /**
      * 通过主键获取数据
      * @param t
-     * @param c
      * @return
      */
-    public <T> T retrieveRow(T t, Class<?> c) {
+    public <T> T retrieveRow(T t) {
         try {
             RowPutChange row = toRow(t);
             //读取一行
@@ -262,7 +256,7 @@ public class OtsUtils {
             log.info("查找数据成功{}", row.getTableName());
             Row responseRow = getRowResponse.getRow();
             if(responseRow != null){
-                return formatRow(responseRow, c);
+                return formatRow(responseRow, t.getClass());
             }
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -282,7 +276,7 @@ public class OtsUtils {
      * @param direction
      * @return
      */
-    public <T> List<T> retrieveRow(T startT, T endT, Integer limit, Direction direction, Class<?> c) {
+    public <T> List<T> retrieveRow(T startT, T endT, Integer limit, Direction direction) {
         try {
             RowPutChange startRow = toRow(startT);
             RowPutChange entRow = toRow(endT);
@@ -300,7 +294,7 @@ public class OtsUtils {
                 List<T> result = new ArrayList<>();
                 rows.forEach(row -> {
                     try {
-                        result.add(formatRow(row, c));
+                        result.add(formatRow(row, startT.getClass()));
                     } catch (IllegalAccessException | InstantiationException e) {
                         log.error("格式化数据失败!详情:{}", e.getMessage());
                         e.printStackTrace();
@@ -504,7 +498,7 @@ public class OtsUtils {
      * @param <T>
      * @return
      */
-    public <T> RowPutChange toRow(T t) {
+    private <T> RowPutChange toRow(T t) {
         Class<T> c = (Class<T>) t.getClass();
         List<Field> fields = Arrays.asList(c.getDeclaredFields());
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
@@ -523,9 +517,7 @@ public class OtsUtils {
                             if(!StringUtils.isBlank(pk.name())){
                                 name = pk.name();
                             }
-                            if (type.equals("class java.lang.String")){
-                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
-                            }
+                            primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
                             if (type.equals("class java.lang.Integer")){
                                 primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.AUTO_INCREMENT);
                             }
@@ -564,13 +556,62 @@ public class OtsUtils {
     }
 
     /**
+     * 构建多元索引
+     * @param c
+     * @return
+     */
+    private IndexSchema toIndex(Class<?> c) {
+        IndexSchema indexSchema = new IndexSchema();
+        List<FieldSchema> fieldSchemas = new ArrayList<>();
+        List<Field> fields = Arrays.asList(c.getDeclaredFields());
+        fields.forEach(field -> {
+            field.setAccessible(true);
+            List<Annotation> annotations = Arrays.asList(field.getAnnotations());// 获取自定义注解
+            annotations.forEach(annotation -> {
+                String name = field.getName(); // 获取属性的名字
+                String type = field.getGenericType().toString(); // 获取属性的类型
+                if(annotation.annotationType() ==  OTSPrimaryKey.class){
+                    OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
+                    if(!StringUtils.isBlank(pk.name())){
+                        name = pk.name();
+                    }
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    if (type.equals("class java.lang.Integer")){
+                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
+                    indexSchema.setIndexSort(new Sort(
+                            Collections.singletonList(new FieldSort(name, SortOrder.ASC))));
+                    fieldSchemas.add(fieldSchema);
+                }
+                if(annotation.annotationType() ==  OTSColumn.class){
+                    OTSColumn column = field.getAnnotation(OTSColumn.class);
+                    if(!StringUtils.isBlank(column.name())){
+                        name = column.name();
+                    }
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    if (type.equals("class java.lang.Integer")){
+                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    if (type.equals("class java.lang.Boolean")){
+                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    if (type.equals("class java.lang.Double")){
+                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    fieldSchemas.add(fieldSchema);
+                }
+            });
+        });
+        indexSchema.setFieldSchemas(fieldSchemas);
+        return indexSchema;
+    }
+
+    /**
      * 格式化返回值
      * @param row
      * @param c
-     * @param <T>
      * @return
-     * @throws IllegalAccessException
-     * @throws InstantiationException
      */
     private <T> T formatRow(Row row, Class<?> c) throws IllegalAccessException, InstantiationException {
         T result = (T) c.newInstance();

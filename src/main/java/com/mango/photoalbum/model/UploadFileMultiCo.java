@@ -1,4 +1,4 @@
-package com.mango.photoalbum.model.co;
+package com.mango.photoalbum.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
