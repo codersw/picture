@@ -14,7 +14,7 @@ public class PhotoAlbumListCo {
      */
     @ApiModelProperty(value = "当前页", required = true)
     @NotNull(message = "请传入当前页")
-    private Integer pageIndex;
+    private Integer pageIndex = 1;
 
     /**
      * 每页总条数
