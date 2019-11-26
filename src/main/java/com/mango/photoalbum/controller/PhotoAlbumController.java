@@ -56,7 +56,7 @@ public class PhotoAlbumController {
     }
 
     /**
-     *
+     * 相册列表
      * @return
      */
     @ApiOperation(value = "相册列表", notes = "相册列表")

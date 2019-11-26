@@ -11,7 +11,6 @@ import java.util.List;
 @ApiModel("上传多文件")
 public class UploadFileMultiCo {
 
-
     @ApiModelProperty("多文件")
     @NotNull(message = "文件不能为空")
     private List<UploadFileCo> uploadFileCos;

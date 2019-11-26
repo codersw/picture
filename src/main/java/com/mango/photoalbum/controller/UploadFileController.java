@@ -1,19 +1,14 @@
 package com.mango.photoalbum.controller;
 
-import com.mango.photoalbum.model.UploadFileCo;
-import com.mango.photoalbum.model.UploadFileMultiCo;
-import com.mango.photoalbum.model.UploadFile;
-import com.mango.photoalbum.model.Result;
-import com.mango.photoalbum.model.ResultGenerator;
+import com.mango.photoalbum.model.*;
+import com.mango.photoalbum.service.UploadFileService;
 import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.FileUtils;
-import com.mango.photoalbum.utils.OssUtils;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,8 +25,8 @@ import java.util.Objects;
 @RequestMapping("/upload")
 public class UploadFileController {
 
-    @Autowired
-    private OssUtils oss;
+    @Resource
+    private UploadFileService uploadFileService;
 
     /**
      * 上传图片
@@ -44,38 +39,13 @@ public class UploadFileController {
     @PostMapping(value = "/file", headers = "content-type=multipart/form-data")
     public Result file(@ModelAttribute UploadFileCo uploadFileCo) {
         try {
-            if(!CommonUtils.isNullOrEmpty(uploadFileCo.getFile())){
-                if(!Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
-                    return ResultGenerator.genFailResult("上传文件类型只可以是图片");
-                }
-                String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
-                if(StringUtils.isBlank(uploadFileCo.getFileId())){
-                    uploadFileCo.setFileId(CommonUtils.UUID());
-                }
-                String ossFileName = uploadFileCo.getFileId() + fileType;
-                oss.save(uploadFileCo.getFile().getInputStream(), ossFileName );
-                UploadFile uploadFile = UploadFile.builder()
-                        .fileId(uploadFileCo.getFileId())
-                        .fileName(uploadFileCo.getFile().getOriginalFilename())
-                        .filePath(oss.getViewUrl(ossFileName))
-                        .fileSize(uploadFileCo.getFile().getSize())
-                        .fileType(fileType)
-                        .createTime(new Date())
-                        .modifyTime(new Date())
-                        .remark(uploadFileCo.getRemark())
-                        .userId(uploadFileCo.getUserId())
-                        .build();
-                return ResultGenerator.genSuccessResult(uploadFile);
-            }else{
-                return ResultGenerator.genFailResult("图片不可以是空的");
-            }
+            return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileCo));
         }catch (Exception e){
             e.printStackTrace();
             log.error("上传图片发生异常{}", e.getMessage());
             return ResultGenerator.genFailResult("上传图片发生异常");
         }
     }
-
 
     /**
      * 上传图片
@@ -89,29 +59,11 @@ public class UploadFileController {
             List<UploadFile> result = new ArrayList<>();
             List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
             uploadFileCos.forEach(uploadFileCo ->{
-                if(Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
-                    String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
-                    if(StringUtils.isBlank(uploadFileCo.getFileId())){
-                        uploadFileCo.setFileId(CommonUtils.UUID());
-                    }
-                    String ossFileName = uploadFileCo.getFileId() + fileType;
-                    try {
-                        oss.save(uploadFileCo.getFile().getInputStream(), ossFileName );
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        log.error("上传图片发生异常{}", e.getMessage());
-                    }
-                    result.add(UploadFile.builder()
-                            .fileId(uploadFileCo.getFileId())
-                            .fileName(uploadFileCo.getFile().getOriginalFilename())
-                            .filePath(oss.getViewUrl(ossFileName))
-                            .fileSize(uploadFileCo.getFile().getSize())
-                            .fileType(fileType)
-                            .createTime(new Date())
-                            .modifyTime(new Date())
-                            .remark(uploadFileCo.getRemark())
-                            .userId(uploadFileCo.getUserId())
-                            .build());
+                try {
+                    result.add(uploadFileService.save(uploadFileCo));
+                } catch (Exception e) {
+                    log.error("上传图片发生异常{}", e.getMessage());
+                    e.printStackTrace();
                 }
             });
             return ResultGenerator.genSuccessResult(result);
@@ -120,5 +72,41 @@ public class UploadFileController {
             log.error("上传图片发生异常{}", e.getMessage());
             return ResultGenerator.genFailResult("上传图片发生异常");
         }
+    }
+
+    /**
+     * 相册详情
+     * @param fileId
+     * @return
+     */
+    @ApiOperation(value = "文件详情", notes = "相册详情")
+    @GetMapping("/{fileId}")
+    public Result get(@PathVariable String fileId) {
+        return ResultGenerator.genSuccessResult(uploadFileService.get(fileId));
+    }
+
+    /**
+     * 删除相册
+     * @param fileId
+     * @return
+     */
+    @ApiOperation(value = "删除文件", notes = "删除文件")
+    @DeleteMapping("/{fileId}")
+    public Result delete(@PathVariable String fileId) {
+        uploadFileService.delete(fileId);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    /**
+     * 相册列表
+     * @return
+     */
+    @ApiOperation(value = "文件列表", notes = "文件列表")
+    @GetMapping("/list")
+    public Result list(UploadFileListCo uploadFileListCo){
+        return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
+                .total(uploadFileService.total(uploadFileListCo))
+                .list(uploadFileService.list(uploadFileListCo))
+                .build());
     }
 }
