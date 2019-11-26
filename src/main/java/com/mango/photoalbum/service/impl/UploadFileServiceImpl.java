@@ -7,6 +7,7 @@ import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
 import com.alicloud.openservices.tablestore.model.search.query.Query;
 import com.alicloud.openservices.tablestore.model.search.query.QueryBuilder;
+import com.alicloud.openservices.tablestore.model.search.query.RangeQuery;
 import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.*;
@@ -82,11 +83,15 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public Integer total(UploadFileListCo uploadFileListCo) {
+        TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
+        termQuery.setFieldName("isDel");  // 设置针对哪个字段
+        termQuery.setTerm(ColumnValue.fromLong(0));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
                 .indexName(ots.getTableName(UploadFile.class))
                 .searchQuery(
                         SearchQuery.newBuilder()
+                                .query((QueryBuilder) termQuery)
                                 .limit(0)   // 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
                                 .getTotalCount(true) // 设置返回总条数
                                 .build())
@@ -97,13 +102,17 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public List<UploadFile> list(UploadFileListCo uploadFileListCo) {
+        TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
+        termQuery.setFieldName("isDel");  // 设置针对哪个字段
+        termQuery.setTerm(ColumnValue.fromLong(0));
         int offset = (uploadFileListCo.getPageIndex() - 1) * uploadFileListCo.getPageSize();
         SearchRequest searchRequest = SearchRequest.newBuilder()
-                .tableName(ots.getTableName(PhotoAlbum.class))
-                .indexName(ots.getTableName(PhotoAlbum.class))
+                .tableName(ots.getTableName(UploadFile.class))
+                .indexName(ots.getTableName(UploadFile.class))
                 .searchQuery(
                         SearchQuery.newBuilder()
                                 .offset(offset)
+                                .query((QueryBuilder) termQuery)
                                 .limit(uploadFileListCo.getPageSize())
                                 .getTotalCount(true) // 设置返回总条数
                                 .build())
