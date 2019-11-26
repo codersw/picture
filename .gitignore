@@ -31,5 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
-src/main/java/com/mango/photoalbum/dao/
-src/main/java/com/mango/photoalbum/service/
+photoalbum.properties
+photoalbum.xml

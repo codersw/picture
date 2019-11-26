@@ -18,7 +18,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Override
     public PhotoAlbumVo save(PhotoAlbumCo PhotoAlbumCo) {
-        existTable();
+        ots.creatTable(PhotoAlbum.class);
         return null;
     }
 
@@ -35,11 +35,5 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
     @Override
     public List<PhotoAlbumVo> list() {
         return null;
-    }
-
-    private void existTable(){
-        if(!ots.existTable(TableNameContant.PHOTOALBUM)){
-            ots.creatTable(ots.toTableStore(TableNameContant.PHOTOALBUM, PhotoAlbum.class, "albumId"));
-        }
     }
 }

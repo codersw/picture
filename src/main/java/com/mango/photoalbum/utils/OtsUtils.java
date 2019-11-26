@@ -5,14 +5,16 @@ import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.TableStoreException;
 import com.alicloud.openservices.tablestore.model.*;
 import com.alicloud.openservices.tablestore.model.search.*;
-import com.mango.photoalbum.model.ots.TableStore;
-import com.mango.photoalbum.model.ots.TableStoreRow;
+import com.mango.photoalbum.annotation.OTSClass;
+import com.mango.photoalbum.annotation.OTSColumn;
+import com.mango.photoalbum.annotation.OTSPrimaryKey;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -55,26 +57,20 @@ public class OtsUtils {
 
     /**
      * 创建表格
-     * @param tableStore
+     * @param c
      */
-    public void creatTable(TableStore tableStore){
-        log.info("开始创建表格{}", tableStore.getTableName());
-        //描述表的结构信息
-        TableMeta tableMeta = new TableMeta(tableStore.getTableName());
-        //添加主键列
-        tableMeta.addPrimaryKeyColumns(tableStore.getPrimaryKeySchemas());
-        //添加属性列
-        tableMeta.addDefinedColumns(tableStore.getDefinedColumnSchemas());
-        int timeToLive = -1; // 数据的过期时间, 单位秒, -1代表永不过期. 假如设置过期时间为一年, 即为 365 * 24 * 3600
-        int maxVersions = 1; // 最大保存版本数, maxVersions大于1时, 无法使用二级索引和多元索引功能
-        //描述表的配置信息
-        TableOptions tableOptions = new TableOptions(timeToLive, maxVersions);
-        //将表的结构信息和配置信息封装到一个request里
-        CreateTableRequest request = new CreateTableRequest(tableMeta, tableOptions);
-        //创建表格
+    public void creatTable(Class<?> c){
         try {
+            if(existTable(c)) return;
+            int timeToLive = -1; // 数据的过期时间, 单位秒, -1代表永不过期. 假如设置过期时间为一年, 即为 365 * 24 * 3600
+            int maxVersions = 1; // 最大保存版本数, maxVersions大于1时, 无法使用二级索引和多元索引功能
+            //描述表的配置信息
+            TableOptions tableOptions = new TableOptions(timeToLive, maxVersions);
+            //将表的结构信息和配置信息封装到一个request里
+            CreateTableRequest request = new CreateTableRequest(toTable(c), tableOptions);
+            //创建表格
             client.createTable(request);
-            log.info("创建表格成功:{}", tableStore.getTableName());
+            log.info("创建表格成功:{}", request.getTableMeta().getTableName());
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("创建表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -86,16 +82,15 @@ public class OtsUtils {
 
     /**
      * 删除表格
-     * @param tableName
+     * @param c
      */
-    public void deleteTable(String tableName){
-        log.info("删除表格开始:{}", tableName);
-        DeleteTableRequest request = new DeleteTableRequest(tableName);
+    public void deleteTable(Class<?> c) {
+        DeleteTableRequest request = new DeleteTableRequest(getTableName(c));
         try {
             client.deleteTable(request);
-            log.info("删除表格成功:{}", tableName);
+            log.info("删除表格成功:{}", request.getTableName());
         } catch (TableStoreException e) {
-            System.err.println("操作失败，详情：" + e.getMessage());
+            e.printStackTrace();
             log.error("删除表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
@@ -105,13 +100,14 @@ public class OtsUtils {
 
     /**
      * 判断表格是否存在
-     * @param tableName
+     * @param c
      * @return
      */
-    public boolean existTable(String tableName) {
-        log.info("判断表格是否存在开始:{}", tableName);
-        DescribeTableRequest request = new DescribeTableRequest(tableName);
+    private boolean existTable(Class<?> c) {
         try {
+            String tableName = getTableName(c);
+            log.info("判断表格是否存在开始:{}", tableName);
+            DescribeTableRequest request = new DescribeTableRequest(tableName);
             DescribeTableResponse response = client.describeTable(request);
             TableMeta tableMeta = response.getTableMeta();
             if (tableMeta != null && tableMeta.getTableName() != null) {
@@ -226,22 +222,13 @@ public class OtsUtils {
 
     /**
      * 添加数据
-     * @param row
+     * @param t
      */
-    public void creatRow(TableStoreRow row){
-        log.info("开始添加数据{}", row.getTableName());
-        //主键信息
-        PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
-        //属性列信息
-        RowPutChange rowPutChange = new RowPutChange(row.getTableName(), primaryKey);
-        Map<String, ColumnValue> columnValue = row.getColumnValue();
-        columnValue.keySet().forEach(key ->{
-            rowPutChange.addColumn(key, columnValue.get(key));
-        });
-        //添加新数据到表格
+    public <T> void creatRow(T t){
         try {
-            client.putRow(new PutRowRequest(rowPutChange));
-            log.info("添加数据成功{}", row.getTableName());
+            PutRowRequest request = new PutRowRequest(toRow(t));
+            client.putRow(request);
+            log.info("添加数据成功{}", request.getRowChange().getTableName());
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("添加数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -253,26 +240,19 @@ public class OtsUtils {
 
     /**
      * 通过主键获取数据
-     * @param row
+     * @param t
      * @return
      */
-    public TableStoreRow retrieveRow(TableStoreRow row) {
-        log.info("开始查找数据{}", row.getTableName());
-        //主键信息
-        PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
-        //读取一行
-        SingleRowQueryCriteria rowQueryCriteria = new SingleRowQueryCriteria(row.getTableName(), primaryKey);
-        //设置读取最新版本
-        rowQueryCriteria.setMaxVersions(1);
+    public <T> Row retrieveRow(T t) {
         try {
+            RowPutChange row = toRow(t);
+            //读取一行
+            SingleRowQueryCriteria rowQueryCriteria = new SingleRowQueryCriteria(row.getTableName(), row.getPrimaryKey());
+            //设置读取最新版本
+            rowQueryCriteria.setMaxVersions(1);
             GetRowResponse getRowResponse = client.getRow(new GetRowRequest(rowQueryCriteria));
-            Row responseRow = getRowResponse.getRow();
-            if(responseRow == null) {
-                log.info("查找数据结果集为空!");
-                return null;
-            }
             log.info("查找数据成功{}", row.getTableName());
-            return formatTableStoreRow(responseRow);
+            return getRowResponse.getRow();
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -285,38 +265,27 @@ public class OtsUtils {
 
     /**
      * 通过条件获取数据
-     * @param startRow
-     * @param endRow
+     * @param startT
+     * @param endT
      * @param limit
      * @param direction
      * @return
      */
-    public List<TableStoreRow> retrieveRow(TableStoreRow startRow, TableStoreRow endRow, Integer limit, Direction direction) {
-        log.info("开始查找数据{}", startRow.getTableName());
-        //构建start主键
-        PrimaryKey primaryStartKey = creatPrimaryKey(startRow.getPrimaryKeyValue());
-        //构建end主键
-        PrimaryKey primaryEndKey = creatPrimaryKey(endRow.getPrimaryKeyValue());
-        RangeRowQueryCriteria rangeRowQueryCriteria = new RangeRowQueryCriteria(startRow.getTableName());
-        rangeRowQueryCriteria.setInclusiveStartPrimaryKey(primaryStartKey);
-        rangeRowQueryCriteria.setExclusiveEndPrimaryKey(primaryEndKey);
-        rangeRowQueryCriteria.setLimit(limit);
-        rangeRowQueryCriteria.setDirection(direction);
-        //设置读取最新版本
-        rangeRowQueryCriteria.setMaxVersions(1);
+    public <T> List<Row> retrieveRow(T startT, T endT, Integer limit, Direction direction) {
         try {
+            RowPutChange startRow = toRow(startT);
+            RowPutChange entRow = toRow(endT);
+            RangeRowQueryCriteria rangeRowQueryCriteria = new RangeRowQueryCriteria(startRow.getTableName());
+            rangeRowQueryCriteria.setInclusiveStartPrimaryKey(startRow.getPrimaryKey());
+            rangeRowQueryCriteria.setExclusiveEndPrimaryKey(entRow.getPrimaryKey());
+            rangeRowQueryCriteria.setLimit(limit);
+            rangeRowQueryCriteria.setDirection(direction);
+            //设置读取最新版本
+            rangeRowQueryCriteria.setMaxVersions(1);
             GetRangeResponse getRangeResponse = client.getRange(new GetRangeRequest(rangeRowQueryCriteria));
-            List<Row> rows = getRangeResponse.getRows();
-            if(rows.isEmpty()) {
-                log.info("查找数据结果集为空!");
-                return null;
-            }
             log.info("查找数据成功{}", startRow.getTableName());
-            List<TableStoreRow> tableStoreRows = new ArrayList<>();
-            rows.forEach(row ->{
-                tableStoreRows.add(formatTableStoreRow(row));
-            });
-            return tableStoreRows;
+
+            return getRangeResponse.getRows();
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -333,23 +302,14 @@ public class OtsUtils {
      * @param searchIndexName
      * @param searchQuery
      */
-    public List<TableStoreRow> searchQuery(String tableName, String searchIndexName,SearchQuery searchQuery){
+    public List<Row> searchQuery(String tableName, String searchIndexName, SearchQuery searchQuery){
         log.info("开始多条件查找数据{}", tableName);
         searchQuery.setGetTotalCount(true);
         SearchRequest searchRequest = new SearchRequest(tableName, searchIndexName, searchQuery);
         try {
             SearchResponse resp = client.search(searchRequest);
-            List<Row> rows = resp.getRows();
-            if(rows.isEmpty()) {
-                log.info("查找数据结果集为空!");
-                return null;
-            }
             log.info("多条件查找数据成功{}", tableName);
-            List<TableStoreRow> tableStoreRows = new ArrayList<>();
-            rows.forEach(row ->{
-                tableStoreRows.add(formatTableStoreRow(row));
-            });
-            return tableStoreRows;
+            return  resp.getRows();
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("多条件查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -362,19 +322,13 @@ public class OtsUtils {
 
     /**
      * 更新数据
-     * @param row
+     * @param t
      */
-    public void updataRow(TableStoreRow row){
-        //构建主键
-        PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
-        RowUpdateChange rowUpdateChange = new RowUpdateChange(row.getTableName(), primaryKey);
-        //构建属性列
-        Map<String, ColumnValue> columnValue = row.getColumnValue();
-        columnValue.keySet().forEach(key ->{
-            rowUpdateChange.put(key, columnValue.get(key));
-        });
-        //添加新数据到表格
+    public <T> void updataRow(T t) {
         try {
+            RowPutChange row = toRow(t);
+            RowUpdateChange rowUpdateChange = new RowUpdateChange(row.getTableName(), row.getPrimaryKey());
+            rowUpdateChange.put(row.getColumnsToPut());
             client.updateRow(new UpdateRowRequest(rowUpdateChange));
             log.info("更新数据成功{}", row.getTableName());
         } catch (TableStoreException e) {
@@ -388,14 +342,12 @@ public class OtsUtils {
 
     /**
      * 删除数据
-     * @param row
+     * @param t
      */
-    private void deleteRow(TableStoreRow row) {
-        //构建主键
-        PrimaryKey primaryKey = creatPrimaryKey(row.getPrimaryKeyValue());
-        RowDeleteChange rowDeleteChange = new RowDeleteChange(row.getTableName(), primaryKey);
-        //删除数据
+    private <T> void deleteRow(T t) {
         try {
+            RowPutChange row = toRow(t);
+            RowDeleteChange rowDeleteChange = new RowDeleteChange(row.getTableName(), row.getPrimaryKey());
             client.deleteRow(new DeleteRowRequest(rowDeleteChange));
             log.info("删除数据成功{}", row.getTableName());
         } catch (TableStoreException e) {
@@ -420,62 +372,134 @@ public class OtsUtils {
     }
 
     /**
-     * 格式化单条数据
-     * @param row
+     * 创建表格
+     * @param c
      * @return
      */
-    private TableStoreRow formatTableStoreRow(Row row){
-        //处理主键信息
-        Map<String, PrimaryKeyValue> primaryKeyValueMap = new HashMap<>();
-        Map<String, PrimaryKeyColumn> primaryKeyColumnsMap = row.getPrimaryKey().getPrimaryKeyColumnsMap();
-        primaryKeyColumnsMap.keySet().forEach(key ->{
-            primaryKeyValueMap.put(key, primaryKeyColumnsMap.get(key).getValue());
+    private TableMeta toTable(Class<?> c) {
+        List<Field> fields = Arrays.asList(c.getDeclaredFields());
+        List<PrimaryKeySchema> primaryKeySchemas = new ArrayList<>();
+        List<DefinedColumnSchema> definedColumnSchemas = new ArrayList<>();
+        fields.forEach(field -> {
+            field.setAccessible(true);
+            List<Annotation> annotations = Arrays.asList(field.getAnnotations());// 获取自定义注解
+            annotations.forEach(annotation -> {
+                String name = field.getName(); // 获取属性的名字
+                String type = field.getGenericType().toString(); // 获取属性的类型
+                if(annotation.annotationType() ==  OTSPrimaryKey.class){
+                   OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
+                   if(!StringUtils.isBlank(pk.name())){
+                       name = pk.name();
+                   }
+                   PrimaryKeySchema primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.STRING);
+                   if (type.equals("class java.lang.Integer")){
+                       primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.INTEGER);
+                   }
+                   primaryKeySchemas.add(primaryKeySchema);
+               }
+               if(annotation.annotationType() ==  OTSColumn.class){
+                   OTSColumn column = field.getAnnotation(OTSColumn.class);
+                   if(!StringUtils.isBlank(column.name())){
+                       name = column.name();
+                   }
+                   DefinedColumnSchema definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.STRING);
+                   if (type.equals("class java.lang.Integer")){
+                       definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.INTEGER);
+                   }
+                   if (type.equals("class java.lang.Boolean")){
+                       definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.BOOLEAN);
+                   }
+                   if (type.equals("class java.lang.Double")){
+                       definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.DOUBLE);
+                   }
+                   definedColumnSchemas.add(definedColumnSchema);
+               }
+            });
         });
-        //处理属性列信息
-        Map<String, ColumnValue> columnValueMap = new HashMap<>();
-        List<Column> columns = Arrays.asList(row.getColumns());
-        columns.forEach(column -> {
-            columnValueMap.put(column.getName(), column.getValue());
-        });
-        return TableStoreRow.builder()
-                .primaryKeyValue(primaryKeyValueMap)
-                .columnValue(columnValueMap)
-                .build();
+        //描述表的结构信息
+        TableMeta tableMeta = new TableMeta(getTableName(c));
+        //添加主键列
+        tableMeta.addPrimaryKeyColumns(primaryKeySchemas);
+        //添加属性列
+        tableMeta.addDefinedColumns(definedColumnSchemas);
+        return tableMeta;
     }
 
-    public TableStore toTableStore(String tableName, Class<?> c, String... primaryKey){
+    /**
+     * 创建行数据
+     * @param t
+     * @param <T>
+     * @return
+     */
+    private <T> RowPutChange toRow(T t) {
+        Class<T> c = (Class<T>) t.getClass();
         List<Field> fields = Arrays.asList(c.getDeclaredFields());
-        List<String> pkList = Arrays.asList(primaryKey);
-        List<PrimaryKeySchema> primaryKeySchemas = new ArrayList<PrimaryKeySchema>();
-        List<DefinedColumnSchema> definedColumnSchemas = new ArrayList<DefinedColumnSchema>();
+        PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
+        Map<String, ColumnValue> columnValue = new HashMap<>();
         fields.forEach(field -> {
-            String name = field.getName(); // 获取属性的名字
-            String type = field.getGenericType().toString(); // 获取属性的类型
-            if(pkList.contains(name)){
-                PrimaryKeySchema primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.STRING);
-                if (type.equals("class java.lang.Integer")){
-                    primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.INTEGER);
+            field.setAccessible(true);
+            List<Annotation> annotations = Arrays.asList(field.getAnnotations());// 获取自定义注解
+            annotations.forEach(annotation -> {
+                String name = field.getName(); // 获取属性的名字
+                String type = field.getGenericType().toString(); // 获取属性的类型
+                try {
+                    Object value = field.get(t);//获取属性值
+                    if(value != null){
+                        if(annotation.annotationType() ==  OTSPrimaryKey.class){
+                            OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
+                            if(!StringUtils.isBlank(pk.name())){
+                                name = pk.name();
+                            }
+                            if (type.equals("class java.lang.String")){
+                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
+                            }
+                            if (type.equals("class java.lang.Integer")){
+                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromLong((Integer) value));
+                            }
+                        }
+                        if(annotation.annotationType() ==  OTSColumn.class){
+                            OTSColumn column = field.getAnnotation(OTSColumn.class);
+                            if(!StringUtils.isBlank(column.name())){
+                                name = column.name();
+                            }
+                            if (type.equals("class java.lang.String")){
+                                columnValue.put(name, ColumnValue.fromString((String) value));
+                            }
+                            if (type.equals("class java.lang.Integer")){
+                                columnValue.put(name, ColumnValue.fromLong((Integer) value));
+                            }
+                            if (type.equals("class java.lang.Boolean")){
+                                columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
+                            }
+                            if (type.equals("class java.util.Date")){
+                                columnValue.put(name, ColumnValue.fromString(DateUtils.dateToStr((Date) value,"yyyy-MM-dd HH:mm:ss")));
+                            }
+                        }
+                    }
+                } catch (IllegalAccessException e) {
+                    log.error("生成数据出错{}", e.getMessage());
+                    e.printStackTrace();
                 }
-                primaryKeySchemas.add(primaryKeySchema);
-            } else {
-                DefinedColumnSchema definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.STRING);
-                if (type.equals("class java.lang.Integer")){
-                    definedColumnSchema= new DefinedColumnSchema(name, DefinedColumnType.INTEGER);
-                }
-                if (type.equals("class java.lang.Boolean")){
-                    definedColumnSchema= new DefinedColumnSchema(name, DefinedColumnType.BOOLEAN);
-                }
-                if (type.equals("class java.lang.Double")){
-                    definedColumnSchema= new DefinedColumnSchema(name, DefinedColumnType.DOUBLE);
-                }
-                definedColumnSchemas.add(definedColumnSchema);
-            }
+            });
         });
-        return TableStore.builder()
-                .tableName(tableName)
-                .primaryKeySchemas(primaryKeySchemas)
-                .definedColumnSchemas(definedColumnSchemas)
-                .build();
+        //属性列信息
+        RowPutChange rowPutChange = new RowPutChange(getTableName(c), primaryKeyBuilder.build());
+        columnValue.keySet().forEach(key ->{
+            rowPutChange.addColumn(key, columnValue.get(key));
+        });
+        return rowPutChange;
+    }
 
+    /**
+     * 获取自定义表名字
+     * @param c
+     * @return
+     */
+    private String getTableName(Class<?> c){
+        String name = c.getAnnotation(OTSClass.class).name();
+        if(StringUtils.isBlank(name)){
+            name = c.getName();
+        }
+        return name;
     }
 }
