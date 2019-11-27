@@ -19,8 +19,7 @@ public class DateUtils {
     public static String getLocalTime(String format) {
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat(format);
-        String dateString = formatter.format(currentTime);
-        return dateString;
+        return formatter.format(currentTime);
     }
 
     /**
@@ -77,7 +76,7 @@ public class DateUtils {
         Calendar to = Calendar.getInstance();
         from.setTime(fromDate);
         to.setTime(toDate);
-        return to.get(1) - from.get(1);
+        return to.get(Calendar.YEAR) - from.get(Calendar.YEAR);
     }
 
 
@@ -93,8 +92,8 @@ public class DateUtils {
         Calendar to = Calendar.getInstance();
         from.setTime(fromDate);
         to.setTime(toDate);
-        int year = to.get(1) - from.get(1);
-        return (year * 12 + to.get(2)) - from.get(2);
+        int year = to.get(Calendar.YEAR) - from.get(Calendar.YEAR);
+        return (year * 12 + to.get(Calendar.MONTH)) - from.get(Calendar.MONTH);
     }
 
     /**
@@ -121,7 +120,7 @@ public class DateUtils {
     public static Date addSecond(Date date, int second) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(13, calendar.get(13) + second);
+        calendar.set(Calendar.SECOND, calendar.get(Calendar.SECOND) + second);
         return calendar.getTime();
     }
 
@@ -135,7 +134,7 @@ public class DateUtils {
     public static Date addMinute(Date date, int minute) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(12, calendar.get(12) + minute);
+        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + minute);
         return calendar.getTime();
     }
 
@@ -149,7 +148,7 @@ public class DateUtils {
     public static Date addHour(Date date, int hour) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(11, calendar.get(11) + hour);
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + hour);
         return calendar.getTime();
     }
 
@@ -163,7 +162,7 @@ public class DateUtils {
     public static Date addDay(Date date, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(6, calendar.get(6) + day);
+        calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) + day);
         return calendar.getTime();
     }
 
@@ -177,7 +176,7 @@ public class DateUtils {
     public static Date addMonth(Date date, int month) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(2, calendar.get(2) + month);
+        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) + month);
         return calendar.getTime();
     }
 
@@ -191,7 +190,7 @@ public class DateUtils {
     public static Date addYear(Date date, int year) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(1, calendar.get(2) + year);
+        calendar.set(Calendar.YEAR, calendar.get(Calendar.MONTH) + year);
         return calendar.getTime();
     }
 
@@ -270,19 +269,12 @@ public class DateUtils {
         // 设置一个时间进日历类
         calendar.setTime(strToDate(time,"yyyy-MM-dd"));
         // 设置指定的日期
-        calendar.add(calendar.DATE, i);
+        calendar.add(Calendar.DATE, i);
         // 通过日历类拿到想要的日期
         Date t = calendar.getTime();
         // 日期转换字符串
         times = dateToStr(t, "yyyy-MM-dd");
         return times;
     }
-
-
-    public static void main(String[] args) throws  Exception{
-
-    }
-
-
 
 }

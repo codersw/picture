@@ -4,8 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -27,4 +25,8 @@ public class UploadFileCo {
     @ApiModelProperty(value = "文件")
     @NotNull(message = "文件不能为空")
     private MultipartFile file;
+
+    @ApiModelProperty(value = "是否为封面 0：否 1：是", required = true)
+    @NotNull(message = "是否为封面不能为空")
+    private Integer isCover = 0;
 }

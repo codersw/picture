@@ -54,6 +54,7 @@ public class UploadFileController {
             List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
             uploadFileCos.forEach(uploadFileCo ->{
                 try {
+                    uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
                     result.add(uploadFileService.save(uploadFileCo));
                 } catch (Exception e) {
                     log.error("上传图片发生异常{}", e.getMessage());

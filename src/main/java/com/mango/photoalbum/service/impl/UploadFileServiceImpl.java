@@ -9,6 +9,7 @@ import com.alicloud.openservices.tablestore.model.search.query.Query;
 import com.alicloud.openservices.tablestore.model.search.query.QueryBuilder;
 import com.alicloud.openservices.tablestore.model.search.query.RangeQuery;
 import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
+import com.mango.photoalbum.enums.IsCoverEnum;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.UploadFileService;
@@ -59,6 +60,13 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .isDel(IsDelEnum.FALSE.getValue())
                     .build();
             ots.creatRow(uploadFile);
+            //如果是封面
+            if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
+                ots.updataRow(PhotoAlbum.builder()
+                        .albumId(uploadFileCo.getAlbumId())
+                        .cover(uploadFileCo.getFileId())
+                        .build());
+            }
             return uploadFile;
         }else{
             throw new Exception("图片不可以是空的");

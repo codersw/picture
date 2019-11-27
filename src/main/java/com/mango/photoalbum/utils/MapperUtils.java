@@ -78,15 +78,5 @@ public final class MapperUtils {
                 .register();
         return MAPPER_FACTORY.getMapperFacade().mapAsList(sList, rClass);
     }
-
-    /**
-     * 用例：复制bean/list的简单用法
-     * 支持传入Map控制属性， key-value 分别是 复制对象-目标对象 的属性名
-     * @param args
-     * @author liuyuxuan
-     */
-    public static void main(String [] args) {
-
-    }
 }
 

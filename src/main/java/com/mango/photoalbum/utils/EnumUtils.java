@@ -140,11 +140,4 @@ public class EnumUtils {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-
-
-    }
-
-
 }
