@@ -86,15 +86,14 @@ public class UploadFileServiceImpl implements UploadFileService {
         TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        SearchQuery query = new SearchQuery();
+        query.setQuery(termQuery);
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
                 .indexName(ots.getTableName(UploadFile.class))
-                .searchQuery(
-                        SearchQuery.newBuilder()
-                                .query((QueryBuilder) termQuery)
-                                .limit(0)   // 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
-                                .getTotalCount(true) // 设置返回总条数
-                                .build())
+                .searchQuery(query)
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
         return (int) searchResponse.getTotalCount();
@@ -105,17 +104,20 @@ public class UploadFileServiceImpl implements UploadFileService {
         TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
-        int offset = (uploadFileListCo.getPageIndex() - 1) * uploadFileListCo.getPageSize();
+        SearchQuery query = new SearchQuery();
+        query.setQuery(termQuery);
+        Integer pageSize = uploadFileListCo.getPageSize();
+        if(pageSize == 0){
+            query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        } else {
+            int offset = (uploadFileListCo.getPageIndex() - 1) * uploadFileListCo.getPageSize();
+            query.setOffset(offset);
+        }
+        query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
                 .indexName(ots.getTableName(UploadFile.class))
-                .searchQuery(
-                        SearchQuery.newBuilder()
-                                .offset(offset)
-                                .query((QueryBuilder) termQuery)
-                                .limit(uploadFileListCo.getPageSize())
-                                .getTotalCount(true) // 设置返回总条数
-                                .build())
+                .searchQuery(query)
                 .returnAllColumns(true) // 设置返回所有列
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);

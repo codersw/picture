@@ -2,18 +2,12 @@ package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.UploadFileService;
-import com.mango.photoalbum.utils.CommonUtils;
-import com.mango.photoalbum.utils.FileUtils;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 文件接口

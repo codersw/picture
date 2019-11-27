@@ -74,8 +74,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                     .fileId(photoAlbum.getCover())
                     .build());
             if(uploadFile != null){
-                String ossFileName = uploadFile.getFileId() + uploadFile.getFileType();
-                photoAlbum.setCoverPath(oss.getViewUrl(ossFileName));
+                photoAlbum.setCoverPath(uploadFile.getFilePath());
             }
         }
         return photoAlbum;
@@ -122,8 +121,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                                 .fileId(photoAlbum.getCover())
                                 .build());
                         if(uploadFile != null){
-                            String ossFileName = uploadFile.getFileId() + uploadFile.getFileType();
-                            photoAlbum.setCoverPath(oss.getViewUrl(ossFileName));
+                            photoAlbum.setCoverPath(uploadFile.getFilePath());
                         }
                     }
                     result.add(photoAlbum);
