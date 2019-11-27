@@ -11,8 +11,10 @@ import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.PhotoAlbumCo;
 import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.model.PhotoAlbumListCo;
+import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.utils.CommonUtils;
+import com.mango.photoalbum.utils.OssUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,9 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Resource
     private OtsUtils ots;
+
+    @Resource
+    private OssUtils oss;
 
     @Override
     public PhotoAlbum save(PhotoAlbumCo photoAlbumCo) {
@@ -61,8 +66,19 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Override
     public PhotoAlbum get(String albumId) {
-        return ots.retrieveRow(PhotoAlbum.builder()
-                .albumId(albumId).build());
+        PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+                .albumId(albumId)
+                .build());
+        if(!StringUtils.isBlank(photoAlbum.getCover())){
+            UploadFile uploadFile = ots.retrieveRow(UploadFile.builder()
+                    .fileId(photoAlbum.getCover())
+                    .build());
+            if(uploadFile != null){
+                String ossFileName = uploadFile.getFileId() + uploadFile.getFileType();
+                photoAlbum.setCoverPath(oss.getViewUrl(ossFileName));
+            }
+        }
+        return photoAlbum;
     }
 
     @Override
@@ -100,7 +116,17 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         if(rows.size() > 0){
             rows.forEach(row -> {
                 try {
-                    result.add(ots.formatRow(row, PhotoAlbum.class));
+                    PhotoAlbum photoAlbum = ots.formatRow(row, PhotoAlbum.class);
+                    if(!StringUtils.isBlank(photoAlbum.getCover())){
+                        UploadFile uploadFile = ots.retrieveRow(UploadFile.builder()
+                                .fileId(photoAlbum.getCover())
+                                .build());
+                        if(uploadFile != null){
+                            String ossFileName = uploadFile.getFileId() + uploadFile.getFileType();
+                            photoAlbum.setCoverPath(oss.getViewUrl(ossFileName));
+                        }
+                    }
+                    result.add(photoAlbum);
                 } catch (IllegalAccessException | InstantiationException e) {
                     e.printStackTrace();
                 }

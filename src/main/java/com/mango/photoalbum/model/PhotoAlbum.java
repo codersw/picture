@@ -80,4 +80,9 @@ public class PhotoAlbum {
     @OTSColumn
     private String shootLocation;
 
+    /**
+     * 封面 图片url
+     */
+    private String coverPath;
+
 }
