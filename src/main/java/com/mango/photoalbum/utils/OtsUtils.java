@@ -3,7 +3,6 @@ package com.mango.photoalbum.utils;
 import com.alicloud.openservices.tablestore.ClientException;
 import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.TableStoreException;
-import com.alicloud.openservices.tablestore.core.utils.Preconditions;
 import com.alicloud.openservices.tablestore.model.*;
 import com.alicloud.openservices.tablestore.model.search.*;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
@@ -12,8 +11,6 @@ import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
-import javafx.util.Pair;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.*;
 
@@ -30,7 +26,6 @@ import java.util.*;
  *@Author swen
  */
 @Slf4j
-@Data
 @Component
 public class OtsUtils {
 
@@ -328,59 +323,6 @@ public class OtsUtils {
             log.error("多条件查找失败!请求失败详情：{}",e.getMessage());
         }
         return null;
-    }
-
-    public void rangeQuery(String tableName, String indexName) {
-        SearchQuery searchQuery = new SearchQuery();
-
-        SearchRequest searchRequest = new SearchRequest(tableName, indexName, searchQuery);
-        SearchResponse resp = client.search(searchRequest);
-        System.out.println("TotalCount: " + resp.getTotalCount()); // 匹配到的总行数，非返回行数
-        System.out.println("Row: " + resp.getRows());
-    }
-
-    /**
-     * 范围查询指定范围内的数据，返回指定页数大小的数据，并能根据offset跳过部分行
-     * @param tableName
-     * @param startKey
-     * @param endKey
-     * @param offset
-     * @param pageSize
-     * @return
-     */
-    public Pair<List<Row>, PrimaryKey> readByPage(String tableName,
-                                                   PrimaryKey startKey, PrimaryKey endKey, int offset, int pageSize) {
-        Preconditions.checkArgument(offset >= 0, "Offset should not be negative.");
-        Preconditions.checkArgument(pageSize > 0, "Page size should be greater than 0.");
-        List<Row> rows = new ArrayList<Row>(pageSize);
-        int limit = pageSize;
-        int skip = offset;
-        PrimaryKey nextStart = startKey;
-        // 若查询的数据量很大，则一次请求有可能不会返回所有的数据，需要流式查询所有需要的数据。
-        while (limit > 0 && nextStart != null) {
-            // 构造GetRange的查询参数。
-            // 注意：startPrimaryKey需要设置为上一次读到的位点，从上一次未读完的地方继续往下读，实现流式的范围查询。
-            RangeRowQueryCriteria criteria = new RangeRowQueryCriteria(tableName);
-            criteria.setInclusiveStartPrimaryKey(nextStart);
-            criteria.setExclusiveEndPrimaryKey(endKey);
-            // 需要设置正确的limit，这里期望读出的数据行数最多为完整的一页数据以及需要过滤(offset)的数据
-            criteria.setLimit(skip + limit);
-            criteria.setMaxVersions(1);
-            GetRangeRequest request = new GetRangeRequest();
-            request.setRangeRowQueryCriteria(criteria);
-            GetRangeResponse response = client.getRange(request);
-            for (Row row : response.getRows()) {
-                if (skip > 0) {
-                    skip--; // 对于offset之前的数据，需要过滤掉，采用的策略是读出来后在客户端进行过滤。
-                } else {
-                    rows.add(row);
-                    limit--;
-                }
-            }
-            // 设置下一次查询的起始位点
-            nextStart = response.getNextStartPrimaryKey();
-        }
-        return new Pair<>(rows, nextStart);
     }
 
     /**

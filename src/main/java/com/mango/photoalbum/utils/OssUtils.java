@@ -1,11 +1,9 @@
 package com.mango.photoalbum.utils;
 
-import com.alicloud.openservices.tablestore.core.utils.Base64;
 import com.aliyun.oss.*;
 import com.aliyun.oss.model.CannedAccessControlList;
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import com.aliyun.oss.model.OSSObject;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +17,6 @@ import java.util.Date;
  *@Author swen
  */
 @Slf4j
-@Data
 @Component
 public class OssUtils {
 

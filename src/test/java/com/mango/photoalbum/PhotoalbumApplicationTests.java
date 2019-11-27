@@ -1,13 +1,11 @@
 package com.mango.photoalbum;
 
-import com.alicloud.openservices.tablestore.model.*;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
 import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.utils.OtsUtils;
-import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,44 +95,5 @@ public class PhotoalbumApplicationTests {
         request.setSearchQuery(searchQuery);
         SearchResponse searchResponse = ots.searchQuery(request);
         log.info(searchResponse.toString());
-    }
-
-    @Test
-    public void getRowsByPage() {
-        String tableName = ots.getTableName(PhotoAlbum.class);
-        int pageSize = 1;
-        int offset = 0;
-        PrimaryKey startKey = new PrimaryKey(new ArrayList<PrimaryKeyColumn>(){
-            {
-                add(new PrimaryKeyColumn("albumId", PrimaryKeyValue.INF_MIN));
-            }
-        });
-        PrimaryKey endKey = new PrimaryKey(new ArrayList<PrimaryKeyColumn>(){
-            {
-                add(new PrimaryKeyColumn("albumId", PrimaryKeyValue.INF_MAX));
-            }
-        });
-        // 读第一页，从范围的offset=33的行开始读起
-        Pair<List<Row>, PrimaryKey> result = ots.readByPage(tableName, startKey, endKey, offset, pageSize);
-        for (Row row : result.getKey()) {
-            System.out.println(Arrays.toString(row.getColumns()));
-        }
-        System.out.println("Total rows count: " + result.getKey().size());
-        // 顺序翻页，读完范围内的所有数据
-        startKey = result.getValue();
-        while (startKey != null) {
-            result = ots.readByPage(tableName, startKey, endKey, 0, pageSize);
-            for (Row row : result.getKey()) {
-                System.out.println(Arrays.toString(row.getColumns()));
-            }
-            startKey = result.getValue();
-            System.out.println("Total rows count: " + result.getKey().size());
-        }
-    }
-
-    @Test
-    public void rangeQuery(){
-        String tableName = ots.getTableName(PhotoAlbum.class);
-        ots.rangeQuery(tableName,"z_albumId");
     }
 }

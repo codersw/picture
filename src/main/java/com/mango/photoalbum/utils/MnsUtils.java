@@ -8,14 +8,12 @@ import com.aliyun.mns.common.ServiceException;
 import com.aliyun.mns.model.Message;
 import com.mango.photoalbum.config.ThreadPoolHelper;
 import com.mango.photoalbum.constant.QueueConstant;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Data
 public class MnsUtils {
 
     @Value("${alibaba.mns.accessKeyId}")
