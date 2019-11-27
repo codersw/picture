@@ -102,13 +102,9 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         SearchQuery query = new SearchQuery();
         query.setQuery(formatQuery(photoAlbumListCo));
         Integer pageSize = photoAlbumListCo.getPageSize();
-        if(pageSize == 0) {
-            query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
-        } else {
-            int offset = (photoAlbumListCo.getPageIndex() - 1) * photoAlbumListCo.getPageSize();
-            query.setOffset(offset);
-            query.setLimit(photoAlbumListCo.getPageSize());
-        }
+        int offset = (photoAlbumListCo.getPageIndex() - 1) * photoAlbumListCo.getPageSize();
+        query.setOffset(offset);
+        query.setLimit(pageSize);
         query.setGetTotalCount(true);// 设置返回总条数
         query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",SortOrder.DESC))));
         SearchRequest searchRequest = SearchRequest.newBuilder()
@@ -176,7 +172,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
             TermQuery termQuery1 = new TermQuery();
             termQuery1.setFieldName("userId");
             termQuery1.setTerm(ColumnValue.fromString(keyword));
-            queries.add(termQuery1);
+            queries.add(termQuery);
             //boolQuery.setMustQueries(Collections.singletonList(termQuery));
             boolQuery.setShouldQueries(queries);
             boolQuery.setMinimumShouldMatch(2);

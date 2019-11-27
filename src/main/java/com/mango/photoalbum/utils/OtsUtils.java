@@ -469,12 +469,15 @@ public class OtsUtils {
                                 columnValue.put(name, ColumnValue.fromString((String) value));
                             }
                             if (type.equals("class java.lang.Integer")){
+                                assert value instanceof Integer;
                                 columnValue.put(name, ColumnValue.fromLong((Integer) value));
                             }
                             if (type.equals("class java.lang.Boolean")){
+                                assert value instanceof Boolean;
                                 columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
                             }
                             if (type.equals("class java.util.Date")){
+                                assert value instanceof Date;
                                 columnValue.put(name, ColumnValue.fromString(DateUtils.dateToStr((Date) value,"yyyy-MM-dd HH:mm:ss")));
                             }
                         }
@@ -586,7 +589,11 @@ public class OtsUtils {
                         }
                         if (type.equals("class java.util.Date")){
                             String value = columnValue.asString();
-                            field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd HH:mm:ss"));
+                            if(value.split(" ").length > 1) {
+                                field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd HH:mm:ss"));
+                            } else {
+                                field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd"));
+                            }
                         }
                     }
                 }

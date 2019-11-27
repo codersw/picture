@@ -28,9 +28,9 @@ public class PhotoAlbumCo {
     @ApiModelProperty(value = "封面")
     private String cover;
 
-    @ApiModelProperty(value = "拍摄时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @ApiModelProperty(value = "拍摄时间格式yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
     private Date shootTime;
 
     @ApiModelProperty(value = "拍摄地点")
