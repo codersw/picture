@@ -1,8 +1,7 @@
 package com.mango.photoalbum;
 
-import com.alicloud.openservices.tablestore.model.search.SearchQuery;
-import com.alicloud.openservices.tablestore.model.search.SearchRequest;
-import com.alicloud.openservices.tablestore.model.search.SearchResponse;
+import com.alicloud.openservices.tablestore.SyncClient;
+import com.alicloud.openservices.tablestore.model.search.*;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.utils.OtsUtils;
@@ -97,4 +96,6 @@ public class PhotoalbumApplicationTests {
         SearchResponse searchResponse = ots.searchQuery(request);
         log.info(searchResponse.toString());
     }
+
+
 }

@@ -18,11 +18,11 @@ public class PhotoAlbumListCo {
      * 当前页
      */
     @ApiModelProperty(value = "当前页")
-    private Integer pageIndex = 0;
+    private Integer pageIndex = 1;
 
     /**
      * 每页总条数
      */
     @ApiModelProperty(value = "每页总条数")
-    private Integer pageSize = 0;
+    private Integer pageSize = 20;
 }

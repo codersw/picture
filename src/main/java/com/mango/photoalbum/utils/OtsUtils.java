@@ -14,6 +14,7 @@ import com.mango.photoalbum.annotation.OTSPrimaryKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
@@ -179,19 +180,19 @@ public class OtsUtils {
     public void createSearchIndex(Class<?> c){
         try {
             String tableName = getTableName(c);
-            log.info("创建联合索引开始:表{}索引{}", tableName, tableName);
+            log.info("创建多元索引开始:表{}索引{}", tableName, tableName);
             CreateSearchIndexRequest request = new CreateSearchIndexRequest();
             request.setTableName(tableName);
             request.setIndexName(tableName);
             request.setIndexSchema(toIndex(c));
             client.createSearchIndex(request);
-            log.info("创建联合成功:表{}索引{}", tableName, tableName);
+            log.info("创建多元索引成功:表{}索引{}", tableName, tableName);
         } catch (TableStoreException e) {
             e.printStackTrace();
-            log.info("创建联合失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            log.info("创建多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("创建联合失败!请求失败详情：{}",e.getMessage());
+            log.error("创建多元索引失败!请求失败详情：{}",e.getMessage());
         }
     }
 
@@ -511,41 +512,41 @@ public class OtsUtils {
             annotations.forEach(annotation -> {
                 String name = field.getName(); // 获取属性的名字
                 String type = field.getGenericType().toString(); // 获取属性的类型
+                // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
                 if(annotation.annotationType() ==  OTSPrimaryKey.class){
                     OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
                     if(!StringUtils.isBlank(pk.name())){
                         name = pk.name();
                     }
-                    //TODO FieldType.TEXT支持分词,而KEYWORD只能用前缀匹配
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.TEXT).setIndex(true).setEnableSortAndAgg(true);
-                    if (type.equals("class java.lang.Integer")){
-                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
-                    }
-                    // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
-                    indexSchema.setIndexSort(new Sort(
-                            Collections.singletonList(new FieldSort(name, SortOrder.ASC))));
-                    fieldSchemas.add(fieldSchema);
+//                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+//                    if (type.equals("class java.lang.Integer")){
+//                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+//                    }
+//                    fieldSchemas.add(fieldSchema);
+                    indexSchema.addFieldSchema(new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true));
                 }
                 if(annotation.annotationType() ==  OTSColumn.class){
                     OTSColumn column = field.getAnnotation(OTSColumn.class);
                     if(!StringUtils.isBlank(column.name())){
                         name = column.name();
                     }
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.TEXT).setIndex(true).setEnableSortAndAgg(true);
-                    if (type.equals("class java.lang.Integer")){
-                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
-                    }
-                    if (type.equals("class java.lang.Boolean")){
-                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true);
-                    }
-                    if (type.equals("class java.lang.Double")){
-                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true);
-                    }
-                    fieldSchemas.add(fieldSchema);
+                    //TODO FieldType.TEXT支持分词,而KEYWORD只能用前缀匹配
+//                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.TEXT).setAnalyzer(FieldSchema.Analyzer.SingleWord);
+                    indexSchema.addFieldSchema(new FieldSchema(name, FieldType.TEXT).setAnalyzer(FieldSchema.Analyzer.MaxWord));
+//                    if (type.equals("class java.lang.Integer")){
+//                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+//                    }
+//                    if (type.equals("class java.lang.Boolean")){
+//                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true);
+//                    }
+//                    if (type.equals("class java.lang.Double")){
+//                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true);
+//                    }
+//                    fieldSchemas.add(fieldSchema);
                 }
             });
         });
-        indexSchema.setFieldSchemas(fieldSchemas);
+//        indexSchema.setFieldSchemas(fieldSchemas);
         return indexSchema;
     }
 
