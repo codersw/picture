@@ -1,12 +1,16 @@
 package com.mango.photoalbum.service.impl;
 
+import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.Row;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
 import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
 import com.alicloud.openservices.tablestore.model.search.agg.AggregationBuilders;
-import com.alicloud.openservices.tablestore.model.search.query.Query;
-import com.alicloud.openservices.tablestore.model.search.query.QueryBuilders;
+import com.alicloud.openservices.tablestore.model.search.query.*;
+import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
+import com.alicloud.openservices.tablestore.model.search.sort.PrimaryKeySort;
+import com.alicloud.openservices.tablestore.model.search.sort.Sort;
+import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.PhotoAlbumCo;
 import com.mango.photoalbum.model.PhotoAlbum;
@@ -19,9 +23,7 @@ import com.mango.photoalbum.utils.OtsUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class PhotoAlbumServiceImpl implements PhotoAlbumService {
@@ -82,14 +84,14 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Override
     public Integer total(PhotoAlbumListCo photoAlbumListCo) {
+        SearchQuery query = new SearchQuery();
+        query.setQuery(formatQuery(photoAlbumListCo));
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(PhotoAlbum.class))
                 .indexName(ots.getTableName(PhotoAlbum.class))
-                .searchQuery(
-                        SearchQuery.newBuilder()
-                                .limit(0)   // 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
-                                .getTotalCount(true) // 设置返回总条数
-                                .build())
+                .searchQuery(query)
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
         return (int) searchResponse.getTotalCount();
@@ -97,16 +99,22 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Override
     public List<PhotoAlbum> list(PhotoAlbumListCo photoAlbumListCo) {
-        int offset = (photoAlbumListCo.getPageIndex() - 1) * photoAlbumListCo.getPageSize();
+        SearchQuery query = new SearchQuery();
+        query.setQuery(formatQuery(photoAlbumListCo));
+        Integer pageSize = photoAlbumListCo.getPageSize();
+        if(pageSize == 0) {
+            query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        } else {
+            int offset = (photoAlbumListCo.getPageIndex() - 1) * photoAlbumListCo.getPageSize();
+            query.setOffset(offset);
+            query.setLimit(photoAlbumListCo.getPageSize());
+        }
+        query.setGetTotalCount(true);// 设置返回总条数
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",SortOrder.DESC))));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(PhotoAlbum.class))
                 .indexName(ots.getTableName(PhotoAlbum.class))
-                .searchQuery(
-                        SearchQuery.newBuilder()
-                                .offset(offset)
-                                .limit(photoAlbumListCo.getPageSize())
-                                .getTotalCount(true) // 设置返回总条数
-                                .build())
+                .searchQuery(query)
                 .returnAllColumns(true) // 设置返回所有列
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
@@ -133,4 +141,46 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         return result;
     }
 
+    /**
+     * 格式化查询条件
+     * @param photoAlbumListCo
+     * @return
+     */
+    private BoolQuery formatQuery(PhotoAlbumListCo photoAlbumListCo) {
+        BoolQuery boolQuery = new BoolQuery();
+        TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
+        termQuery.setFieldName("isDel");  // 设置针对哪个字段
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        boolQuery.setMustQueries(Collections.singletonList(termQuery));
+        List<Query> queries = new ArrayList<>();
+        String keyword = photoAlbumListCo.getKeyword();
+        if(!StringUtils.isBlank(keyword)){
+            //模糊匹配
+            WildcardQuery wildcardQuery = new WildcardQuery();
+            wildcardQuery.setFieldName("title");
+            wildcardQuery.setValue("?" + keyword + "*");
+            WildcardQuery wildcardQuery2 = new WildcardQuery();
+            wildcardQuery2.setFieldName("createTime");
+            wildcardQuery2.setValue("?" + keyword + "*");
+            WildcardQuery wildcardQuery3 = new WildcardQuery();
+            wildcardQuery3.setFieldName("shootTime");
+            wildcardQuery3.setValue("?" + keyword + "*");
+            WildcardQuery wildcardQuery4 = new WildcardQuery();
+            wildcardQuery4.setFieldName("shootLocation");
+            wildcardQuery4.setValue("?" + keyword + "*");
+            queries.add(wildcardQuery);
+            queries.add(wildcardQuery2);
+            queries.add(wildcardQuery3);
+            queries.add(wildcardQuery4);
+            queries.add(termQuery);
+            TermQuery termQuery1 = new TermQuery();
+            termQuery1.setFieldName("userId");
+            termQuery1.setTerm(ColumnValue.fromString(keyword));
+            queries.add(termQuery1);
+            //boolQuery.setMustQueries(Collections.singletonList(termQuery));
+            boolQuery.setShouldQueries(queries);
+            boolQuery.setMinimumShouldMatch(2);
+        }
+        return boolQuery;
+    }
 }

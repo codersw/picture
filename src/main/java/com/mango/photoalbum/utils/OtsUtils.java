@@ -513,7 +513,7 @@ public class OtsUtils {
                     if(!StringUtils.isBlank(pk.name())){
                         name = pk.name();
                     }
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.TEXT).setIndex(true).setEnableSortAndAgg(true);
                     if (type.equals("class java.lang.Integer")){
                         fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
                     }
@@ -527,7 +527,7 @@ public class OtsUtils {
                     if(!StringUtils.isBlank(column.name())){
                         name = column.name();
                     }
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.TEXT).setIndex(true).setEnableSortAndAgg(true);
                     if (type.equals("class java.lang.Integer")){
                         fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
                     }
