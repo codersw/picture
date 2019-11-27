@@ -6,6 +6,8 @@ import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class UploadFileController {
     public Result file(@ModelAttribute UploadFileCo uploadFileCo) {
         try {
             return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileCo));
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
             log.error("上传图片发生异常{}", e.getMessage());
             return ResultGenerator.genFailResult("上传图片发生异常");
@@ -62,7 +64,7 @@ public class UploadFileController {
                 }
             });
             return ResultGenerator.genSuccessResult(result);
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
             log.error("上传图片发生异常{}", e.getMessage());
             return ResultGenerator.genFailResult("上传图片发生异常");
@@ -76,7 +78,7 @@ public class UploadFileController {
      */
     @ApiOperation(value = "文件详情", notes = "相册详情")
     @GetMapping("/{fileId}")
-    public Result get(@PathVariable String fileId) {
+    public Result get(@PathVariable @ApiParam("文件id") String fileId) {
         return ResultGenerator.genSuccessResult(uploadFileService.get(fileId));
     }
 
@@ -87,7 +89,7 @@ public class UploadFileController {
      */
     @ApiOperation(value = "删除文件", notes = "删除文件")
     @DeleteMapping("/{fileId}")
-    public Result delete(@PathVariable String fileId) {
+    public Result delete(@PathVariable @ApiParam("文件id") String fileId) {
         uploadFileService.delete(fileId);
         return ResultGenerator.genSuccessResult();
     }
@@ -98,10 +100,27 @@ public class UploadFileController {
      */
     @ApiOperation(value = "文件列表", notes = "文件列表")
     @GetMapping("/list")
-    public Result list(UploadFileListCo uploadFileListCo){
+    public Result list(@ModelAttribute UploadFileListCo uploadFileListCo) {
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
                 .total(uploadFileService.total(uploadFileListCo))
                 .list(uploadFileService.list(uploadFileListCo))
                 .build());
     }
+
+    /**
+     * 下载文件
+     * @param fileId
+     * @param response
+     */
+    @ApiOperation(value = "下载文件", notes = "文件文件")
+    @RequestMapping("/download/{fileId}")
+    public void download(@PathVariable @ApiParam("文件id") String fileId, HttpServletResponse response) {
+        try {
+            uploadFileService.download(fileId, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("下载文件发生异常{}", e.getMessage());
+        }
+    }
+
 }

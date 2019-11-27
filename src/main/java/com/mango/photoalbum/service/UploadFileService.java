@@ -4,6 +4,8 @@ import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.model.UploadFileCo;
 import com.mango.photoalbum.model.UploadFileListCo;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.util.List;
 
 public interface UploadFileService {
@@ -17,4 +19,6 @@ public interface UploadFileService {
     Integer total(UploadFileListCo uploadFileListCo);
 
     List<UploadFile> list(UploadFileListCo uploadFileListCo);
+
+    void download(String sourcePath, HttpServletResponse response) throws Exception;
 }

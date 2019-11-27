@@ -20,6 +20,9 @@ import com.mango.photoalbum.utils.OtsUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -141,5 +144,17 @@ public class UploadFileServiceImpl implements UploadFileService {
             });
         }
         return result;
+    }
+
+    @Override
+    public void download(String fileId, HttpServletResponse response) throws Exception {
+        UploadFile file = get(fileId);
+        if(file != null) {
+            response.setHeader("Content-Disposition",
+                    "attachment;filename=" + new String(file.getFileName().getBytes(), StandardCharsets.ISO_8859_1));
+            oss.load(fileId + file.getFileType(), response.getOutputStream());
+        } else {
+            throw new Exception("想要下载的文件不存在");
+        }
     }
 }
