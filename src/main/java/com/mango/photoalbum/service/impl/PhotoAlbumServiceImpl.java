@@ -147,22 +147,23 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         String keyword = photoAlbumListCo.getKeyword();
         if(!StringUtils.isBlank(keyword)){
             //模糊匹配
-            WildcardQuery wildcardQuery = new WildcardQuery();
-            wildcardQuery.setFieldName("title");
-            wildcardQuery.setValue("?" + keyword + "*");
-            WildcardQuery wildcardQuery2 = new WildcardQuery();
-            wildcardQuery2.setFieldName("createTime");
-            wildcardQuery2.setValue("?" + keyword + "*");
-            WildcardQuery wildcardQuery3 = new WildcardQuery();
-            wildcardQuery3.setFieldName("shootTime");
-            wildcardQuery3.setValue("?" + keyword + "*");
-            WildcardQuery wildcardQuery4 = new WildcardQuery();
-            wildcardQuery4.setFieldName("shootLocation");
-            wildcardQuery4.setValue("?" + keyword + "*");
-            queries.add(wildcardQuery);
-            queries.add(wildcardQuery2);
-            queries.add(wildcardQuery3);
-            queries.add(wildcardQuery4);
+
+            MatchQuery matchQuery = new MatchQuery();
+            matchQuery.setFieldName("title");
+            matchQuery.setText(keyword);
+            MatchQuery matchQuery1 = new MatchQuery();
+            matchQuery.setFieldName("createTime");
+            matchQuery.setText(keyword);
+            MatchQuery matchQuery2 = new MatchQuery();
+            matchQuery.setFieldName("shootTime");
+            matchQuery.setText(keyword);
+            MatchQuery matchQuery3 = new MatchQuery();
+            matchQuery.setFieldName("shootLocation");
+            matchQuery.setText(keyword);
+            queries.add(matchQuery);
+            queries.add(matchQuery1);
+            queries.add(matchQuery2);
+            queries.add(matchQuery3);
             queries.add(termQuery);
             TermQuery termQuery1 = new TermQuery();
             termQuery1.setFieldName("userId");

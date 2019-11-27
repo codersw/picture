@@ -9,6 +9,9 @@ import com.alicloud.openservices.tablestore.model.search.query.Query;
 import com.alicloud.openservices.tablestore.model.search.query.QueryBuilder;
 import com.alicloud.openservices.tablestore.model.search.query.RangeQuery;
 import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
+import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
+import com.alicloud.openservices.tablestore.model.search.sort.Sort;
+import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.enums.IsCoverEnum;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.*;
@@ -24,10 +27,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -123,6 +123,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         SearchQuery query = new SearchQuery();
         query.setQuery(termQuery);
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.DESC))));
         Integer pageSize = uploadFileListCo.getPageSize();
         if(pageSize == 0){
             query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
