@@ -17,6 +17,7 @@ import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.FileUtils;
 import com.mango.photoalbum.utils.OssUtils;
 import com.mango.photoalbum.utils.OtsUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class UploadFileServiceImpl implements UploadFileService {
 
     @Resource
@@ -45,11 +47,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                throw new Exception("上传文件类型只可以是图片");
             }
             String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
-            if(StringUtils.isBlank(uploadFileCo.getFileId())){
-                uploadFileCo.setFileId(CommonUtils.UUID());
-            }
             String ossFileName = uploadFileCo.getFileId() + fileType;
-            oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
             UploadFile uploadFile = UploadFile.builder()
                     .fileId(uploadFileCo.getFileId())
                     .fileName(uploadFileCo.getFile().getOriginalFilename())
@@ -59,17 +57,25 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .createTime(new Date())
                     .modifyTime(new Date())
                     .remark(uploadFileCo.getRemark())
-                    .userId(uploadFileCo.getUserId())
+                    .modifyUserId(uploadFileCo.getUserId())
                     .isDel(IsDelEnum.FALSE.getValue())
                     .build();
+            if(StringUtils.isBlank(uploadFileCo.getFileId())){
+                uploadFileCo.setFileId(CommonUtils.UUID());
+                uploadFile.setCreateUserId(uploadFileCo.getUserId());
+            }
+            //oss上传图片
+            oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+            //ots 保存图片信息
             ots.creatRow(uploadFile);
-            //如果是封面
+            //如果是封面修改相册封面
             if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
                 ots.updataRow(PhotoAlbum.builder()
                         .albumId(uploadFileCo.getAlbumId())
                         .cover(uploadFileCo.getFileId())
                         .build());
             }
+            log.info("oss文件上传成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
             return uploadFile;
         }else{
             throw new Exception("图片不可以是空的");

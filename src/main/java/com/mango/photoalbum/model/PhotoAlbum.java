@@ -44,7 +44,13 @@ public class PhotoAlbum {
      * 上传人id
      */
     @OTSColumn
-    private Integer userId;
+    private Integer createUserId;
+
+    /**
+     * 修改人id
+     */
+    @OTSColumn
+    private Integer modifyUserId;
 
     /**
      * 是否删除

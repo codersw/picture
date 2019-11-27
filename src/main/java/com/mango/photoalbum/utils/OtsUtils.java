@@ -476,7 +476,7 @@ public class OtsUtils {
                                 assert value instanceof Boolean;
                                 columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
                             }
-                            if (type.equals("class java.util.Date")){
+                            if (type.equals("class java.util.Date")) {
                                 assert value instanceof Date;
                                 columnValue.put(name, ColumnValue.fromString(DateUtils.dateToStr((Date) value,"yyyy-MM-dd HH:mm:ss")));
                             }

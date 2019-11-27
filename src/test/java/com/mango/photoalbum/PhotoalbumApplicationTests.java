@@ -52,7 +52,8 @@ public class PhotoalbumApplicationTests {
                 .shootLocation("asdasdasdasd")
                 .isDel(IsDelEnum.FALSE.getValue())
                 .title("sadasdd")
-                .userId(131312)
+                .createUserId(131312)
+                .modifyUserId(123444)
                 .build();
         ots.creatRow(photoAlbum);
     }

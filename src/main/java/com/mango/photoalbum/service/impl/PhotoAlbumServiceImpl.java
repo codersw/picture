@@ -5,10 +5,8 @@ import com.alicloud.openservices.tablestore.model.Row;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
 import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
-import com.alicloud.openservices.tablestore.model.search.agg.AggregationBuilders;
 import com.alicloud.openservices.tablestore.model.search.query.*;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
-import com.alicloud.openservices.tablestore.model.search.sort.PrimaryKeySort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.enums.IsDelEnum;
@@ -18,7 +16,6 @@ import com.mango.photoalbum.model.PhotoAlbumListCo;
 import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.utils.CommonUtils;
-import com.mango.photoalbum.utils.OssUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -31,16 +28,13 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
     @Resource
     private OtsUtils ots;
 
-    @Resource
-    private OssUtils oss;
-
     @Override
     public PhotoAlbum save(PhotoAlbumCo photoAlbumCo) {
         ots.creatTable(PhotoAlbum.class);
         PhotoAlbum photoAlbum = PhotoAlbum.builder()
                 .albumId(photoAlbumCo.getAlbumId())
                 .shootTime(photoAlbumCo.getShootTime())
-                .userId(photoAlbumCo.getUserId())
+                .modifyUserId(photoAlbumCo.getUserId())
                 .title(photoAlbumCo.getTitle())
                 .cover(photoAlbumCo.getCover())
                 .shootLocation(photoAlbumCo.getShootLocation())
@@ -50,6 +44,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                 .build();
         if(StringUtils.isBlank(photoAlbumCo.getAlbumId())){
             photoAlbum.setAlbumId(CommonUtils.UUID());
+            photoAlbum.setCreateUserId(photoAlbumCo.getUserId());
             ots.creatRow(photoAlbum);
         } else {
             ots.updataRow(photoAlbum);
@@ -173,8 +168,8 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
             termQuery1.setFieldName("userId");
             termQuery1.setTerm(ColumnValue.fromString(keyword));
             queries.add(termQuery);
-            //boolQuery.setMustQueries(Collections.singletonList(termQuery));
             boolQuery.setShouldQueries(queries);
+            //有俩个精确查找所以必须最少匹配俩个搜索条件
             boolQuery.setMinimumShouldMatch(2);
         }
         return boolQuery;
