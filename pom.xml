@@ -5,8 +5,8 @@
     <groupId>com.mango</groupId>
     <artifactId>photoalbum</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>picture</name>
-    <description>Picture project for Spring Boot</description>
+    <name>photoalbum</name>
+    <description>photoalbum project for Spring Boot</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
