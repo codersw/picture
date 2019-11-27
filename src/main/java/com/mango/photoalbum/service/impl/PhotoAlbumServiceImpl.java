@@ -17,12 +17,14 @@ import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.OtsUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.*;
 
 @Service
+@Slf4j
 public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Resource
@@ -49,6 +51,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         } else {
             ots.updataRow(photoAlbum);
         }
+        log.info("相册保存成功fileId:{},CreateUserId:{},modifyUserId:{}", photoAlbum.getAlbumId(), photoAlbum.getCreateUserId(), photoAlbum.getModifyUserId());
         return photoAlbum;
     }
 
