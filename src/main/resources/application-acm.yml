@@ -5,7 +5,7 @@ alibaba:
   acm:
     file-extension: yml
     endpoint: acm.aliyun.com
-    namespace: 65ed613c-6db8-48dc-9990-a95ed23b764a
-    accessKey: f1683ebaa76e467dbc4d017ac8b3a257
-    secretKey: 1ju360RY/lHE0QBrOqqPn4tpXHc=
-    group: picture
+    namespace: 76e49807-6836-455f-bb2d-dd2e912ef393
+    accessKey: LTAI4Fd66vvuVj31seQ2YbQQ
+    secretKey: AgUkSMWtlICI7lY2oBFM0aD94ZlqYt
+    group: photoalbum

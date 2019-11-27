@@ -85,7 +85,7 @@ public class UploadFileServiceImpl implements UploadFileService {
     public Integer total(UploadFileListCo uploadFileListCo) {
         TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
-        termQuery.setTerm(ColumnValue.fromLong(0));
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
                 .indexName(ots.getTableName(UploadFile.class))
@@ -104,7 +104,7 @@ public class UploadFileServiceImpl implements UploadFileService {
     public List<UploadFile> list(UploadFileListCo uploadFileListCo) {
         TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
-        termQuery.setTerm(ColumnValue.fromLong(0));
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         int offset = (uploadFileListCo.getPageIndex() - 1) * uploadFileListCo.getPageSize();
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
