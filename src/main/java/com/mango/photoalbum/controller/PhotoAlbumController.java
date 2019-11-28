@@ -50,7 +50,7 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "保存相册", notes = "保存相册")
     @PostMapping
-    public Result save(PhotoAlbumCo photoAlbumCo) {
+    public Result save(@RequestBody PhotoAlbumCo photoAlbumCo) {
         return ResultGenerator.genSuccessResult(photoAlbumService.save(photoAlbumCo));
     }
 
@@ -60,7 +60,7 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "相册列表", notes = "相册列表")
     @GetMapping("/list")
-    public Result list(PhotoAlbumListCo photoAlbumListCo){
+    public Result list(@RequestBody PhotoAlbumListCo photoAlbumListCo){
         return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
                 .total(photoAlbumService.total(photoAlbumListCo))
                 .list(photoAlbumService.list(photoAlbumListCo))

@@ -100,7 +100,7 @@ public class UploadFileController {
      */
     @ApiOperation(value = "文件列表", notes = "文件列表")
     @GetMapping("/list")
-    public Result list(@ModelAttribute UploadFileListCo uploadFileListCo) {
+    public Result list(@RequestBody UploadFileListCo uploadFileListCo) {
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
                 .total(uploadFileService.total(uploadFileListCo))
                 .list(uploadFileService.list(uploadFileListCo))
