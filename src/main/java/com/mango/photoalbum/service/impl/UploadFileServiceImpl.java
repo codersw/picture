@@ -54,7 +54,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .modifyUserId(uploadFileCo.getUserId())
                 .isDel(IsDelEnum.FALSE.getValue())
                 .build();
-        if(StringUtils.isBlank(uploadFileCo.getFileId()) && CommonUtils.isNullOrEmpty(uploadFileCo.getFile())) {
+        if(StringUtils.isBlank(uploadFileCo.getFileId()) && !CommonUtils.isNullOrEmpty(uploadFileCo.getFile())) {
             uploadFile.setFileId(CommonUtils.UUID());
             uploadFile.setCreateUserId(uploadFileCo.getUserId());
             String ossFileName = uploadFile.getFileId() + fileType;
