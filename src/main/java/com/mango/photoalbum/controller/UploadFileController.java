@@ -3,6 +3,7 @@ package com.mango.photoalbum.controller;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.UploadFileService;
 import io.swagger.annotations.*;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
@@ -102,8 +103,9 @@ public class UploadFileController {
     @ApiOperation(value = "文件列表", notes = "文件列表")
     @GetMapping("/list")
     public Result list(UploadFileListCo uploadFileListCo) {
+        uploadFileListCo.setTotal(uploadFileService.total(uploadFileListCo));
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
-                .total(uploadFileService.total(uploadFileListCo))
+                .total(uploadFileListCo.getTotal())
                 .list(uploadFileService.list(uploadFileListCo))
                 .build());
     }

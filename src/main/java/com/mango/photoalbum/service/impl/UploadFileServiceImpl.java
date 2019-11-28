@@ -5,10 +5,7 @@ import com.alicloud.openservices.tablestore.model.Row;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
 import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
-import com.alicloud.openservices.tablestore.model.search.query.Query;
-import com.alicloud.openservices.tablestore.model.search.query.QueryBuilder;
-import com.alicloud.openservices.tablestore.model.search.query.RangeQuery;
-import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
+import com.alicloud.openservices.tablestore.model.search.query.*;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
@@ -41,45 +38,54 @@ public class UploadFileServiceImpl implements UploadFileService {
     @Override
     public UploadFile save(UploadFileCo uploadFileCo) throws Exception{
         ots.creatTable(UploadFile.class);
-        if(!CommonUtils.isNullOrEmpty(uploadFileCo.getFile())){
-            if(!Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
-               throw new RuntimeException("上传文件类型只可以是图片");
-            }
-            String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
-            UploadFile uploadFile = UploadFile.builder()
-                    .fileId(uploadFileCo.getFileId())
-                    .fileName(uploadFileCo.getFile().getOriginalFilename())
-                    .fileSize(uploadFileCo.getFile().getSize())
-                    .fileType(fileType)
-                    .createTime(new Date())
-                    .modifyTime(new Date())
-                    .albumId(uploadFileCo.getAlbumId())
-                    .remark(uploadFileCo.getRemark())
-                    .modifyUserId(uploadFileCo.getUserId())
-                    .isDel(IsDelEnum.FALSE.getValue())
-                    .build();
-            if(StringUtils.isBlank(uploadFileCo.getFileId())){
-                uploadFile.setFileId(CommonUtils.UUID());
-                uploadFile.setCreateUserId(uploadFileCo.getUserId());
-            }
+        if(!Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
+           throw new RuntimeException("上传文件类型只可以是图片");
+        }
+        String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
+        UploadFile uploadFile = UploadFile.builder()
+                .fileId(uploadFileCo.getFileId())
+                .fileName(uploadFileCo.getFile().getOriginalFilename())
+                .fileSize(uploadFileCo.getFile().getSize())
+                .fileType(fileType)
+                .createTime(new Date())
+                .modifyTime(new Date())
+                .albumId(uploadFileCo.getAlbumId())
+                .remark(uploadFileCo.getRemark())
+                .modifyUserId(uploadFileCo.getUserId())
+                .isDel(IsDelEnum.FALSE.getValue())
+                .build();
+        if(StringUtils.isBlank(uploadFileCo.getFileId()) && CommonUtils.isNullOrEmpty(uploadFileCo.getFile())) {
+            uploadFile.setFileId(CommonUtils.UUID());
+            uploadFile.setCreateUserId(uploadFileCo.getUserId());
             String ossFileName = uploadFile.getFileId() + fileType;
             //oss上传图片
             oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
             uploadFile.setFilePath(oss.getViewUrl(ossFileName));
             //ots 保存图片信息
             ots.creatRow(uploadFile);
-            //如果是封面修改相册封面
-            if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
-                ots.updataRow(PhotoAlbum.builder()
-                        .albumId(uploadFile.getAlbumId())
-                        .cover(uploadFile.getFileId())
-                        .build());
-            }
-            log.info("文件保存成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
-            return uploadFile;
-        }else{
-            throw new RuntimeException("图片不可以是空的");
+        } else {
+            uploadFile.setModifyUserId(uploadFileCo.getUserId());
+            //修改图片
+            ots.updataRow(uploadFile);
         }
+        //如果是封面修改相册封面
+        if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
+            setCover(uploadFile);
+        }
+        log.info("文件保存成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
+        return uploadFile;
+    }
+
+    /**
+     * 修改相册封面
+     * @param uploadFile
+     */
+    private void setCover(UploadFile uploadFile) {
+        ots.updataRow(PhotoAlbum.builder()
+                .albumId(uploadFile.getAlbumId())
+                .cover(uploadFile.getFileId())
+                .build());
+        log.info("修改相册封面成功fileId:{},malbumId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getAlbumId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
     }
 
     @Override
@@ -103,8 +109,13 @@ public class UploadFileServiceImpl implements UploadFileService {
         TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        TermQuery termQuery1 = new TermQuery();
+        termQuery1.setFieldName("albumId");  // 设置针对哪个字段
+        termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
         SearchQuery query = new SearchQuery();
-        query.setQuery(termQuery);
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
+        query.setQuery(boolQuery);
         query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
         query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
@@ -121,15 +132,21 @@ public class UploadFileServiceImpl implements UploadFileService {
         TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        TermQuery termQuery1 = new TermQuery();
+        termQuery1.setFieldName("albumId");  // 设置针对哪个字段
+        termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
         SearchQuery query = new SearchQuery();
-        query.setQuery(termQuery);
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
+        query.setQuery(boolQuery);
         query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.DESC))));
         Integer pageSize = uploadFileListCo.getPageSize();
-        if(pageSize == 0){
-            query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        if(pageSize == 0) {
+            query.setLimit(uploadFileListCo.getTotal());
         } else {
-            int offset = (uploadFileListCo.getPageIndex() - 1) * uploadFileListCo.getPageSize();
+            int offset = (uploadFileListCo.getPageIndex() - 1) * pageSize;
             query.setOffset(offset);
+            query.setLimit(pageSize);
         }
         query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
