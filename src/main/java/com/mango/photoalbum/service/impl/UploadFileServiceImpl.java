@@ -132,11 +132,11 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public Integer total(UploadFileListCo uploadFileListCo) {
-        TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
-        termQuery.setFieldName("isDel");  // 设置针对哪个字段
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         TermQuery termQuery1 = new TermQuery();
-        termQuery1.setFieldName("albumId");  // 设置针对哪个字段
+        termQuery1.setFieldName("albumId");
         termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
         SearchQuery query = new SearchQuery();
         BoolQuery boolQuery = new BoolQuery();
@@ -155,11 +155,11 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public List<UploadFile> list(UploadFileListCo uploadFileListCo) {
-        TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
-        termQuery.setFieldName("isDel");  // 设置针对哪个字段
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         TermQuery termQuery1 = new TermQuery();
-        termQuery1.setFieldName("albumId");  // 设置针对哪个字段
+        termQuery1.setFieldName("albumId");
         termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
         SearchQuery query = new SearchQuery();
         BoolQuery boolQuery = new BoolQuery();
