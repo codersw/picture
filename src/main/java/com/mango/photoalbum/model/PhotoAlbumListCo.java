@@ -12,7 +12,7 @@ public class PhotoAlbumListCo {
      * 关键字
      */
     @ApiModelProperty(value = "关键字")
-    private String keyword;
+    private String keyword = "";
 
     /**
      * 当前页
