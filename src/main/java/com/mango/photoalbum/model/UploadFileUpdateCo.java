@@ -2,14 +2,15 @@ package com.mango.photoalbum.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.Data;
+import javax.validation.constraints.NotBlank;
 
 @Data
-@ApiModel("上传文件")
-public class UploadFileCo {
+@ApiModel("修改文件")
+public class UploadFileUpdateCo {
 
-    @ApiModelProperty(value = "文件id,不传随机生成")
+    @ApiModelProperty(value = "文件id", required = true)
+    @NotBlank(message = "文件id不可以为空")
     private String fileId;
 
     @ApiModelProperty(value = "相册id")
@@ -18,12 +19,9 @@ public class UploadFileCo {
     @ApiModelProperty(value = "文件备注")
     private String remark;
 
-    @ApiModelProperty(value = "上传人id")
+    @ApiModelProperty(value = "修改人id")
     private Integer userId;
 
-    @ApiModelProperty(value = "文件")
-    private MultipartFile file;
-
     @ApiModelProperty(value = "是否为封面 0：否 1：是")
-    private Integer isCover = 0;
+    private Integer isCover;
 }

@@ -54,6 +54,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .createUserId(uploadFileCo.getUserId())
                 .modifyUserId(uploadFileCo.getUserId())
                 .isDel(IsDelEnum.FALSE.getValue())
+                .IsCover(uploadFileCo.getIsCover())
                 .build();
         if(StringUtils.isBlank(uploadFileCo.getFileId())) {
             uploadFile.setFileId(CommonUtils.UUID());
@@ -66,34 +67,37 @@ public class UploadFileServiceImpl implements UploadFileService {
         //ots保存文件信息
         ots.creatRow(uploadFile);
         //如果是封面修改相册封面
-        setCover(uploadFileCo);
+        setCover(uploadFile);
         log.info("文件保存成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
         return uploadFile;
     }
 
     @Override
-    public void update(UploadFileCo uploadFileCo) {
-        ots.updataRow(UploadFile.builder()
-                .fileId(uploadFileCo.getFileId())
+    public void update(UploadFileUpdateCo uploadFileUpdateCo) {
+        UploadFile uploadFile = UploadFile.builder()
+                .fileId(uploadFileUpdateCo.getFileId())
                 .modifyTime(new Date())
-                .modifyUserId(uploadFileCo.getUserId())
-                .remark(uploadFileCo.getRemark())
-                .build());
+                .modifyUserId(uploadFileUpdateCo.getUserId())
+                .remark(uploadFileUpdateCo.getRemark())
+                .albumId(uploadFileUpdateCo.getAlbumId())
+                .IsCover(uploadFileUpdateCo.getIsCover())
+                .build();
+        ots.updataRow(uploadFile);
         //如果是封面修改相册封面
-        setCover(uploadFileCo);
+        setCover(uploadFile);
     }
 
     /**
      * 修改相册封面
-     * @param uploadFileCo
+     * @param uploadFile
      */
-    private void setCover(UploadFileCo uploadFileCo) {
-        if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
+    private void setCover(UploadFile uploadFile) {
+        if(uploadFile.getIsCover().equals(IsCoverEnum.TRUE.getValue()) && !StringUtils.isBlank(uploadFile.getAlbumId())){
             ots.updataRow(PhotoAlbum.builder()
-                    .albumId(uploadFileCo.getAlbumId())
-                    .cover(uploadFileCo.getFileId())
+                    .albumId(uploadFile.getAlbumId())
+                    .cover(uploadFile.getFileId())
                     .build());
-            log.info("修改相册封面成功fileId:{},malbumId:{},modifyUserId:{}", uploadFileCo.getFileId(), uploadFileCo.getAlbumId(), uploadFileCo.getUserId());
+            log.info("修改相册封面成功fileId:{},malbumId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getAlbumId(), uploadFile.getModifyUserId());
         }
     }
 

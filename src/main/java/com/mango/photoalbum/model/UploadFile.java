@@ -97,4 +97,5 @@ public class UploadFile {
     @OTSColumn
     private Integer isDel;
 
+    private Integer IsCover;
 }

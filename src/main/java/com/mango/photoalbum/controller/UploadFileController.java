@@ -46,14 +46,14 @@ public class UploadFileController {
 
     /**
      * 文件详情修改接口
-     * @param uploadFileCo
+     * @param uploadFileUpdateCo
      * @return
      */
     @ApiOperation(value = "修改文件接口", notes = "修改文件接口")
     @PostMapping(value = "/file/update")
-    public Result fileUpdate(@RequestBody UploadFileCo uploadFileCo) {
+    public Result fileUpdate(@RequestBody UploadFileUpdateCo uploadFileUpdateCo) {
         try {
-            uploadFileService.update(uploadFileCo);
+            uploadFileService.update(uploadFileUpdateCo);
             return ResultGenerator.genSuccessResult();
         } catch (Exception e){
             e.printStackTrace();
@@ -134,7 +134,7 @@ public class UploadFileController {
      * @param response
      */
     @ApiOperation(value = "下载文件", notes = "文件文件")
-    @RequestMapping("/download/{fileId}")
+    @RequestMapping(value = "/download/{fileId}" , method = { RequestMethod.GET, RequestMethod.POST})
     public void download(@PathVariable @ApiParam("文件id") String fileId, HttpServletResponse response) {
         try {
             uploadFileService.download(fileId, response);
