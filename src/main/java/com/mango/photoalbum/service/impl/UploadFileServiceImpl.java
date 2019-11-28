@@ -53,6 +53,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .fileType(fileType)
                     .createTime(new Date())
                     .modifyTime(new Date())
+                    .albumId(uploadFileCo.getAlbumId())
                     .remark(uploadFileCo.getRemark())
                     .modifyUserId(uploadFileCo.getUserId())
                     .isDel(IsDelEnum.FALSE.getValue())
