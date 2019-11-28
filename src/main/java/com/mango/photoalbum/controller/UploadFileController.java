@@ -1,6 +1,7 @@
 package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.model.*;
+import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.service.UploadFileService;
 import io.swagger.annotations.*;
 import io.swagger.models.auth.In;
@@ -24,6 +25,9 @@ public class UploadFileController {
 
     @Resource
     private UploadFileService uploadFileService;
+
+    @Resource
+    private PhotoAlbumService photoAlbumService;
 
     /**
      * 上传图片
@@ -113,6 +117,7 @@ public class UploadFileController {
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
                 .total(uploadFileListCo.getTotal())
                 .list(uploadFileService.list(uploadFileListCo))
+                .data(photoAlbumService.get(uploadFileListCo.getAlbumId()))
                 .build());
     }
 

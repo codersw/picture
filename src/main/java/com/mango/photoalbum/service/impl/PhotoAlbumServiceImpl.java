@@ -91,11 +91,13 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                 .searchQuery(query)
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return 0;
         return (int) searchResponse.getTotalCount();
     }
 
     @Override
     public List<PhotoAlbum> list(PhotoAlbumListCo photoAlbumListCo) {
+        List<PhotoAlbum> result = new ArrayList<>();
         SearchQuery query = new SearchQuery();
         query.setQuery(formatQuery(photoAlbumListCo));
         Integer pageSize = photoAlbumListCo.getPageSize();
@@ -111,8 +113,8 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                 .returnAllColumns(true) // 设置返回所有列
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return result;
         List<Row> rows = searchResponse.getRows();
-        List<PhotoAlbum> result = new ArrayList<>();
         if(rows.size() > 0){
             rows.forEach(row -> {
                 try {

@@ -517,9 +517,9 @@ public class OtsUtils {
                         name = pk.name();
                     }
                     //TODO FieldType.TEXT支持分词,而KEYWORD只能用前缀匹配
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true).setStore(true);
                     if (type.equals("class java.lang.Integer")){
-                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true).setStore(true);
                     }
                     fieldSchemas.add(fieldSchema);
                 }
@@ -528,21 +528,21 @@ public class OtsUtils {
                     if(!StringUtils.isBlank(column.name())){
                         name = column.name();
                     }
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true).setStore(true);
                     if (type.equals("class java.lang.Integer")){
-                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true).setStore(true);
                     }
                     if (type.equals("class java.lang.Boolean")){
-                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true);
+                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true).setStore(true);
                     }
                     if (type.equals("class java.lang.Double")){
-                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true);
+                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true).setStore(true);
                     }
                     fieldSchemas.add(fieldSchema);
                 }
-                // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
-                indexSchema.setIndexSort(new Sort(
-                        Collections.singletonList(new FieldSort(name, SortOrder.ASC))));
+//                // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
+//                indexSchema.setIndexSort(new Sort(
+//                        Collections.singletonList(new FieldSort(name, SortOrder.ASC))));
             });
         });
         indexSchema.setFieldSchemas(fieldSchemas);

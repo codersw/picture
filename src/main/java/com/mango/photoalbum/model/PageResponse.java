@@ -21,5 +21,10 @@ public class PageResponse<T> {
      * 内容集合
      **/
     private List<T> list;
+
+    /**
+     * 多余数据
+     */
+    private Object data;
 }
 
