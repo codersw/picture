@@ -174,7 +174,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             query.setOffset(offset);
             query.setLimit(pageSize);
         }
-        query.setGetTotalCount(true);// 设置返回总条数
+        query.setGetTotalCount(false);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
                 .indexName(ots.getTableName(UploadFile.class))
