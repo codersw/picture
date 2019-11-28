@@ -43,14 +43,12 @@ public class UploadFileServiceImpl implements UploadFileService {
         ots.creatTable(UploadFile.class);
         if(!CommonUtils.isNullOrEmpty(uploadFileCo.getFile())){
             if(!Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
-               throw new Exception("上传文件类型只可以是图片");
+               throw new RuntimeException("上传文件类型只可以是图片");
             }
             String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
-            String ossFileName = uploadFileCo.getFileId() + fileType;
             UploadFile uploadFile = UploadFile.builder()
                     .fileId(uploadFileCo.getFileId())
                     .fileName(uploadFileCo.getFile().getOriginalFilename())
-                    .filePath(oss.getViewUrl(ossFileName))
                     .fileSize(uploadFileCo.getFile().getSize())
                     .fileType(fileType)
                     .createTime(new Date())
@@ -60,24 +58,26 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .isDel(IsDelEnum.FALSE.getValue())
                     .build();
             if(StringUtils.isBlank(uploadFileCo.getFileId())){
-                uploadFileCo.setFileId(CommonUtils.UUID());
+                uploadFile.setFileId(CommonUtils.UUID());
                 uploadFile.setCreateUserId(uploadFileCo.getUserId());
             }
+            String ossFileName = uploadFile.getFileId() + fileType;
             //oss上传图片
             oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+            uploadFile.setFilePath(oss.getViewUrl(ossFileName));
             //ots 保存图片信息
             ots.creatRow(uploadFile);
             //如果是封面修改相册封面
             if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
                 ots.updataRow(PhotoAlbum.builder()
-                        .albumId(uploadFileCo.getAlbumId())
-                        .cover(uploadFileCo.getFileId())
+                        .albumId(uploadFile.getAlbumId())
+                        .cover(uploadFile.getFileId())
                         .build());
             }
             log.info("文件保存成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
             return uploadFile;
         }else{
-            throw new Exception("图片不可以是空的");
+            throw new RuntimeException("图片不可以是空的");
         }
     }
 
@@ -162,10 +162,10 @@ public class UploadFileServiceImpl implements UploadFileService {
                         "attachment;filename=" + new String(file.getFileName().getBytes(), StandardCharsets.ISO_8859_1));
                 oss.load(path, response.getOutputStream());
             } else {
-                throw new Exception("想要下载的文件不存在" + fileId);
+                throw new RuntimeException("想要下载的文件不存在" + fileId);
             }
         } else {
-            throw new Exception("想要下载的文件不存在" + fileId);
+            throw new RuntimeException("想要下载的文件不存在" + fileId);
         }
     }
 }

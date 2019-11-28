@@ -61,13 +61,14 @@ public class UploadFileController {
                 } catch (Exception e) {
                     log.error("上传图片发生异常{}", e.getMessage());
                     e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             });
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e){
             e.printStackTrace();
             log.error("上传图片发生异常{}", e.getMessage());
-            return ResultGenerator.genFailResult("上传图片发生异常");
+            return ResultGenerator.genFailResult(e.getMessage());
         }
     }
 
