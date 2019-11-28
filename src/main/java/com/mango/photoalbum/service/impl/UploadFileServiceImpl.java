@@ -51,41 +51,50 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .modifyTime(new Date())
                 .albumId(uploadFileCo.getAlbumId())
                 .remark(uploadFileCo.getRemark())
+                .createUserId(uploadFileCo.getUserId())
                 .modifyUserId(uploadFileCo.getUserId())
                 .isDel(IsDelEnum.FALSE.getValue())
                 .build();
-        if(StringUtils.isBlank(uploadFileCo.getFileId()) && !CommonUtils.isNullOrEmpty(uploadFileCo.getFile())) {
+        if(StringUtils.isBlank(uploadFileCo.getFileId())) {
             uploadFile.setFileId(CommonUtils.UUID());
-            uploadFile.setCreateUserId(uploadFileCo.getUserId());
-            String ossFileName = uploadFile.getFileId() + fileType;
-            //oss上传图片
-            oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
-            uploadFile.setFilePath(oss.getViewUrl(ossFileName));
-            //ots 保存图片信息
-            ots.creatRow(uploadFile);
-        } else {
-            uploadFile.setModifyUserId(uploadFileCo.getUserId());
-            //修改图片
-            ots.updataRow(uploadFile);
         }
+        String ossFileName = uploadFile.getFileId() + fileType;
+        //oss上传图片
+        oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+        //oss文件路径获取
+        uploadFile.setFilePath(oss.getViewUrl(ossFileName));
+        //ots保存文件信息
+        ots.creatRow(uploadFile);
         //如果是封面修改相册封面
-        if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
-            setCover(uploadFile);
-        }
+        setCover(uploadFileCo);
         log.info("文件保存成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
         return uploadFile;
     }
 
+    @Override
+    public void update(UploadFileCo uploadFileCo) {
+        ots.updataRow(UploadFile.builder()
+                .fileId(uploadFileCo.getFileId())
+                .modifyTime(new Date())
+                .modifyUserId(uploadFileCo.getUserId())
+                .remark(uploadFileCo.getRemark())
+                .build());
+        //如果是封面修改相册封面
+        setCover(uploadFileCo);
+    }
+
     /**
      * 修改相册封面
-     * @param uploadFile
+     * @param uploadFileCo
      */
-    private void setCover(UploadFile uploadFile) {
-        ots.updataRow(PhotoAlbum.builder()
-                .albumId(uploadFile.getAlbumId())
-                .cover(uploadFile.getFileId())
-                .build());
-        log.info("修改相册封面成功fileId:{},malbumId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getAlbumId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
+    private void setCover(UploadFileCo uploadFileCo) {
+        if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())){
+            ots.updataRow(PhotoAlbum.builder()
+                    .albumId(uploadFileCo.getAlbumId())
+                    .cover(uploadFileCo.getFileId())
+                    .build());
+            log.info("修改相册封面成功fileId:{},malbumId:{},modifyUserId:{}", uploadFileCo.getFileId(), uploadFileCo.getAlbumId(), uploadFileCo.getUserId());
+        }
     }
 
     @Override

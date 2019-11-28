@@ -12,6 +12,8 @@ public interface UploadFileService {
 
     UploadFile save(UploadFileCo uploadFileCo) throws Exception;
 
+    void update(UploadFileCo uploadFileCo);
+
     void delete(String fileId);
 
     UploadFile get(String fileId);

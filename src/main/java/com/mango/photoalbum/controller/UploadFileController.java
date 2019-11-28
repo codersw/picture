@@ -39,8 +39,26 @@ public class UploadFileController {
             return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileCo));
         } catch (Exception e){
             e.printStackTrace();
-            log.error("上传图片发生异常{}", e.getMessage());
-            return ResultGenerator.genFailResult("上传图片发生异常");
+            log.error("上传文件发生异常{}", e.getMessage());
+            return ResultGenerator.genFailResult("上传文件发生异常");
+        }
+    }
+
+    /**
+     * 文件详情修改接口
+     * @param uploadFileCo
+     * @return
+     */
+    @ApiOperation(value = "修改文件接口", notes = "修改文件接口")
+    @PostMapping(value = "/file/update")
+    public Result fileUpdate(@RequestBody UploadFileCo uploadFileCo) {
+        try {
+            uploadFileService.update(uploadFileCo);
+            return ResultGenerator.genSuccessResult();
+        } catch (Exception e){
+            e.printStackTrace();
+            log.error("修改文件发生异常{}", e.getMessage());
+            return ResultGenerator.genFailResult("修改文件发生异常");
         }
     }
 
@@ -60,7 +78,7 @@ public class UploadFileController {
                     uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
                     result.add(uploadFileService.save(uploadFileCo));
                 } catch (Exception e) {
-                    log.error("上传图片发生异常{}", e.getMessage());
+                    log.error("上传文件发生异常{}", e.getMessage());
                     e.printStackTrace();
                     throw new RuntimeException(e);
                 }
@@ -68,7 +86,7 @@ public class UploadFileController {
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e){
             e.printStackTrace();
-            log.error("上传图片发生异常{}", e.getMessage());
+            log.error("上传文件发生异常{}", e.getMessage());
             return ResultGenerator.genFailResult(e.getMessage());
         }
     }
