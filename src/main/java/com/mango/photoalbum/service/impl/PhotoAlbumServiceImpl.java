@@ -152,16 +152,16 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
             //模糊匹配
             WildcardQuery wildcardQuery = new WildcardQuery();
             wildcardQuery.setFieldName("title");
-            wildcardQuery.setValue("?" + keyword + "*");
+            wildcardQuery.setValue(keyword + "*");
             WildcardQuery wildcardQuery2 = new WildcardQuery();
             wildcardQuery2.setFieldName("createTime");
-            wildcardQuery2.setValue("?" + keyword + "*");
+            wildcardQuery2.setValue(keyword + "*");
             WildcardQuery wildcardQuery3 = new WildcardQuery();
             wildcardQuery3.setFieldName("shootTime");
-            wildcardQuery3.setValue("?" + keyword + "*");
+            wildcardQuery3.setValue(keyword + "*");
             WildcardQuery wildcardQuery4 = new WildcardQuery();
             wildcardQuery4.setFieldName("shootLocation");
-            wildcardQuery4.setValue("?" + keyword + "*");
+            wildcardQuery4.setValue(keyword + "*");
             queries.add(wildcardQuery);
             queries.add(wildcardQuery2);
             queries.add(wildcardQuery3);
@@ -172,12 +172,12 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
             TermQuery termQuery2 = new TermQuery();
             termQuery2.setFieldName("modifyUserId");
             termQuery2.setTerm(ColumnValue.fromString(keyword));
-            queries.add(termQuery);
             queries.add(termQuery1);
             queries.add(termQuery2);
+            boolQuery.setMustQueries(Collections.singletonList(termQuery));
             boolQuery.setShouldQueries(queries);
-            //最少匹配俩个搜索条件
-            boolQuery.setMinimumShouldMatch(2);
+            //最少匹配一个搜索条件
+            boolQuery.setMinimumShouldMatch(1);
         }
         return boolQuery;
     }
