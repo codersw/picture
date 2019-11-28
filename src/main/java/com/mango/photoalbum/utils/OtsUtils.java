@@ -512,41 +512,41 @@ public class OtsUtils {
             annotations.forEach(annotation -> {
                 String name = field.getName(); // 获取属性的名字
                 String type = field.getGenericType().toString(); // 获取属性的类型
-                // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
                 if(annotation.annotationType() ==  OTSPrimaryKey.class){
                     OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
                     if(!StringUtils.isBlank(pk.name())){
                         name = pk.name();
                     }
-//                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
-//                    if (type.equals("class java.lang.Integer")){
-//                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
-//                    }
-//                    fieldSchemas.add(fieldSchema);
-                    indexSchema.addFieldSchema(new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true));
+                    //TODO FieldType.TEXT支持分词,而KEYWORD只能用前缀匹配
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    if (type.equals("class java.lang.Integer")){
+                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    fieldSchemas.add(fieldSchema);
                 }
                 if(annotation.annotationType() ==  OTSColumn.class){
                     OTSColumn column = field.getAnnotation(OTSColumn.class);
                     if(!StringUtils.isBlank(column.name())){
                         name = column.name();
                     }
-                    //TODO FieldType.TEXT支持分词,而KEYWORD只能用前缀匹配
-//                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.TEXT).setAnalyzer(FieldSchema.Analyzer.SingleWord);
-                    indexSchema.addFieldSchema(new FieldSchema(name, FieldType.TEXT).setAnalyzer(FieldSchema.Analyzer.MaxWord));
-//                    if (type.equals("class java.lang.Integer")){
-//                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
-//                    }
-//                    if (type.equals("class java.lang.Boolean")){
-//                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true);
-//                    }
-//                    if (type.equals("class java.lang.Double")){
-//                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true);
-//                    }
-//                    fieldSchemas.add(fieldSchema);
+                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true);
+                    if (type.equals("class java.lang.Integer")){
+                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    if (type.equals("class java.lang.Boolean")){
+                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    if (type.equals("class java.lang.Double")){
+                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true);
+                    }
+                    fieldSchemas.add(fieldSchema);
                 }
+                // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
+                indexSchema.setIndexSort(new Sort(
+                        Collections.singletonList(new FieldSort(name, SortOrder.ASC))));
             });
         });
-//        indexSchema.setFieldSchemas(fieldSchemas);
+        indexSchema.setFieldSchemas(fieldSchemas);
         return indexSchema;
     }
 

@@ -83,13 +83,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
     @Override
     public Integer total(PhotoAlbumListCo photoAlbumListCo) {
         SearchQuery query = new SearchQuery();
-        BoolQuery boolQuery = new BoolQuery();
-        TermQuery termQuery = new TermQuery();
-        termQuery.setFieldName("isDel");  // 设置针对哪个字段
-        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
-        boolQuery.setMustQueries(Collections.singletonList(boolQuery));
-        query.setQuery(boolQuery);
-//        query.setQuery(formatQuery(photoAlbumListCo));
+        query.setQuery(formatQuery(photoAlbumListCo));
         query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
         query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
@@ -104,16 +98,13 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
     @Override
     public List<PhotoAlbum> list(PhotoAlbumListCo photoAlbumListCo) {
         SearchQuery query = new SearchQuery();
-        TermQuery termQuery = new TermQuery();
-        termQuery.setFieldName("isDel");  // 设置针对哪个字段
-        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
-        query.setQuery(termQuery);
+        query.setQuery(formatQuery(photoAlbumListCo));
         Integer pageSize = photoAlbumListCo.getPageSize();
         int offset = (photoAlbumListCo.getPageIndex() - 1) * photoAlbumListCo.getPageSize();
         query.setOffset(offset);
         query.setLimit(pageSize);
         query.setGetTotalCount(true);// 设置返回总条数
-//        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",SortOrder.DESC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",SortOrder.DESC))));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(PhotoAlbum.class))
                 .indexName(ots.getTableName(PhotoAlbum.class))
@@ -151,44 +142,43 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
      */
     private BoolQuery formatQuery(PhotoAlbumListCo photoAlbumListCo) {
         BoolQuery boolQuery = new BoolQuery();
-        MatchQuery termQuery = new MatchQuery();
+        TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
-        termQuery.setText(IsDelEnum.FALSE.getValue().toString());
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         boolQuery.setMustQueries(Collections.singletonList(termQuery));
         List<Query> queries = new ArrayList<>();
-//        String keyword = photoAlbumListCo.getKeyword();
-//        if(!StringUtils.isBlank(keyword)){
+        String keyword = photoAlbumListCo.getKeyword();
+        if(!StringUtils.isBlank(keyword)){
             //模糊匹配
-//            MatchQuery matchQuery = new MatchQuery();
-//            matchQuery.setFieldName("title");
-//            matchQuery.setText(keyword);
-//            MatchQuery matchQuery1 = new MatchQuery();
-//            matchQuery1.setFieldName("createTime");
-//            matchQuery1.setText(keyword);
-//            MatchQuery matchQuery2 = new MatchQuery();
-//            matchQuery2.setFieldName("shootTime");
-//            matchQuery2.setText(keyword);
-//            MatchQuery matchQuery3 = new MatchQuery();
-//            matchQuery3.setFieldName("shootLocation");
-//            matchQuery3.setText(keyword);
-//            queries.add(matchQuery);
-
-//            queries.add(matchQuery1);
-//            queries.add(matchQuery2);
-//            queries.add(matchQuery3);
-//            queries.add(termQuery);
-//            TermQuery termQuery1 = new TermQuery();
-//            termQuery1.setFieldName("createUserId");
-//            termQuery1.setTerm(ColumnValue.fromString(keyword));
-//            TermQuery termQuery2 = new TermQuery();
-//            termQuery2.setFieldName("modifyUserId");
-//            termQuery2.setTerm(ColumnValue.fromString(keyword));
-//            queries.add(termQuery1);
-//            queries.add(termQuery2);
-//            boolQuery.setShouldQueries(queries);
+            WildcardQuery wildcardQuery = new WildcardQuery();
+            wildcardQuery.setFieldName("title");
+            wildcardQuery.setValue("?" + keyword + "*");
+            WildcardQuery wildcardQuery2 = new WildcardQuery();
+            wildcardQuery2.setFieldName("createTime");
+            wildcardQuery2.setValue("?" + keyword + "*");
+            WildcardQuery wildcardQuery3 = new WildcardQuery();
+            wildcardQuery3.setFieldName("shootTime");
+            wildcardQuery3.setValue("?" + keyword + "*");
+            WildcardQuery wildcardQuery4 = new WildcardQuery();
+            wildcardQuery4.setFieldName("shootLocation");
+            wildcardQuery4.setValue("?" + keyword + "*");
+            queries.add(wildcardQuery);
+            queries.add(wildcardQuery2);
+            queries.add(wildcardQuery3);
+            queries.add(wildcardQuery4);
+            TermQuery termQuery1 = new TermQuery();
+            termQuery1.setFieldName("createUserId");
+            termQuery1.setTerm(ColumnValue.fromString(keyword));
+            TermQuery termQuery2 = new TermQuery();
+            termQuery2.setFieldName("modifyUserId");
+            termQuery2.setTerm(ColumnValue.fromString(keyword));
+            queries.add(termQuery);
+            queries.add(termQuery1);
+            queries.add(termQuery2);
+            boolQuery.setShouldQueries(queries);
             //最少匹配俩个搜索条件
-//            boolQuery.setMinimumShouldMatch(2);
-//        }
+            boolQuery.setMinimumShouldMatch(2);
+        }
         return boolQuery;
     }
 }
