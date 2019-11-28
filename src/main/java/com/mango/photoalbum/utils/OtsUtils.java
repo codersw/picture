@@ -450,14 +450,16 @@ public class OtsUtils {
                 String type = field.getGenericType().toString(); // 获取属性的类型
                 try {
                     Object value = field.get(t);//获取属性值
-                    if(value != null){
+                    if(value != null) {
                         if(annotation.annotationType() ==  OTSPrimaryKey.class){
                             OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
                             if(!StringUtils.isBlank(pk.name())){
                                 name = pk.name();
                             }
-                            primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
-                            if (type.equals("class java.lang.Integer")){
+                            if (type.equals("class java.lang.String")){
+                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
+                            }
+                            if (type.equals("class java.lang.Integer")) {
                                 primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.AUTO_INCREMENT);
                             }
                         }
@@ -470,15 +472,12 @@ public class OtsUtils {
                                 columnValue.put(name, ColumnValue.fromString((String) value));
                             }
                             if (type.equals("class java.lang.Integer")){
-                                assert value instanceof Integer;
                                 columnValue.put(name, ColumnValue.fromLong((Integer) value));
                             }
                             if (type.equals("class java.lang.Boolean")){
-                                assert value instanceof Boolean;
                                 columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
                             }
                             if (type.equals("class java.util.Date")) {
-                                assert value instanceof Date;
                                 columnValue.put(name, ColumnValue.fromString(DateUtils.dateToStr((Date) value,"yyyy-MM-dd HH:mm:ss")));
                             }
                         }

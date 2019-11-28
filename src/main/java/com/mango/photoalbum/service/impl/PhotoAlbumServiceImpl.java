@@ -32,7 +32,6 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Override
     public PhotoAlbum save(PhotoAlbumCo photoAlbumCo) {
-        ots.creatTable(PhotoAlbum.class);
         PhotoAlbum photoAlbum = PhotoAlbum.builder()
                 .albumId(photoAlbumCo.getAlbumId())
                 .shootTime(photoAlbumCo.getShootTime())
@@ -42,16 +41,16 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                 .shootLocation(photoAlbumCo.getShootLocation())
                 .isDel(IsDelEnum.FALSE.getValue())
                 .modifyTime(new Date())
-                .createTime(new Date())
                 .build();
         if(StringUtils.isBlank(photoAlbumCo.getAlbumId())){
             photoAlbum.setAlbumId(CommonUtils.UUID());
             photoAlbum.setCreateUserId(photoAlbumCo.getUserId());
+            photoAlbum.setCreateTime(new Date());
             ots.creatRow(photoAlbum);
         } else {
             ots.updataRow(photoAlbum);
         }
-        log.info("相册保存成功fileId:{},CreateUserId:{},modifyUserId:{}", photoAlbum.getAlbumId(), photoAlbum.getCreateUserId(), photoAlbum.getModifyUserId());
+        log.info("相册保存成功{}", photoAlbum.toString());
         return photoAlbum;
     }
 

@@ -36,11 +36,7 @@ public class UploadFileServiceImpl implements UploadFileService {
     private OssUtils oss;
 
     @Override
-    public UploadFile save(UploadFileCo uploadFileCo) throws Exception{
-        ots.creatTable(UploadFile.class);
-        if(!Objects.requireNonNull(uploadFileCo.getFile().getContentType()).contains("image")){
-           throw new RuntimeException("上传文件类型只可以是图片");
-        }
+    public UploadFile save(UploadFileCo uploadFileCo) {
         String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
         UploadFile uploadFile = UploadFile.builder()
                 .fileId(uploadFileCo.getFileId())
@@ -60,8 +56,13 @@ public class UploadFileServiceImpl implements UploadFileService {
             uploadFile.setFileId(CommonUtils.UUID());
         }
         String ossFileName = uploadFile.getFileId() + fileType;
-        //oss上传图片
-        oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+        try {
+            //oss上传图片
+            oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+        }
         //oss文件路径获取
         uploadFile.setFilePath(oss.getViewUrl(ossFileName));
         //ots保存文件信息
@@ -70,6 +71,18 @@ public class UploadFileServiceImpl implements UploadFileService {
         setCover(uploadFile);
         log.info("文件保存成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
         return uploadFile;
+    }
+
+    @Override
+    public List<UploadFile> save(UploadFileMultiCo uploadFileMultiCo) {
+        List<UploadFile> result = new ArrayList<>();
+        List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
+        if(uploadFileCos.size() > 0) {
+            uploadFileCos.forEach(uploadFileCo -> {
+                result.add(save(uploadFileCo));
+            });
+        }
+        return result;
     }
 
     @Override

@@ -71,19 +71,7 @@ public class UploadFileController {
     @PostMapping(value = "/files", headers = "content-type=multipart/form-data")
     public Result files(@ModelAttribute UploadFileMultiCo uploadFileMultiCo) {
         try {
-            List<UploadFile> result = new ArrayList<>();
-            List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
-            uploadFileCos.forEach(uploadFileCo ->{
-                try {
-                    uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
-                    result.add(uploadFileService.save(uploadFileCo));
-                } catch (Exception e) {
-                    log.error("上传文件发生异常{}", e.getMessage());
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-            });
-            return ResultGenerator.genSuccessResult(result);
+            return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileMultiCo));
         } catch (Exception e){
             e.printStackTrace();
             log.error("上传文件发生异常{}", e.getMessage());

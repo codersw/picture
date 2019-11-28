@@ -1,15 +1,15 @@
 package com.mango.photoalbum.service;
 
-import com.mango.photoalbum.model.UploadFile;
-import com.mango.photoalbum.model.UploadFileCo;
-import com.mango.photoalbum.model.UploadFileListCo;
-import com.mango.photoalbum.model.UploadFileUpdateCo;
+import com.mango.photoalbum.model.*;
+
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface UploadFileService {
 
     UploadFile save(UploadFileCo uploadFileCo) throws Exception;
+
+    List<UploadFile> save(UploadFileMultiCo uploadFileMultiCo);
 
     void update(UploadFileUpdateCo uploadFileUpdateCo);
 
