@@ -1,6 +1,8 @@
 package com.mango.photoalbum.handler;
 
 
+import com.mango.photoalbum.enums.ResultCodeEnum;
+import com.mango.photoalbum.exception.UnauthorizedException;
 import com.mango.photoalbum.model.Result;
 import com.mango.photoalbum.model.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -75,5 +77,18 @@ public class GlobalExceptionHandler {
         } else {
             return ResultGenerator.genFailResult("数据校验失败");
         }
+    }
+
+    @ExceptionHandler(value = UnauthorizedException.class)
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    public Result applicationUnauthorizedException(UnauthorizedException e) {
+        if (log.isErrorEnabled()) {
+            log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
+        }
+        Result result = new Result();
+        result.setCode(ResultCodeEnum.UNAUTHORIZED);
+        result.setMessage(e.getMessage());
+        return result;
     }
 }
