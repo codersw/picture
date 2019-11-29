@@ -4,14 +4,10 @@ import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.service.UploadFileService;
 import io.swagger.annotations.*;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 文件接口

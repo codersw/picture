@@ -106,7 +106,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         query.setOffset(offset);
         query.setLimit(pageSize);
         query.setGetTotalCount(false);// 设置返回总条数
-        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",SortOrder.DESC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.DESC))));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(PhotoAlbum.class))
                 .indexName(ots.getTableName(PhotoAlbum.class))
@@ -153,30 +153,18 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         String keyword = photoAlbumListCo.getKeyword();
         if(!StringUtils.isBlank(keyword)){
             //模糊匹配
-            WildcardQuery wildcardQuery = new WildcardQuery();
+            MatchQuery wildcardQuery = new MatchQuery();
             wildcardQuery.setFieldName("title");
-            wildcardQuery.setValue(keyword + "*");
-            WildcardQuery wildcardQuery2 = new WildcardQuery();
-            wildcardQuery2.setFieldName("createTime");
-            wildcardQuery2.setValue(keyword + "*");
-            WildcardQuery wildcardQuery3 = new WildcardQuery();
-            wildcardQuery3.setFieldName("shootTime");
-            wildcardQuery3.setValue(keyword + "*");
-            WildcardQuery wildcardQuery4 = new WildcardQuery();
-            wildcardQuery4.setFieldName("shootLocation");
-            wildcardQuery4.setValue(keyword + "*");
+            wildcardQuery.setText(keyword);
             queries.add(wildcardQuery);
-            queries.add(wildcardQuery2);
-            queries.add(wildcardQuery3);
+            MatchQuery wildcardQuery4 = new MatchQuery();
+            wildcardQuery4.setFieldName("shootLocation");
+            wildcardQuery4.setText(keyword);
             queries.add(wildcardQuery4);
             TermQuery termQuery1 = new TermQuery();
             termQuery1.setFieldName("createUserId");
             termQuery1.setTerm(ColumnValue.fromString(keyword));
-            TermQuery termQuery2 = new TermQuery();
-            termQuery2.setFieldName("modifyUserId");
-            termQuery2.setTerm(ColumnValue.fromString(keyword));
             queries.add(termQuery1);
-            queries.add(termQuery2);
             boolQuery.setMustQueries(Collections.singletonList(termQuery));
             boolQuery.setShouldQueries(queries);
             //最少匹配一个搜索条件

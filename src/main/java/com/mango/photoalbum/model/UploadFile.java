@@ -1,11 +1,13 @@
 package com.mango.photoalbum.model;
 
 
+import com.alicloud.openservices.tablestore.model.DefinedColumnType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import com.mango.photoalbum.enums.IndexTypeEnum;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
@@ -60,13 +62,13 @@ public class UploadFile {
     /**
      * 相册id
      */
-    @OTSColumn
+    @OTSColumn(indexType = IndexTypeEnum.KEYWORD)
     private String albumId;
 
     /**
      * 上传日期
      */
-    @OTSColumn
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;
@@ -74,7 +76,7 @@ public class UploadFile {
     /**
      * 修改时间
      */
-    @OTSColumn
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date modifyTime;
@@ -82,19 +84,19 @@ public class UploadFile {
     /**
      * 上传人id
      */
-    @OTSColumn
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
     private Integer createUserId;
 
     /**
      * 修改人id
      */
-    @OTSColumn
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
     private Integer modifyUserId;
 
     /**
      * 是否删除
      */
-    @OTSColumn
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
     private Integer isDel;
 
     /**

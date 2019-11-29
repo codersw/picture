@@ -1,6 +1,8 @@
 package com.mango.photoalbum.annotation;
 
 
+import com.alicloud.openservices.tablestore.model.DefinedColumnType;
+import com.mango.photoalbum.enums.IndexTypeEnum;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,5 +14,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OTSColumn {
+
     String name() default "";
+
+    DefinedColumnType definedColumnType() default DefinedColumnType.STRING;
+
+    IndexTypeEnum indexType() default IndexTypeEnum.NULL;
 }

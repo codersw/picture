@@ -11,6 +11,7 @@ import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,8 +74,6 @@ public class OtsUtils {
             CreateTableRequest request = new CreateTableRequest(toTable(c), tableOptions);
             //创建表格
             client.createTable(request);
-            //创建多元索引
-            createSearchIndex(c);
             log.info("创建表格成功:{}", request.getTableMeta().getTableName());
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -179,6 +178,7 @@ public class OtsUtils {
      */
     public void createSearchIndex(Class<?> c){
         try {
+            if(!getTableIndex(c)) return;
             String tableName = getTableName(c);
             log.info("创建多元索引开始:表{}索引{}", tableName, tableName);
             CreateSearchIndexRequest request = new CreateSearchIndexRequest();
@@ -392,28 +392,17 @@ public class OtsUtils {
                    if(!StringUtils.isBlank(pk.name())){
                        name = pk.name();
                    }
-                   PrimaryKeySchema primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.STRING);
-                   if (type.equals("class java.lang.Integer")){
-                       primaryKeySchema = new PrimaryKeySchema(name, PrimaryKeyType.INTEGER, PrimaryKeyOption.AUTO_INCREMENT);
+                   if(pk.primaryKeyAuto()) {
+                       primaryKeySchemas.add(new PrimaryKeySchema(name, PrimaryKeyType.INTEGER, PrimaryKeyOption.AUTO_INCREMENT));
                    }
-                   primaryKeySchemas.add(primaryKeySchema);
+                   primaryKeySchemas.add(new PrimaryKeySchema(name, pk.primaryKeyType()));
                }
                if(annotation.annotationType() ==  OTSColumn.class){
                    OTSColumn column = field.getAnnotation(OTSColumn.class);
                    if(!StringUtils.isBlank(column.name())){
                        name = column.name();
                    }
-                   DefinedColumnSchema definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.STRING);
-                   if (type.equals("class java.lang.Integer")){
-                       definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.INTEGER);
-                   }
-                   if (type.equals("class java.lang.Boolean")){
-                       definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.BOOLEAN);
-                   }
-                   if (type.equals("class java.lang.Double")){
-                       definedColumnSchema = new DefinedColumnSchema(name, DefinedColumnType.DOUBLE);
-                   }
-                   definedColumnSchemas.add(definedColumnSchema);
+                   definedColumnSchemas.add(new DefinedColumnSchema(name, column.definedColumnType()));
                }
             });
         });
@@ -450,11 +439,22 @@ public class OtsUtils {
                         if(!StringUtils.isBlank(pk.name())){
                             name = pk.name();
                         }
-                        if (type.equals("class java.lang.String")){
-                            primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
-                        }
-                        if (type.equals("class java.lang.Integer")) {
-                            primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.AUTO_INCREMENT);
+                        switch (pk.primaryKeyType()) {
+                            case STRING:
+                                primaryKeyBuilder.addPrimaryKeyColumn(name,
+                                        PrimaryKeyValue.fromString((String) value));
+                                break;
+                            case INTEGER:
+                                PrimaryKeyValue primaryKeyValue = PrimaryKeyValue.fromLong((Integer) value);
+                                if(pk.primaryKeyAuto()) {
+                                    primaryKeyValue = PrimaryKeyValue.AUTO_INCREMENT;
+                                }
+                                primaryKeyBuilder.addPrimaryKeyColumn(name, primaryKeyValue);
+                                break;
+                            case BINARY:
+                                primaryKeyBuilder.addPrimaryKeyColumn(name,
+                                        PrimaryKeyValue.fromBinary((byte[]) value));
+                                break;
                         }
                     }
                     if(annotation.annotationType() == OTSColumn.class){
@@ -462,17 +462,31 @@ public class OtsUtils {
                         if(!StringUtils.isBlank(column.name())){
                             name = column.name();
                         }
-                        if (type.equals("class java.lang.String")){
-                            columnValue.put(name, ColumnValue.fromString((String) value));
-                        }
-                        if (type.equals("class java.lang.Integer")){
-                            columnValue.put(name, ColumnValue.fromLong((Integer) value));
-                        }
-                        if (type.equals("class java.lang.Boolean")){
-                            columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
-                        }
                         if (type.equals("class java.util.Date")) {
-                            columnValue.put(name, ColumnValue.fromString(DateUtils.dateToStr((Date) value,"yyyy-MM-dd HH:mm:ss")));
+                            assert value instanceof Date;
+                            value = (int) ((Date) value).getTime();
+                        }
+                        switch (column.definedColumnType()) {
+                            case STRING:
+                                assert value instanceof String;
+                                columnValue.put(name, ColumnValue.fromString((String) value));
+                                break;
+                            case INTEGER:
+                                assert value instanceof Integer;
+                                columnValue.put(name, ColumnValue.fromLong((Integer) value));
+                                break;
+                            case BINARY:
+                                assert value instanceof byte[];
+                                columnValue.put(name, ColumnValue.fromBinary((byte[]) value));
+                                break;
+                            case DOUBLE:
+                                assert value instanceof Double;
+                                columnValue.put(name, ColumnValue.fromDouble((Double) value));
+                                break;
+                            case BOOLEAN:
+                                assert value instanceof Boolean;
+                                columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
+                                break;
                         }
                     }
                 }
@@ -491,7 +505,7 @@ public class OtsUtils {
      * @param c
      * @return
      */
-    private IndexSchema toIndex(Class<?> c) {
+    private IndexSchema toIndex(Class<?> c) throws RuntimeException{
         IndexSchema indexSchema = new IndexSchema();
         List<FieldSchema> fieldSchemas = new ArrayList<>();
         List<Field> fields = Arrays.asList(c.getDeclaredFields());
@@ -500,39 +514,63 @@ public class OtsUtils {
             List<Annotation> annotations = Arrays.asList(field.getAnnotations());// 获取自定义注解
             annotations.forEach(annotation -> {
                 String name = field.getName(); // 获取属性的名字
-                String type = field.getGenericType().toString(); // 获取属性的类型
                 if(annotation.annotationType() ==  OTSPrimaryKey.class){
                     OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
                     if(!StringUtils.isBlank(pk.name())){
                         name = pk.name();
                     }
-                    //TODO FieldType.TEXT支持分词,而KEYWORD只能用前缀匹配
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true).setStore(true);
-                    if (type.equals("class java.lang.Integer")){
-                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true).setStore(true);
+                    switch (pk.indexType()) {
+                        case NULL:
+                            break;
+                        case TEXT:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true));
+                            break;
+                        case LONG:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true).setStore(true));
+                            break;
+                        case KEYWORD:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.KEYWORD).setStore(true).setIndex(true).setEnableSortAndAgg(true));
+                            break;
+                        default:
+                            throw new RuntimeException("主键只允许TEXT,LONG,KEYWORD类型的多元索引");
                     }
-                    fieldSchemas.add(fieldSchema);
                 }
                 if(annotation.annotationType() ==  OTSColumn.class){
                     OTSColumn column = field.getAnnotation(OTSColumn.class);
                     if(!StringUtils.isBlank(column.name())){
                         name = column.name();
                     }
-                    FieldSchema fieldSchema = new FieldSchema(name, FieldType.KEYWORD).setIndex(true).setEnableSortAndAgg(true).setStore(true);
-                    if (type.equals("class java.lang.Integer")){
-                        fieldSchema = new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true).setStore(true);
+                    switch (column.indexType()) {
+                        case NULL:
+                            break;
+                        case TEXT:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true));
+                            break;
+                        case LONG:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true).setStore(true));
+                            if(name.toLowerCase().contains("Time")) {
+                                indexSchema.setIndexSort(new Sort(
+                                        Collections.singletonList(new FieldSort(name, SortOrder.DESC))));
+                            }
+                            break;
+                        case KEYWORD:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.KEYWORD).setStore(true).setIndex(true).setEnableSortAndAgg(true));
+                            break;
+                        case DOUBLE:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.DOUBLE).setStore(true).setIndex(true).setEnableSortAndAgg(true));
+                            break;
+                        case BOOLEAN:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.BOOLEAN).setStore(true).setIndex(true).setEnableSortAndAgg(true));
+                            break;
+                        case NESTED:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.NESTED).setStore(true).setIndex(true));
+                            break;
+                        case GEO_POINT:
+                            fieldSchemas.add(new FieldSchema(name, FieldType.GEO_POINT).setStore(true).setIndex(true));
+                            break;
                     }
-                    if (type.equals("class java.lang.Boolean")){
-                        fieldSchema = new FieldSchema(name, FieldType.BOOLEAN).setIndex(true).setEnableSortAndAgg(true).setStore(true);
-                    }
-                    if (type.equals("class java.lang.Double")){
-                        fieldSchema = new FieldSchema(name, FieldType.DOUBLE).setIndex(true).setEnableSortAndAgg(true).setStore(true);
-                    }
-                    fieldSchemas.add(fieldSchema);
+
                 }
-//                // 设置按照Timestamp这一列进行预排序, Timestamp这一列必须建立索引，并打开EnableSortAndAgg
-//                indexSchema.setIndexSort(new Sort(
-//                        Collections.singletonList(new FieldSort(name, SortOrder.ASC))));
             });
         });
         indexSchema.setFieldSchemas(fieldSchemas);
@@ -577,12 +615,8 @@ public class OtsUtils {
                         field.set(result, (int) value);
                     }
                     if (type.equals("class java.util.Date")){
-                        String value = columnValue.asString();
-                        if(value.split(" ").length > 1) {
-                            field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd HH:mm:ss"));
-                        } else {
-                            field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd"));
-                        }
+                        long value = columnValue.asLong();
+                        field.set(result, new Date(value));
                     }
                 }
             }
@@ -595,11 +629,20 @@ public class OtsUtils {
      * @param c
      * @return
      */
-    public String getTableName(Class<?> c){
+    public String getTableName(Class<?> c) {
         String name = c.getAnnotation(OTSClass.class).name();
         if(StringUtils.isBlank(name)){
             name = c.getName();
         }
         return name;
+    }
+
+    /**
+     * 获取是否创建多元索引
+     * @param c
+     * @return
+     */
+    private boolean getTableIndex(Class<?> c) {
+        return c.getAnnotation(OTSClass.class).searchIndex();
     }
 }

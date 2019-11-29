@@ -12,5 +12,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OTSClass {
+
     String name() default "";
+
+    boolean searchIndex() default true;
 }
