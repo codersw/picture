@@ -78,9 +78,20 @@ public class UploadFileServiceImpl implements UploadFileService {
         List<UploadFile> result = new ArrayList<>();
         List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
         if(uploadFileCos.size() > 0) {
-            uploadFileCos.forEach(uploadFileCo -> {
+            Integer isCover = IsCoverEnum.FALSE.getValue();
+            for(UploadFileCo uploadFileCo : uploadFileCos) {
+                isCover = uploadFileCo.getIsCover();
                 result.add(save(uploadFileCo));
-            });
+            }
+            if(isCover.equals(IsCoverEnum.FALSE.getValue())){
+                UploadFileCo uploadFileCo = uploadFileCos.get(0);
+                setCover(UploadFile.builder()
+                        .modifyUserId(uploadFileCo.getUserId())
+                        .albumId(uploadFileCo.getAlbumId())
+                        .fileId(uploadFileCo.getFileId())
+                        .IsCover(IsCoverEnum.TRUE.getValue())
+                        .build());
+            }
         }
         return result;
     }
@@ -107,6 +118,8 @@ public class UploadFileServiceImpl implements UploadFileService {
     private void setCover(UploadFile uploadFile) {
         if(uploadFile.getIsCover().equals(IsCoverEnum.TRUE.getValue()) && !StringUtils.isBlank(uploadFile.getAlbumId())){
             ots.updataRow(PhotoAlbum.builder()
+                    .modifyUserId(uploadFile.getModifyUserId())
+                    .modifyTime(new Date())
                     .albumId(uploadFile.getAlbumId())
                     .cover(uploadFile.getFileId())
                     .build());
