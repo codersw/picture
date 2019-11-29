@@ -42,7 +42,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         UploadFile uploadFile = UploadFile.builder()
                 .fileId(uploadFileCo.getFileId())
                 .fileName(uploadFileCo.getFile().getOriginalFilename())
-                .fileSize(uploadFileCo.getFile().getSize())
+                .fileSize((int) uploadFileCo.getFile().getSize())
                 .fileType(fileType)
                 .createTime(new Date())
                 .modifyTime(new Date())
