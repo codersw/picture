@@ -1,5 +1,8 @@
 package com.mango.photoalbum.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alicloud.openservices.tablestore.ClientException;
 import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.TableStoreException;
@@ -72,9 +75,10 @@ public class OtsUtils {
             TableOptions tableOptions = new TableOptions(timeToLive, maxVersions);
             //将表的结构信息和配置信息封装到一个request里
             CreateTableRequest request = new CreateTableRequest(toTable(c), tableOptions);
+            log.info("创建表格开始:{}", JSON.toJSONString(request));
             //创建表格
-            client.createTable(request);
-            log.info("创建表格成功:{}", request.getTableMeta().getTableName());
+            CreateTableResponse response = client.createTable(request);
+            log.info("创建表格成功:{}", response);
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("创建表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -180,13 +184,13 @@ public class OtsUtils {
         try {
             if(!getTableIndex(c)) return;
             String tableName = getTableName(c);
-            log.info("创建多元索引开始:表{}索引{}", tableName, tableName);
             CreateSearchIndexRequest request = new CreateSearchIndexRequest();
             request.setTableName(tableName);
             request.setIndexName(tableName);
             request.setIndexSchema(toIndex(c));
-            client.createSearchIndex(request);
-            log.info("创建多元索引成功:表{}索引{}", tableName, tableName);
+            log.info("创建多元索引开始:{}", JSON.toJSONString(request));
+            CreateSearchIndexResponse response = client.createSearchIndex(request);
+            log.info("创建多元索引成功:{}", JSON.toJSONString(response));
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.info("创建多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -225,8 +229,9 @@ public class OtsUtils {
     public <T> void creatRow(T t){
         try {
             PutRowRequest request = new PutRowRequest(toRow(t));
-            client.putRow(request);
-            log.info("添加数据成功{}", request.getRowChange().getTableName());
+            log.info("添加数据开始:{}", request.getRowChange().getColumnsToPut());
+            PutRowResponse rowResponse = client.putRow(request);
+            log.info("添加数据成功:{}", JSON.toJSONString(rowResponse));
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("添加数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -248,8 +253,10 @@ public class OtsUtils {
             SingleRowQueryCriteria rowQueryCriteria = new SingleRowQueryCriteria(row.getTableName(), row.getPrimaryKey());
             //设置读取最新版本
             rowQueryCriteria.setMaxVersions(1);
-            GetRowResponse getRowResponse = client.getRow(new GetRowRequest(rowQueryCriteria));
-            log.info("查找数据成功{}", row.getTableName());
+            GetRowRequest rowRequest = new GetRowRequest(rowQueryCriteria);
+            log.info("查找数据开始:{}", JSON.toJSONString(rowRequest.getRowQueryCriteria().getPrimaryKey()));
+            GetRowResponse getRowResponse = client.getRow(rowRequest);
+            log.info("查找数据成功:{}", JSON.toJSONString(getRowResponse));
             Row responseRow = getRowResponse.getRow();
             if(responseRow != null){
                 return formatRow(responseRow, t.getClass());
@@ -284,7 +291,7 @@ public class OtsUtils {
             //设置读取最新版本
             rangeRowQueryCriteria.setMaxVersions(1);
             GetRangeResponse getRangeResponse = client.getRange(new GetRangeRequest(rangeRowQueryCriteria));
-            log.info("查找数据成功{}", startRow.getTableName());
+            log.info("查找数据成功:{}", JSON.toJSONString(getRangeResponse));
             List<Row> rows = getRangeResponse.getRows();
             if(!rows.isEmpty()){
                 List<T> result = new ArrayList<>();
@@ -309,8 +316,10 @@ public class OtsUtils {
      */
     public SearchResponse searchQuery(SearchRequest request){
         try {
-            log.info("多条件查找数据成功{}", request.getTableName());
-            return client.search(request);
+            log.info("多条件查找数据开始{}", JSON.toJSONString(request));
+            SearchResponse response = client.search(request);
+            log.info("多条件查找数据成功{}", JSON.toJSONString(response));
+            return response;
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("多条件查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -330,8 +339,10 @@ public class OtsUtils {
             RowPutChange row = toRow(t);
             RowUpdateChange rowUpdateChange = new RowUpdateChange(row.getTableName(), row.getPrimaryKey());
             rowUpdateChange.put(row.getColumnsToPut());
-            client.updateRow(new UpdateRowRequest(rowUpdateChange));
-            log.info("更新数据成功{}", row.getTableName());
+            UpdateRowRequest request = new UpdateRowRequest(rowUpdateChange);
+            log.info("更新数据开始{}", request.getRowChange().getColumnsToUpdate());
+            UpdateRowResponse response = client.updateRow(request);
+            log.info("更新数据成功{}", JSON.toJSONString(response));
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("更新数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
