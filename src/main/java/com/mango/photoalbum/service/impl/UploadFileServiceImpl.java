@@ -88,17 +88,17 @@ public class UploadFileServiceImpl implements UploadFileService {
                 }
                 result.add(save(uploadFileCo));
             }
-//            PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
-//                    .albumId(uploadFileMultiCo.getAlbumId())
-//                    .build());
-//            if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
-//                setCover(UploadFile.builder()
-//                    .fileId(result.get(0).getFileId())
-//                    .albumId(result.get(0).getAlbumId())
-//                    .modifyUserId(result.get(0).getCreateUserId())
-//                    .modifyTime(new Date())
-//                    .build());
-//            }
+            PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+                    .albumId(uploadFileMultiCo.getAlbumId())
+                    .build());
+            if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
+                setCover(UploadFile.builder()
+                    .fileId(result.get(0).getFileId())
+                    .albumId(result.get(0).getAlbumId())
+                    .modifyUserId(result.get(0).getCreateUserId())
+                    .IsCover(IsCoverEnum.TRUE.getValue())
+                    .build());
+            }
         }
         return result;
     }
@@ -130,7 +130,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .albumId(uploadFile.getAlbumId())
                     .cover(uploadFile.getFileId())
                     .build());
-            log.info("修改相册封面成功fileId:{},malbumId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getAlbumId(), uploadFile.getModifyUserId());
+            log.info("修改相册封面成功:{}", uploadFile.toString());
         }
     }
 
