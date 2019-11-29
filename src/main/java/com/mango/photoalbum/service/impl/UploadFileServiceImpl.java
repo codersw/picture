@@ -88,16 +88,17 @@ public class UploadFileServiceImpl implements UploadFileService {
                 }
                 result.add(save(uploadFileCo));
             }
-            PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
-                    .albumId(uploadFileMultiCo.getAlbumId())
-                    .build());
-            if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
-                setCover(UploadFile.builder()
-                    .fileId(result.get(0).getFileId())
-                    .modifyUserId(result.get(0).getCreateUserId())
-                    .modifyTime(new Date())
-                    .build());
-            }
+//            PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+//                    .albumId(uploadFileMultiCo.getAlbumId())
+//                    .build());
+//            if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
+//                setCover(UploadFile.builder()
+//                    .fileId(result.get(0).getFileId())
+//                    .albumId(result.get(0).getAlbumId())
+//                    .modifyUserId(result.get(0).getCreateUserId())
+//                    .modifyTime(new Date())
+//                    .build());
+//            }
         }
         return result;
     }
