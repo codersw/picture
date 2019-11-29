@@ -79,22 +79,9 @@ public class UploadFileServiceImpl implements UploadFileService {
         List<UploadFile> result = new ArrayList<>();
         List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
         if(uploadFileCos.size() > 0) {
-            Integer isCover = IsCoverEnum.FALSE.getValue();
             for(UploadFileCo uploadFileCo : uploadFileCos) {
-                if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
-                    isCover = IsCoverEnum.TRUE.getValue();
-                }
                 uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
                 result.add(save(uploadFileCo));
-            }
-            if(isCover.equals(IsCoverEnum.FALSE.getValue())){
-                UploadFileCo uploadFileCo = uploadFileCos.get(0);
-                setCover(UploadFile.builder()
-                        .modifyUserId(uploadFileCo.getUserId())
-                        .albumId(uploadFileCo.getAlbumId())
-                        .fileId(uploadFileCo.getFileId())
-                        .IsCover(IsCoverEnum.TRUE.getValue())
-                        .build());
             }
         }
         return result;
