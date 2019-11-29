@@ -50,7 +50,7 @@ public class UploadFile {
     /**
      * 文件大小
      */
-    @OTSColumn
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
     private Long fileSize;
 
     /**
