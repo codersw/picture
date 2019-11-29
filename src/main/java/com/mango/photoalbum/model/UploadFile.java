@@ -2,12 +2,12 @@ package com.mango.photoalbum.model;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.util.Date;
 
 /**
@@ -97,5 +97,9 @@ public class UploadFile {
     @OTSColumn
     private Integer isDel;
 
+    /**
+     * 是否是封面
+     */
+    @JsonIgnore
     private Integer IsCover;
 }

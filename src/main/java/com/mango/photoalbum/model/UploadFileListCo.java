@@ -1,5 +1,6 @@
 package com.mango.photoalbum.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import jdk.nashorn.internal.ir.annotations.Ignore;
@@ -31,6 +32,6 @@ public class UploadFileListCo {
     /**
      * 总条数
      */
-    @Ignore
+    @ApiModelProperty(hidden = true)
     private Integer total;
 }
