@@ -70,7 +70,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         ots.creatRow(uploadFile);
         //如果是封面修改相册封面
         setCover(uploadFile);
-        log.info("文件保存成功fileId:{},CreateUserId:{},modifyUserId:{}", uploadFile.getFileId(), uploadFile.getCreateUserId(), uploadFile.getModifyUserId());
+        log.info("文件保存成功:{}", uploadFile.toString());
         return uploadFile;
     }
 
@@ -84,7 +84,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                 if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
                     isCover = IsCoverEnum.TRUE.getValue();
                 }
-                uploadFileCo.setAlbumId(uploadFileCo.getAlbumId());
+                uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
                 result.add(save(uploadFileCo));
             }
             if(isCover.equals(IsCoverEnum.FALSE.getValue())){
