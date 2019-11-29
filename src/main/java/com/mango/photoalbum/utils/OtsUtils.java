@@ -230,7 +230,7 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("添加数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
-        } catch (ClientException e) {
+        } catch (ClientException | IllegalAccessException e) {
             e.printStackTrace();
             log.error("添加数据失败!请求失败详情：{}",e.getMessage());
         }
@@ -257,7 +257,7 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
-        } catch (ClientException | IllegalAccessException | InstantiationException e) {
+        } catch (ClientException | IllegalAccessException | InstantiationException | ParseException e) {
             e.printStackTrace();
             log.error("查找数据失败!请求失败详情：{}",e.getMessage());
         }
@@ -288,20 +288,15 @@ public class OtsUtils {
             List<Row> rows = getRangeResponse.getRows();
             if(!rows.isEmpty()){
                 List<T> result = new ArrayList<>();
-                rows.forEach(row -> {
-                    try {
-                        result.add(formatRow(row, startT.getClass()));
-                    } catch (IllegalAccessException | InstantiationException e) {
-                        log.error("格式化数据失败!详情:{}", e.getMessage());
-                        e.printStackTrace();
-                    }
-                });
+                for(Row row : rows) {
+                    result.add(formatRow(row, startT.getClass()));
+                }
                 return result;
             }
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
-        } catch (ClientException e) {
+        } catch (ClientException | IllegalAccessException | ParseException | InstantiationException e) {
             e.printStackTrace();
             log.error("查找数据失败!请求失败详情：{}",e.getMessage());
         }
@@ -340,7 +335,7 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("更新数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
-        } catch (ClientException e) {
+        } catch (ClientException | IllegalAccessException e) {
             e.printStackTrace();
             log.error("更新数据失败!请求失败详情：{}",e.getMessage());
         }
@@ -359,7 +354,7 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("删除数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
-        } catch (ClientException e) {
+        } catch (ClientException | IllegalAccessException e) {
             log.error("删除数据失败!请求失败详情：{}",e.getMessage());
         }
     }
@@ -437,57 +432,52 @@ public class OtsUtils {
      * @param <T>
      * @return
      */
-    private <T> RowPutChange toRow(T t) {
+    private <T> RowPutChange toRow(T t) throws IllegalAccessException {
         Class<T> c = (Class<T>) t.getClass();
-        List<Field> fields = Arrays.asList(c.getDeclaredFields());
+        Field[] fields = c.getDeclaredFields();
         PrimaryKeyBuilder primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder();
         Map<String, ColumnValue> columnValue = new HashMap<>();
-        fields.forEach(field -> {
+        for(Field field : fields) {
             field.setAccessible(true);
-            List<Annotation> annotations = Arrays.asList(field.getAnnotations());// 获取自定义注解
-            annotations.forEach(annotation -> {
+            Annotation[] annotations = field.getAnnotations();// 获取自定义注解
+            for(Annotation annotation : annotations) {
                 String name = field.getName(); // 获取属性的名字
                 String type = field.getGenericType().toString(); // 获取属性的类型
-                try {
-                    Object value = field.get(t);//获取属性值
-                    if(value != null) {
-                        if(annotation.annotationType() ==  OTSPrimaryKey.class){
-                            OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
-                            if(!StringUtils.isBlank(pk.name())){
-                                name = pk.name();
-                            }
-                            if (type.equals("class java.lang.String")){
-                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
-                            }
-                            if (type.equals("class java.lang.Integer")) {
-                                primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.AUTO_INCREMENT);
-                            }
+                Object value = field.get(t);//获取属性值
+                if(value != null) {
+                    if(annotation.annotationType() == OTSPrimaryKey.class){
+                        OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
+                        if(!StringUtils.isBlank(pk.name())){
+                            name = pk.name();
                         }
-                        if(annotation.annotationType() ==  OTSColumn.class){
-                            OTSColumn column = field.getAnnotation(OTSColumn.class);
-                            if(!StringUtils.isBlank(column.name())){
-                                name = column.name();
-                            }
-                            if (type.equals("class java.lang.String")){
-                                columnValue.put(name, ColumnValue.fromString((String) value));
-                            }
-                            if (type.equals("class java.lang.Integer")){
-                                columnValue.put(name, ColumnValue.fromLong((Integer) value));
-                            }
-                            if (type.equals("class java.lang.Boolean")){
-                                columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
-                            }
-                            if (type.equals("class java.util.Date")) {
-                                columnValue.put(name, ColumnValue.fromString(DateUtils.dateToStr((Date) value,"yyyy-MM-dd HH:mm:ss")));
-                            }
+                        if (type.equals("class java.lang.String")){
+                            primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.fromString((String) value));
+                        }
+                        if (type.equals("class java.lang.Integer")) {
+                            primaryKeyBuilder.addPrimaryKeyColumn(name, PrimaryKeyValue.AUTO_INCREMENT);
                         }
                     }
-                } catch (IllegalAccessException e) {
-                    log.error("生成数据出错{}", e.getMessage());
-                    e.printStackTrace();
+                    if(annotation.annotationType() == OTSColumn.class){
+                        OTSColumn column = field.getAnnotation(OTSColumn.class);
+                        if(!StringUtils.isBlank(column.name())){
+                            name = column.name();
+                        }
+                        if (type.equals("class java.lang.String")){
+                            columnValue.put(name, ColumnValue.fromString((String) value));
+                        }
+                        if (type.equals("class java.lang.Integer")){
+                            columnValue.put(name, ColumnValue.fromLong((Integer) value));
+                        }
+                        if (type.equals("class java.lang.Boolean")){
+                            columnValue.put(name, ColumnValue.fromBoolean((Boolean) value));
+                        }
+                        if (type.equals("class java.util.Date")) {
+                            columnValue.put(name, ColumnValue.fromString(DateUtils.dateToStr((Date) value,"yyyy-MM-dd HH:mm:ss")));
+                        }
+                    }
                 }
-            });
-        });
+            }
+        }
         //属性列信息
         RowPutChange rowPutChange = new RowPutChange(getTableName(c), primaryKeyBuilder.build());
         columnValue.keySet().forEach(key ->{
@@ -555,53 +545,48 @@ public class OtsUtils {
      * @param c
      * @return
      */
-    public <T> T formatRow(Row row, Class<?> c) throws IllegalAccessException, InstantiationException {
+    public <T> T formatRow(Row row, Class<?> c) throws IllegalAccessException, InstantiationException, ParseException {
         T result = (T) c.newInstance();
-        List<Field> fields = Arrays.asList(c.getDeclaredFields());
-        fields.forEach(field -> {
+        Field[] fields = c.getDeclaredFields();
+        for(Field field : fields) {
             field.setAccessible(true);
             String name = field.getName(); // 获取属性的名字
             String type = field.getGenericType().toString(); // 获取属性的类型
-            try{
-                PrimaryKeyColumn primaryKeyColumn = row.getPrimaryKey().getPrimaryKeyColumnsMap().get(name);
-                if(primaryKeyColumn != null) {
+            PrimaryKeyColumn primaryKeyColumn = row.getPrimaryKey().getPrimaryKeyColumnsMap().get(name);
+            if(primaryKeyColumn != null) {
+                if (type.equals("class java.lang.String")){
+                    field.set(result, primaryKeyColumn.getValue().asString());
+                }
+                if (type.equals("class java.lang.Integer")){
+                    long value = primaryKeyColumn.getValue().asLong();
+                    field.set(result, (int) value);
+                }
+            }
+            NavigableMap<Long, ColumnValue> columnMap = row.getColumnsMap().get(name);
+            if(columnMap != null && !columnMap.isEmpty()) {
+                ColumnValue columnValue = columnMap.firstEntry().getValue();
+                if (columnValue != null) {
                     if (type.equals("class java.lang.String")){
-                        field.set(result, primaryKeyColumn.getValue().asString());
+                        field.set(result, columnValue.asString());
+                    }
+                    if (type.equals("class java.lang.Boolean")){
+                        field.set(result, columnValue.asBoolean());
                     }
                     if (type.equals("class java.lang.Integer")){
-                        long value = primaryKeyColumn.getValue().asLong();
+                        long value = columnValue.asLong();
                         field.set(result, (int) value);
                     }
-                }
-                NavigableMap<Long, ColumnValue> columnMap = row.getColumnsMap().get(name);
-                if(columnMap != null && !columnMap.isEmpty()) {
-                    ColumnValue columnValue = columnMap.firstEntry().getValue();
-                    if (columnValue != null) {
-                        if (type.equals("class java.lang.String")){
-                            field.set(result, columnValue.asString());
-                        }
-                        if (type.equals("class java.lang.Boolean")){
-                            field.set(result, columnValue.asBoolean());
-                        }
-                        if (type.equals("class java.lang.Integer")){
-                            long value = columnValue.asLong();
-                            field.set(result, (int) value);
-                        }
-                        if (type.equals("class java.util.Date")){
-                            String value = columnValue.asString();
-                            if(value.split(" ").length > 1) {
-                                field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd HH:mm:ss"));
-                            } else {
-                                field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd"));
-                            }
+                    if (type.equals("class java.util.Date")){
+                        String value = columnValue.asString();
+                        if(value.split(" ").length > 1) {
+                            field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd HH:mm:ss"));
+                        } else {
+                            field.set(result, DateUtils.strToDate(value, "yyyy-MM-dd"));
                         }
                     }
                 }
-            }catch (IllegalAccessException | ParseException e){
-                log.error("格式化返回值异常{}", e.getMessage());
-                e.printStackTrace();
             }
-        });
+        }
         return result;
     }
 

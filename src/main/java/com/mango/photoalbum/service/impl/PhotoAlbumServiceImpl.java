@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import java.text.ParseException;
 import java.util.*;
 
 @Service
@@ -114,10 +115,10 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
         if(searchResponse == null) return result;
-        List<Row> rows = searchResponse.getRows();
-        if(rows.size() > 0){
-            rows.forEach(row -> {
-                try {
+        try {
+            List<Row> rows = searchResponse.getRows();
+            if(rows.size() > 0) {
+                for(Row row : rows) {
                     PhotoAlbum photoAlbum = ots.formatRow(row, PhotoAlbum.class);
                     if(!StringUtils.isBlank(photoAlbum.getCover())){
                         UploadFile uploadFile = ots.retrieveRow(UploadFile.builder()
@@ -128,10 +129,11 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                         }
                     }
                     result.add(photoAlbum);
-                } catch (IllegalAccessException | InstantiationException e) {
-                    e.printStackTrace();
                 }
-            });
+            }
+        } catch (IllegalAccessException | InstantiationException | ParseException e) {
+            log.error("获取列表出错:{}", e.getMessage());
+            e.printStackTrace();
         }
         return result;
     }

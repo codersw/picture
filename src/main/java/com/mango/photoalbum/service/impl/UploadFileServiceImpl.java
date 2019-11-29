@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.*;
 
 @Service
@@ -80,7 +81,9 @@ public class UploadFileServiceImpl implements UploadFileService {
         if(uploadFileCos.size() > 0) {
             Integer isCover = IsCoverEnum.FALSE.getValue();
             for(UploadFileCo uploadFileCo : uploadFileCos) {
-                isCover = uploadFileCo.getIsCover();
+                if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
+                    isCover = IsCoverEnum.TRUE.getValue();
+                }
                 result.add(save(uploadFileCo));
             }
             if(isCover.equals(IsCoverEnum.FALSE.getValue())){
@@ -163,11 +166,13 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .searchQuery(query)
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return 0;
         return (int) searchResponse.getTotalCount();
     }
 
     @Override
     public List<UploadFile> list(UploadFileListCo uploadFileListCo) {
+        List<UploadFile> result = new ArrayList<>();
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
@@ -195,16 +200,17 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .returnAllColumns(true) // 设置返回所有列
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
-        List<Row> rows = searchResponse.getRows();
-        List<UploadFile> result = new ArrayList<>();
-        if(rows.size() > 0){
-            rows.forEach(row -> {
-                try {
+        if(searchResponse == null) return result;
+        try {
+            List<Row> rows = searchResponse.getRows();
+            if(rows.size() > 0){
+                for(Row row : rows) {
                     result.add(ots.formatRow(row, UploadFile.class));
-                } catch (IllegalAccessException | InstantiationException e) {
-                    e.printStackTrace();
                 }
-            });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取列表报错：{}", e.getMessage());
         }
         return result;
     }
