@@ -80,8 +80,23 @@ public class UploadFileServiceImpl implements UploadFileService {
         List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
         if(uploadFileCos.size() > 0) {
             for(UploadFileCo uploadFileCo : uploadFileCos) {
-                uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
+                if (StringUtils.isEmpty(uploadFileCo.getAlbumId())) {
+                    uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
+                }
+                if (uploadFileCo.getUserId() == null) {
+                    uploadFileCo.setUserId(uploadFileMultiCo.getUserId());
+                }
                 result.add(save(uploadFileCo));
+            }
+            PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+                    .albumId(uploadFileMultiCo.getAlbumId())
+                    .build());
+            if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
+                setCover(UploadFile.builder()
+                    .fileId(result.get(0).getFileId())
+                    .modifyUserId(result.get(0).getCreateUserId())
+                    .modifyTime(new Date())
+                    .build());
             }
         }
         return result;
