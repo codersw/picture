@@ -70,7 +70,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
                 .albumId(albumId)
                 .build());
-        if(!StringUtils.isBlank(photoAlbum.getCover())){
+        if(photoAlbum!= null && !StringUtils.isBlank(photoAlbum.getCover())){
             UploadFile uploadFile = ots.retrieveRow(UploadFile.builder()
                     .fileId(photoAlbum.getCover())
                     .build());

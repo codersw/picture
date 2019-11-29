@@ -84,6 +84,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                 if(uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
                     isCover = IsCoverEnum.TRUE.getValue();
                 }
+                uploadFileCo.setAlbumId(uploadFileCo.getAlbumId());
                 result.add(save(uploadFileCo));
             }
             if(isCover.equals(IsCoverEnum.FALSE.getValue())){
