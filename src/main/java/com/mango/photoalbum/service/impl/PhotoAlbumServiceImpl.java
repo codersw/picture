@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -152,19 +153,23 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         List<Query> queries = new ArrayList<>();
         String keyword = photoAlbumListCo.getKeyword();
         if(!StringUtils.isBlank(keyword)){
-            //模糊匹配
-            MatchQuery wildcardQuery = new MatchQuery();
-            wildcardQuery.setFieldName("title");
-            wildcardQuery.setText(keyword);
-            queries.add(wildcardQuery);
-            MatchQuery wildcardQuery4 = new MatchQuery();
-            wildcardQuery4.setFieldName("shootLocation");
-            wildcardQuery4.setText(keyword);
-            queries.add(wildcardQuery4);
-            TermQuery termQuery1 = new TermQuery();
-            termQuery1.setFieldName("createUserId");
-            termQuery1.setTerm(ColumnValue.fromString(keyword));
-            queries.add(termQuery1);
+            //条件1
+            MatchPhraseQuery matchQuery1 = new MatchPhraseQuery();
+            matchQuery1.setFieldName("title");
+            matchQuery1.setText(keyword);
+            queries.add(matchQuery1);
+            //条件2
+            MatchPhraseQuery  matchQuery2 = new MatchPhraseQuery();
+            matchQuery2.setFieldName("shootLocation");
+            matchQuery2.setText(keyword);
+            queries.add(matchQuery2);
+            //条件3
+            if(Pattern.compile("[0-9]*").matcher(keyword).matches()) {
+                TermQuery termQuery3 = new TermQuery();
+                termQuery3.setFieldName("createUserId");
+                termQuery3.setTerm(ColumnValue.fromString(keyword));
+                queries.add(termQuery3);
+            }
             boolQuery.setMustQueries(Collections.singletonList(termQuery));
             boolQuery.setShouldQueries(queries);
             //最少匹配一个搜索条件

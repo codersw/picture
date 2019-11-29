@@ -462,18 +462,19 @@ public class OtsUtils {
                         if(!StringUtils.isBlank(column.name())){
                             name = column.name();
                         }
-                        if (type.equals("class java.util.Date")) {
-                            assert value instanceof Date;
-                            value = (int) ((Date) value).getTime();
-                        }
                         switch (column.definedColumnType()) {
                             case STRING:
                                 assert value instanceof String;
                                 columnValue.put(name, ColumnValue.fromString((String) value));
                                 break;
                             case INTEGER:
-                                assert value instanceof Integer;
-                                columnValue.put(name, ColumnValue.fromLong((Integer) value));
+                                if (type.equals("class java.util.Date")) {
+                                    assert value instanceof Date;
+                                    columnValue.put(name, ColumnValue.fromLong(((Date) value).getTime()));
+                                } else {
+                                    assert value instanceof Integer;
+                                    columnValue.put(name, ColumnValue.fromLong((Integer) value));
+                                }
                                 break;
                             case BINARY:
                                 assert value instanceof byte[];
