@@ -1,6 +1,5 @@
 package com.mango.photoalbum.annotation;
 
-import com.alicloud.openservices.tablestore.model.PrimaryKeyOption;
 import com.alicloud.openservices.tablestore.model.PrimaryKeyType;
 import com.mango.photoalbum.enums.IndexTypeEnum;
 import java.lang.annotation.ElementType;
