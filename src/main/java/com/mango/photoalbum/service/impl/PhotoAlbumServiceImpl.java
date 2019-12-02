@@ -73,6 +73,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         if(photoAlbum!= null && !StringUtils.isBlank(photoAlbum.getCover())){
             UploadFile uploadFile = ots.retrieveRow(UploadFile.builder()
                     .fileId(photoAlbum.getCover())
+                    .isDel(IsDelEnum.FALSE.getValue())
                     .build());
             if(uploadFile != null){
                 photoAlbum.setCoverPath(uploadFile.getFilePath());
@@ -124,6 +125,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                     if(!StringUtils.isBlank(photoAlbum.getCover())){
                         UploadFile uploadFile = ots.retrieveRow(UploadFile.builder()
                                 .fileId(photoAlbum.getCover())
+                                .isDel(IsDelEnum.FALSE.getValue())
                                 .build());
                         if(uploadFile != null){
                             photoAlbum.setCoverPath(uploadFile.getFilePath());
