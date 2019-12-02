@@ -1,6 +1,5 @@
 package com.mango.photoalbum;
 
-import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.model.search.*;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.PhotoAlbum;
@@ -11,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import java.util.*;
 
 @RunWith(SpringRunner.class)
