@@ -91,7 +91,6 @@ public class PhotoAlbum {
     /**
      * 封面 图片url
      */
-    @OTSColumn
     private String coverPath;
 
 }
