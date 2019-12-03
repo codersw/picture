@@ -60,14 +60,14 @@ public class UploadFileServiceImpl implements UploadFileService {
         try {
             //oss上传图片
             oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+            //oss文件路径获取
+            uploadFile.setFilePath(oss.getViewUrl(ossFileName));
+            //ots保存文件信息
+            ots.creatRow(uploadFile);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(e.getMessage());
+            log.error("文件保存失败:{}", e.getMessage());
         }
-        //oss文件路径获取
-        uploadFile.setFilePath(oss.getViewUrl(ossFileName));
-        //ots保存文件信息
-        ots.creatRow(uploadFile);
         log.info("文件保存成功:{}", uploadFile.toString());
         return uploadFile;
     }
