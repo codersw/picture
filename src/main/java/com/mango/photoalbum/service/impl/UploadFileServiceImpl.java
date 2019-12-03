@@ -68,8 +68,6 @@ public class UploadFileServiceImpl implements UploadFileService {
         uploadFile.setFilePath(oss.getViewUrl(ossFileName));
         //ots保存文件信息
         ots.creatRow(uploadFile);
-        //如果是封面修改相册封面
-        setCover(uploadFile);
         log.info("文件保存成功:{}", uploadFile.toString());
         return uploadFile;
     }
@@ -92,6 +90,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .albumId(uploadFileMultiCo.getAlbumId())
                     .build());
             if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
+                //如果是封面修改相册封面
                 setCover(UploadFile.builder()
                     .fileId(result.get(0).getFileId())
                     .albumId(result.get(0).getAlbumId())
