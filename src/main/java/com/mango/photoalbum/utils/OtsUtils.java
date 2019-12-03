@@ -602,33 +602,49 @@ public class OtsUtils {
             field.setAccessible(true);
             String name = field.getName(); // 获取属性的名字
             String type = field.getGenericType().toString(); // 获取属性的类型
-            PrimaryKeyColumn primaryKeyColumn = row.getPrimaryKey().getPrimaryKeyColumnsMap().get(name);
-            if(primaryKeyColumn != null) {
-                if (type.equals("class java.lang.String")){
-                    field.set(result, primaryKeyColumn.getValue().asString());
+            field.setAccessible(true);
+            Annotation[] annotations = field.getAnnotations();// 获取自定义注解
+            for(Annotation annotation : annotations) {
+                if(annotation.annotationType() ==  OTSPrimaryKey.class) {
+                    OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
+                    if (!StringUtils.isBlank(pk.name())) {
+                        name = pk.name();
+                    }
+                    PrimaryKeyColumn primaryKeyColumn = row.getPrimaryKey().getPrimaryKeyColumnsMap().get(name);
+                    if(primaryKeyColumn != null) {
+                        if (type.equals("class java.lang.String")){
+                            field.set(result, primaryKeyColumn.getValue().asString());
+                        }
+                        if (type.equals("class java.lang.Integer")){
+                            long value = primaryKeyColumn.getValue().asLong();
+                            field.set(result, (int) value);
+                        }
+                    }
                 }
-                if (type.equals("class java.lang.Integer")){
-                    long value = primaryKeyColumn.getValue().asLong();
-                    field.set(result, (int) value);
-                }
-            }
-            NavigableMap<Long, ColumnValue> columnMap = row.getColumnsMap().get(name);
-            if(columnMap != null && !columnMap.isEmpty()) {
-                ColumnValue columnValue = columnMap.firstEntry().getValue();
-                if (columnValue != null) {
-                    if (type.equals("class java.lang.String")){
-                        field.set(result, columnValue.asString());
+                if(annotation.annotationType() ==  OTSColumn.class) {
+                    OTSColumn column = field.getAnnotation(OTSColumn.class);
+                    if (!StringUtils.isBlank(column.name())) {
+                        name = column.name();
                     }
-                    if (type.equals("class java.lang.Boolean")){
-                        field.set(result, columnValue.asBoolean());
-                    }
-                    if (type.equals("class java.lang.Integer")){
-                        long value = columnValue.asLong();
-                        field.set(result, (int) value);
-                    }
-                    if (type.equals("class java.util.Date")){
-                        long value = columnValue.asLong();
-                        field.set(result, new Date(value));
+                    NavigableMap<Long, ColumnValue> columnMap = row.getColumnsMap().get(name);
+                    if(columnMap != null && !columnMap.isEmpty()) {
+                        ColumnValue columnValue = columnMap.firstEntry().getValue();
+                        if (columnValue != null) {
+                            if (type.equals("class java.lang.String")){
+                                field.set(result, columnValue.asString());
+                            }
+                            if (type.equals("class java.lang.Boolean")){
+                                field.set(result, columnValue.asBoolean());
+                            }
+                            if (type.equals("class java.lang.Integer")){
+                                long value = columnValue.asLong();
+                                field.set(result, (int) value);
+                            }
+                            if (type.equals("class java.util.Date")){
+                                long value = columnValue.asLong();
+                                field.set(result, new Date(value));
+                            }
+                        }
                     }
                 }
             }
