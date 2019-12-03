@@ -1,6 +1,7 @@
 package com.mango.photoalbum.aspect;
 
 import com.alibaba.fastjson.JSON;
+import com.mango.photoalbum.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -40,9 +41,9 @@ public class ControllerAspect {
         // 打印调用 controller 的全路径以及执行方法
         log.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
         // 打印请求的 IP
-        log.info("IP             : {}", request.getRemoteAddr());
+        log.info("IP             : {}", CommonUtils.getIpAddr(request));
         // 打印请求入参
-        log.info("Request Args   : {}", JSON.toJSONString(joinPoint.getArgs()));
+//        log.info("Request Args   : {}", JSON.toJSONString(joinPoint.getArgs()));
     }
 
     /**
@@ -67,9 +68,11 @@ public class ControllerAspect {
         long startTime = System.currentTimeMillis();
         Object result = proceedingJoinPoint.proceed();
         // 打印出参
-        log.info("Response Args  : {}", JSON.toJSONString(result));
+//        log.info("Response Args  : {}", JSON.toJSONString(result));
         // 执行耗时
         log.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
         return result;
     }
+
+
 }
