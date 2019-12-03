@@ -1,5 +1,6 @@
 package com.mango.photoalbum.controller;
 
+import com.mango.photoalbum.enums.IsCoverEnum;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.service.UploadFileService;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 文件接口
@@ -110,10 +112,18 @@ public class UploadFileController {
     @GetMapping("/list")
     public Result list(UploadFileListCo uploadFileListCo) {
         uploadFileListCo.setTotal(uploadFileService.total(uploadFileListCo));
+        List<UploadFile> fileList = uploadFileService.list(uploadFileListCo);
+        PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListCo.getAlbumId());
+        fileList.forEach(file ->{
+            file.setIsCover(IsCoverEnum.FALSE.getValue());
+            if(file.getFileId().equals(photoAlbum.getCover())) {
+                file.setIsCover(IsCoverEnum.TRUE.getValue());
+            }
+        });
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
                 .total(uploadFileListCo.getTotal())
-                .list(uploadFileService.list(uploadFileListCo))
-                .data(photoAlbumService.get(uploadFileListCo.getAlbumId()))
+                .list(fileList)
+                .data(photoAlbum)
                 .build());
     }
 
