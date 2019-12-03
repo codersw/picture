@@ -8,11 +8,4 @@ services:
       dockerfile: Dockerfile
       args:
         JAR_FILE: /target/photoalbum.jar
-    ports:
-      - "8080:8080"
-    environment:
-      - "JAVA_OPTS=-Dserver.port=8080 -Dspring.profiles.active=prod"
-    volumes:
-      - "${LOAN_DIR}:/tmp/photoalbum"
-      - "${LOAN_DIR}/logs:/tmp/photoalbum/logs/"
     restart: always
