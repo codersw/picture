@@ -1,6 +1,8 @@
 package com.mango.photoalbum.aspect;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.mango.photoalbum.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -43,7 +45,7 @@ public class ControllerAspect {
         // 打印请求的 IP
         log.info("IP             : {}", CommonUtils.getIpAddr(request));
         // 打印请求入参
-//        log.info("Request Args   : {}", JSON.toJSONString(joinPoint.getArgs()));
+        log.info("Request Args   : {}", JSONObject.toJSONString(joinPoint.getArgs(), SerializerFeature.IgnoreNonFieldGetter));
     }
 
     /**
@@ -68,7 +70,7 @@ public class ControllerAspect {
         long startTime = System.currentTimeMillis();
         Object result = proceedingJoinPoint.proceed();
         // 打印出参
-//        log.info("Response Args  : {}", JSON.toJSONString(result));
+        log.info("Response Args  : {}", JSONObject.toJSONString(result, SerializerFeature.IgnoreNonFieldGetter));
         // 执行耗时
         log.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
         return result;
