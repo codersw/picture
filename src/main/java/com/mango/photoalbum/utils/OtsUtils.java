@@ -75,7 +75,7 @@ public class OtsUtils {
             TableOptions tableOptions = new TableOptions(timeToLive, maxVersions);
             //将表的结构信息和配置信息封装到一个request里
             CreateTableRequest request = new CreateTableRequest(toTable(c), tableOptions);
-            log.info("创建表格开始:{}", JSON.toJSONString(request));
+            log.info("创建表格开始:{}", JSONObject.toJSONString(request.getTableMeta(), SerializerFeature.IgnoreNonFieldGetter));
             //创建表格
             CreateTableResponse response = client.createTable(request);
             log.info("创建表格成功:{}", response);
@@ -188,9 +188,9 @@ public class OtsUtils {
             request.setTableName(tableName);
             request.setIndexName(tableName);
             request.setIndexSchema(toIndex(c));
-            log.info("创建多元索引开始:{}", JSON.toJSONString(request));
+            log.info("创建多元索引开始:{}", JSONObject.toJSONString(request, SerializerFeature.IgnoreNonFieldGetter));
             CreateSearchIndexResponse response = client.createSearchIndex(request);
-            log.info("创建多元索引成功:{}", JSON.toJSONString(response));
+            log.info("创建多元索引成功:{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.info("创建多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -231,7 +231,7 @@ public class OtsUtils {
             PutRowRequest request = new PutRowRequest(toRow(t));
             log.info("添加数据开始:{}", request.getRowChange().getColumnsToPut());
             PutRowResponse rowResponse = client.putRow(request);
-            log.info("添加数据成功:{}", JSON.toJSONString(rowResponse));
+            log.info("添加数据成功:{}", JSON.toJSONString(rowResponse, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("添加数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
@@ -254,9 +254,9 @@ public class OtsUtils {
             //设置读取最新版本
             rowQueryCriteria.setMaxVersions(1);
             GetRowRequest rowRequest = new GetRowRequest(rowQueryCriteria);
-            log.info("查找数据开始:{}", JSON.toJSONString(rowRequest.getRowQueryCriteria().getPrimaryKey()));
+            log.info("查找数据开始:{}", JSONObject.toJSONString(rowRequest.getRowQueryCriteria().getPrimaryKey()));
             GetRowResponse getRowResponse = client.getRow(rowRequest);
-            log.info("查找数据成功:{}", JSON.toJSONString(getRowResponse));
+            log.info("查找数据成功:{}", JSONObject.toJSONString(getRowResponse, SerializerFeature.IgnoreNonFieldGetter));
             Row responseRow = getRowResponse.getRow();
             if(responseRow != null){
                 return formatRow(responseRow, t.getClass());
@@ -291,7 +291,7 @@ public class OtsUtils {
             //设置读取最新版本
             rangeRowQueryCriteria.setMaxVersions(1);
             GetRangeResponse getRangeResponse = client.getRange(new GetRangeRequest(rangeRowQueryCriteria));
-            log.info("查找数据成功:{}", JSON.toJSONString(getRangeResponse));
+            log.info("查找数据成功:{}", JSONObject.toJSONString(getRangeResponse, SerializerFeature.IgnoreNonFieldGetter));
             List<Row> rows = getRangeResponse.getRows();
             if(!rows.isEmpty()){
                 List<T> result = new ArrayList<>();
@@ -316,9 +316,9 @@ public class OtsUtils {
      */
     public SearchResponse searchQuery(SearchRequest request){
         try {
-            log.info("多条件查找数据开始{}", JSON.toJSONString(request));
+            log.info("多条件查找数据开始{}", JSONObject.toJSONString(request, SerializerFeature.IgnoreNonFieldGetter));
             SearchResponse response = client.search(request);
-            log.info("多条件查找数据成功{}", JSON.toJSONString(response));
+            log.info("多条件查找数据成功{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
             return response;
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -342,7 +342,7 @@ public class OtsUtils {
             UpdateRowRequest request = new UpdateRowRequest(rowUpdateChange);
             log.info("更新数据开始{}", request.getRowChange().getColumnsToUpdate());
             UpdateRowResponse response = client.updateRow(request);
-            log.info("更新数据成功{}", JSON.toJSONString(response));
+            log.info("更新数据成功{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("更新数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());

@@ -4,13 +4,11 @@ import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
@@ -18,10 +16,10 @@ import java.time.LocalDateTime;
 @Component
 public class StartedUpRunner implements ApplicationRunner {
 
-    @Autowired
+    @Resource
     private ConfigurableApplicationContext context;
 
-    @Value("${spring.application.name:-picture}")
+    @Value("${spring.application.name:-photoalbum}")
     private String applicationName;
 
     @Resource
