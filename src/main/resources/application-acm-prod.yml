@@ -1,0 +1,11 @@
+spring:
+  application:
+    group: com.alibaba.cloud.acm
+alibaba:
+  acm:
+    file-extension: yml
+    endpoint: acm.aliyun.com
+    namespace: addr-bj-internal.edas.aliyun.com
+    accessKey: CJhmaRVqu9Pmh1Ry
+    secretKey: vpYcHvbYz1V0arxRkTBp2iHsVXOboT
+    group: photoalbum

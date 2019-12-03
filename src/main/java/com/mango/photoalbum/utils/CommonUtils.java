@@ -85,6 +85,6 @@ public class CommonUtils {
                 ip = ip.substring(0, ip.indexOf(","));
             }
         }
-        return ip;
+        return ip.equals("0:0:0:0:0:0:0:1") ? "127.0.0.1" : ip;
     }
 }
