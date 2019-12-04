@@ -71,6 +71,15 @@ public class UploadFileServiceImpl implements UploadFileService {
             //ots保存文件信息
             ots.creatRow(uploadFile);
             log.info("文件保存成功:{}", uploadFile.toString());
+            //如果是封面修改相册封面
+            if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
+                setCover(UploadFile.builder()
+                        .fileId(uploadFileCo.getFileId())
+                        .albumId(uploadFileCo.getAlbumId())
+                        .modifyUserId(uploadFileCo.getUserId())
+                        .IsCover(IsCoverEnum.TRUE.getValue())
+                        .build());
+            }
             return uploadFile;
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,17 +101,8 @@ public class UploadFileServiceImpl implements UploadFileService {
                     uploadFileCo.setUserId(uploadFileMultiCo.getUserId());
                 }
                 result.add(save(uploadFileCo));
-                //如果是封面修改相册封面
-                if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
-                    setCover(UploadFile.builder()
-                            .fileId(uploadFileCo.getFileId())
-                            .albumId(uploadFileCo.getAlbumId())
-                            .modifyUserId(uploadFileCo.getUserId())
-                            .IsCover(IsCoverEnum.TRUE.getValue())
-                            .build());
-                }
             }
-            //复活没有封面修改封面
+            //如果没有封面修改封面
             PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
                     .albumId(uploadFileMultiCo.getAlbumId())
                     .build());
