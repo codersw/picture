@@ -107,7 +107,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         query.setOffset(offset);
         query.setLimit(pageSize);
         query.setGetTotalCount(false);// 设置返回总条数
-        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.DESC))));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(PhotoAlbum.class))
                 .indexName(ots.getTableName(PhotoAlbum.class))

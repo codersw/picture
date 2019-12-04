@@ -200,7 +200,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         BoolQuery boolQuery = new BoolQuery();
         boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
         query.setQuery(boolQuery);
-        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.DESC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
         Integer pageSize = uploadFileListCo.getPageSize();
         if(pageSize == 0) {
             query.setLimit(uploadFileListCo.getTotal());
