@@ -74,9 +74,9 @@ public class UploadFileServiceImpl implements UploadFileService {
             //如果是封面修改相册封面
             if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
                 setCover(UploadFile.builder()
-                        .fileId(uploadFileCo.getFileId())
-                        .albumId(uploadFileCo.getAlbumId())
-                        .modifyUserId(uploadFileCo.getUserId())
+                        .fileId(uploadFile.getFileId())
+                        .albumId(uploadFile.getAlbumId())
+                        .modifyUserId(uploadFile.getCreateUserId())
                         .IsCover(IsCoverEnum.TRUE.getValue())
                         .build());
             }
