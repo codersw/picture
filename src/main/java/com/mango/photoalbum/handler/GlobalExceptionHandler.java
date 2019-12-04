@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
             log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
         }
         Result result = new Result();
-        result.setCode(ResultCodeEnum.UNAUTHORIZED);
+        result.setCode(ResultCodeEnum.UNAUTHORIZED.getValue());
         result.setMessage(e.getMessage());
         return result;
     }

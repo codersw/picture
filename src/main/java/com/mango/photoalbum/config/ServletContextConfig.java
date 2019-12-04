@@ -9,7 +9,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import javax.annotation.Resource;
 
 /**
- * 拦截器配置
+ * 静态资源配置
+ * @author swen
  */
 @Configuration
 public class ServletContextConfig extends WebMvcConfigurationSupport {

@@ -12,6 +12,10 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * 拦截器配置
+ * @author swen
+ */
 @Slf4j
 @Component
 public class AuthorizationInterceptor implements HandlerInterceptor {

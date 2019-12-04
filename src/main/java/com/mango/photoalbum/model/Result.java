@@ -1,9 +1,15 @@
 package com.mango.photoalbum.model;
 
-import com.alibaba.fastjson.JSON;
-import com.mango.photoalbum.enums.ResultCodeEnum;
+
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
@@ -11,13 +17,17 @@ import java.io.Serializable;
  * @Author swen
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@ApiModel
 public class Result<T> implements Serializable {
     
     /**
      *  状态枚举
      **/
     @ApiModelProperty(value = "状态")
-    private ResultCodeEnum code;
+    private Integer code;
 
     /**
      *  消息
@@ -37,15 +47,7 @@ public class Result<T> implements Serializable {
      */
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
-    }
-
-    /**
-     * 覆盖状态码返回值
-     * @return
-     */
-    public Integer getCode() {
-        return code.getValue();
+        return JSONObject.toJSONString(this, SerializerFeature.IgnoreNonFieldGetter);
     }
 
 }

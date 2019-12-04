@@ -11,7 +11,7 @@ import java.io.IOException;
  * file工具类
  * @Author swen
  */
-public class FileUtils extends org.apache.commons.io.FileUtils{
+public class FileUtils extends org.apache.commons.io.FileUtils {
 
     /**
      * 文件上传

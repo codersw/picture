@@ -10,18 +10,13 @@ import com.mango.photoalbum.enums.ResultCodeEnum;
 public class ResultGenerator {
 
     /**
-     * 返回成功
-     **/
-    private static final String DEFAULT_SUCCESS_MESSAGE = "SUCCESS";
-
-    /**
      * 成功不返回参数
      * @return
      */
     public static Result genSuccessResult() {
         Result result = new Result();
-        result.setCode(ResultCodeEnum.SUCCESS);
-        result.setMessage(DEFAULT_SUCCESS_MESSAGE);
+        result.setCode(ResultCodeEnum.SUCCESS.getValue());
+        result.setMessage(ResultCodeEnum.SUCCESS.getName());
         return result;
     }
 
@@ -33,8 +28,8 @@ public class ResultGenerator {
      */
     public static<T> Result<T> genSuccessResult(T data) {
         Result<T> result = new Result<T>();
-        result.setCode(ResultCodeEnum.SUCCESS);
-        result.setMessage(DEFAULT_SUCCESS_MESSAGE);
+        result.setCode(ResultCodeEnum.SUCCESS.getValue());
+        result.setMessage(ResultCodeEnum.SUCCESS.getName());
         result.setData(data);
         return result;
     }
@@ -45,7 +40,7 @@ public class ResultGenerator {
      */
     public static Result genFailResult() {
         Result result = new Result();
-        result.setCode(ResultCodeEnum.FAIL);
+        result.setCode(ResultCodeEnum.FAIL.getValue());
         result.setMessage(ResultCodeEnum.FAIL.getName());
         return result;
     }
@@ -57,7 +52,7 @@ public class ResultGenerator {
      */
     public static Result<?> genFailResult(String message) {
         Result<?> result = new Result<>();
-        result.setCode(ResultCodeEnum.FAIL);
+        result.setCode(ResultCodeEnum.FAIL.getValue());
         result.setMessage(message);
         return result;
     }

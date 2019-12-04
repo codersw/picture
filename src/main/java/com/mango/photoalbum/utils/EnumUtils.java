@@ -22,17 +22,16 @@ public class EnumUtils {
      * @param clazz
      * @return Map的结构， name：名字， value：值
      */
-    public static <T> List<Map> enumMap(Class <T> clazz){
+    public static <T> List<Map<String, String>> enumMap(Class <T> clazz) throws Exception {
         if ( clazz == null || !clazz.isEnum()) {
             throw new InvalidParameterException("非 Enum 操作");
         }
-        List<Map> valueNameList = new ArrayList();
+        List<Map<String, String>> valueNameList = new ArrayList<>();
         try {
             T[] enumConstants = clazz.getEnumConstants();
             Method methodGetName = clazz.getDeclaredMethod("getName");
             Method methodGetValue = clazz.getDeclaredMethod("getValue");
-
-            for(Object obj : enumConstants) {
+            for(T obj : enumConstants) {
                 HashMap<String, String> enumMap = new HashMap<>();
                 enumMap.put("name", (String) methodGetName.invoke(obj));
                 enumMap.put("value", (String) methodGetValue.invoke(obj));
@@ -41,9 +40,8 @@ public class EnumUtils {
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("Enum 解析出错");
-        } finally {
-            return valueNameList;
         }
+        return valueNameList;
     }
 
     /**
@@ -51,18 +49,18 @@ public class EnumUtils {
      * @param clazz
      * @return Map的结构， name：名字， value：值
      */
-    public static <T> List<Map> enumMap(Class <T> clazz,String location){
+    public static <T> List<Map<String, String>> enumMap(Class <T> clazz, String location) throws Exception {
         if ( clazz == null || !clazz.isEnum()) {
             throw new InvalidParameterException("非 Enum 操作");
         }
-        List<Map> valueNameList = new ArrayList();
+        List<Map<String, String>> valueNameList = new ArrayList<>();
         try {
             T[] enumConstants = clazz.getEnumConstants();
             Method methodGetName = clazz.getDeclaredMethod("getName");
             Method methodGetValue = clazz.getDeclaredMethod("getValue");
             Method methodGetLocation = clazz.getDeclaredMethod("getLocation");
             Method methodGetIsReturn = clazz.getDeclaredMethod("getIsReturn");
-            for(Object obj : enumConstants) {
+            for(T obj : enumConstants) {
                 if(StringUtils.isNotBlank(location)){
                     //状态所属位置
                     String enumLocation = (String) methodGetLocation.invoke(obj);
@@ -84,9 +82,8 @@ public class EnumUtils {
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("Enum 解析出错");
-        } finally {
-            return valueNameList;
         }
+        return valueNameList;
     }
 
     /**
@@ -94,14 +91,14 @@ public class EnumUtils {
      * @param enumStr Enum 类的值
      * @return Map的结构， name：名字， value：值
      */
-    public static List<Map> enumMap(String enumStr){
-        Object clazz = null;
+    public static List<? extends Map<? extends String, ? extends String>> enumMap(String enumStr) throws Exception {
+        Class<?> clazz = null;
         try {
             clazz = Class.forName(enumStr);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return enumMap((Class) clazz);
+        return enumMap(clazz);
     }
 
 

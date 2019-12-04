@@ -14,6 +14,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * aop切点记录请求与响应日志
+ * @author swen
+ */
 @Aspect
 @Component
 @Slf4j
