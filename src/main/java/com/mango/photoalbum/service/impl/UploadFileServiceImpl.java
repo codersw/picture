@@ -91,6 +91,14 @@ public class UploadFileServiceImpl implements UploadFileService {
                 if (uploadFileCo.getUserId() == null) {
                     uploadFileCo.setUserId(uploadFileMultiCo.getUserId());
                 }
+                if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
+                    setCover(UploadFile.builder()
+                            .fileId(uploadFileCo.getFileId())
+                            .albumId(uploadFileCo.getAlbumId())
+                            .modifyUserId(uploadFileCo.getUserId())
+                            .IsCover(IsCoverEnum.TRUE.getValue())
+                            .build());
+                }
                 result.add(save(uploadFileCo));
             }
             PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
