@@ -1,6 +1,9 @@
 package com.mango.photoalbum.utils;
 
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -41,6 +44,15 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
     }
 
     /**
+     * 转图片对象
+     * @param file
+     * @return
+     */
+    public static BufferedImage toImage(MultipartFile file) throws IOException {
+        return ImageIO.read(file.getInputStream());
+    }
+
+    /**
      * 创建目录
      * @param filePath
      */
@@ -68,8 +80,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
      * @param fileName 文件名
      * @return 文件的contentType
      */
-    public static String getContentType(String fileName)
-    {
+    public static String getContentType(String fileName) {
         String fileExtension = fileName.substring(fileName.lastIndexOf("."));
         if (".bmp".equalsIgnoreCase(fileExtension))
             return "image/bmp";
@@ -95,5 +106,4 @@ public class FileUtils extends org.apache.commons.io.FileUtils{
             return "text/xml";
         return "text/html";
     }
-
 }

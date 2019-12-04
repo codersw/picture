@@ -1,5 +1,6 @@
 package com.mango.photoalbum;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alicloud.openservices.tablestore.model.search.*;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.PhotoAlbum;
@@ -95,5 +96,11 @@ public class PhotoalbumApplicationTests {
         log.info(searchResponse.toString());
     }
 
-
+    @Test
+    public void retrieveRow() {
+        PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+                .albumId("798c67eff8f94441ba64f822c965066b")
+                .build());
+        log.info(JSONObject.toJSONString(photoAlbum));
+    }
 }

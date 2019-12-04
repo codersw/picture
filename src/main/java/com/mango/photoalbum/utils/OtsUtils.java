@@ -444,7 +444,7 @@ public class OtsUtils {
                 String name = field.getName(); // 获取属性的名字
                 String type = field.getGenericType().toString(); // 获取属性的类型
                 Object value = field.get(t);//获取属性值
-                if(value != null) {
+                if(!CommonUtils.isNullOrEmpty(value)) {
                     if(annotation.annotationType() == OTSPrimaryKey.class){
                         OTSPrimaryKey pk = field.getAnnotation(OTSPrimaryKey.class);
                         if(!StringUtils.isBlank(pk.name())){

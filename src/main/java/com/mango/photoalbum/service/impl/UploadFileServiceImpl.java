@@ -20,10 +20,11 @@ import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.*;
 
 @Service
@@ -38,12 +39,8 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public UploadFile save(UploadFileCo uploadFileCo) {
-        String fileType = FileUtils.getFileType(uploadFileCo.getFile().getOriginalFilename());
         UploadFile uploadFile = UploadFile.builder()
                 .fileId(uploadFileCo.getFileId())
-                .fileName(uploadFileCo.getFile().getOriginalFilename())
-                .fileSize((int) uploadFileCo.getFile().getSize())
-                .fileType(fileType)
                 .createTime(new Date())
                 .modifyTime(new Date())
                 .albumId(uploadFileCo.getAlbumId())
@@ -53,22 +50,32 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .isDel(IsDelEnum.FALSE.getValue())
                 .IsCover(uploadFileCo.getIsCover())
                 .build();
-        if(StringUtils.isBlank(uploadFileCo.getFileId())) {
-            uploadFile.setFileId(CommonUtils.UUID());
-        }
-        String ossFileName = uploadFile.getFileId() + fileType;
         try {
+            MultipartFile file = uploadFileCo.getFile();
+            String fileName = file.getOriginalFilename();
+            String fileType = FileUtils.getFileType(fileName);
+            uploadFile.setFileType(fileType);
+            uploadFile.setFileSize((int)file.getSize());
+            uploadFile.setFileName(fileName);
+            BufferedImage img = FileUtils.toImage(file);
+            uploadFile.setHeight(img.getHeight());
+            uploadFile.setWidth(img.getWidth());
+            if(StringUtils.isBlank(uploadFileCo.getFileId())) {
+                uploadFile.setFileId(CommonUtils.UUID());
+            }
+            String ossFileName = uploadFile.getFileId() + fileType;
             //oss上传图片
             oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
             //oss文件路径获取
             uploadFile.setFilePath(oss.getViewUrl(ossFileName));
             //ots保存文件信息
             ots.creatRow(uploadFile);
+            log.info("文件保存成功:{}", uploadFile.toString());
+            return uploadFile;
         } catch (Exception e) {
             e.printStackTrace();
             log.error("文件保存失败:{}", e.getMessage());
         }
-        log.info("文件保存成功:{}", uploadFile.toString());
         return uploadFile;
     }
 
@@ -76,7 +83,7 @@ public class UploadFileServiceImpl implements UploadFileService {
     public List<UploadFile> save(UploadFileMultiCo uploadFileMultiCo) {
         List<UploadFile> result = new ArrayList<>();
         List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
-        if(uploadFileCos.size() > 0) {
+        if(uploadFileCos != null && uploadFileCos.size() > 0) {
             for(UploadFileCo uploadFileCo : uploadFileCos) {
                 if (StringUtils.isEmpty(uploadFileCo.getAlbumId())) {
                     uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());

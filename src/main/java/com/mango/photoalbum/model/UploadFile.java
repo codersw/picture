@@ -100,8 +100,21 @@ public class UploadFile {
     private Integer isDel;
 
     /**
+     * 宽
+     */
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
+    private Integer width;
+
+    /**
+     * 高
+     */
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
+    private Integer height;
+
+    /**
      * 是否是封面
      */
     @JsonIgnore
     private Integer IsCover;
+
 }
