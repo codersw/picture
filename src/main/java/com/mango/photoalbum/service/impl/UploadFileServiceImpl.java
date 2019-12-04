@@ -91,6 +91,8 @@ public class UploadFileServiceImpl implements UploadFileService {
                 if (uploadFileCo.getUserId() == null) {
                     uploadFileCo.setUserId(uploadFileMultiCo.getUserId());
                 }
+                result.add(save(uploadFileCo));
+                //如果是封面修改相册封面
                 if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
                     setCover(UploadFile.builder()
                             .fileId(uploadFileCo.getFileId())
@@ -99,13 +101,12 @@ public class UploadFileServiceImpl implements UploadFileService {
                             .IsCover(IsCoverEnum.TRUE.getValue())
                             .build());
                 }
-                result.add(save(uploadFileCo));
             }
+            //复活没有封面修改封面
             PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
                     .albumId(uploadFileMultiCo.getAlbumId())
                     .build());
             if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
-                //如果是封面修改相册封面
                 setCover(UploadFile.builder()
                     .fileId(result.get(0).getFileId())
                     .albumId(result.get(0).getAlbumId())
@@ -137,15 +138,13 @@ public class UploadFileServiceImpl implements UploadFileService {
      * @param uploadFile
      */
     private void setCover(UploadFile uploadFile) {
-        if(uploadFile.getIsCover().equals(IsCoverEnum.TRUE.getValue()) && !StringUtils.isBlank(uploadFile.getAlbumId())){
-            ots.updataRow(PhotoAlbum.builder()
-                    .modifyUserId(uploadFile.getModifyUserId())
-                    .modifyTime(new Date())
-                    .albumId(uploadFile.getAlbumId())
-                    .cover(uploadFile.getFileId())
-                    .build());
-            log.info("修改相册封面成功:{}", uploadFile.toString());
-        }
+        ots.updataRow(PhotoAlbum.builder()
+                .modifyUserId(uploadFile.getModifyUserId())
+                .modifyTime(new Date())
+                .albumId(uploadFile.getAlbumId())
+                .cover(uploadFile.getFileId())
+                .build());
+        log.info("修改相册封面成功:{}", uploadFile.toString());
     }
 
     @Override

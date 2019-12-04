@@ -25,5 +25,5 @@ public class UploadFileCo {
     private MultipartFile file;
 
     @ApiModelProperty(value = "是否为封面 0：否 1：是")
-    private Integer isCover = 0;
+    private Integer isCover;
 }
