@@ -93,6 +93,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         List<UploadFile> result = new ArrayList<>();
         List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
         if(uploadFileCos != null && uploadFileCos.size() > 0) {
+            Integer isCover = IsCoverEnum.FALSE.getValue();
             for(UploadFileCo uploadFileCo : uploadFileCos) {
                 if (StringUtils.isEmpty(uploadFileCo.getAlbumId())) {
                     uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
@@ -100,19 +101,24 @@ public class UploadFileServiceImpl implements UploadFileService {
                 if (uploadFileCo.getUserId() == null) {
                     uploadFileCo.setUserId(uploadFileMultiCo.getUserId());
                 }
+                if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
+                    isCover = IsCoverEnum.TRUE.getValue();
+                }
                 result.add(save(uploadFileCo));
             }
             //如果没有封面修改封面
-            PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
-                    .albumId(uploadFileMultiCo.getAlbumId())
-                    .build());
-            if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
-                setCover(UploadFile.builder()
-                    .fileId(result.get(0).getFileId())
-                    .albumId(result.get(0).getAlbumId())
-                    .modifyUserId(result.get(0).getCreateUserId())
-                    .IsCover(IsCoverEnum.TRUE.getValue())
-                    .build());
+            if(isCover.equals(IsCoverEnum.FALSE.getValue())) {
+                PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+                        .albumId(uploadFileMultiCo.getAlbumId())
+                        .build());
+                if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
+                    setCover(UploadFile.builder()
+                            .fileId(result.get(0).getFileId())
+                            .albumId(result.get(0).getAlbumId())
+                            .modifyUserId(result.get(0).getCreateUserId())
+                            .IsCover(IsCoverEnum.TRUE.getValue())
+                            .build());
+                }
             }
         }
         return result;
