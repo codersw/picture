@@ -4,7 +4,7 @@ spring:
 alibaba:
   acm:
     file-extension: yml
-    endpoint: acm.aliyun.com
+    endpoint: addr-bj-internal.edas.aliyun.com
     namespace: 8e3489ae-7639-4c9c-9447-50e63b48d89e
     accessKey: CJhmaRVqu9Pmh1Ry
     secretKey: vpYcHvbYz1V0arxRkTBp2iHsVXOboT
