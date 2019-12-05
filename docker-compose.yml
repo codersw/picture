@@ -8,4 +8,6 @@ services:
       dockerfile: Dockerfile
       args:
         JAR_FILE: /target/photoalbum.jar
+    ports:
+      - "8080:8080"
     restart: always
