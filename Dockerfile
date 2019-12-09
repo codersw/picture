@@ -7,6 +7,7 @@ ARG JAR_FILE
 ADD ${JAR_FILE} app.jar
 RUN bash -c 'touch app.jar'
 ENV JAVA_OPTS ""
+LABEL "cn.517.container.name"="photoalbum"
 # 声明需要暴露的端口
 EXPOSE 8080
 # 配置容器启动后执行的命令

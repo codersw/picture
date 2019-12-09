@@ -16,7 +16,7 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>${LOG_PATTERN}</pattern>
-            <pattern>${LOG_COLOR}</pattern>
+            <!-- <pattern>${LOG_COLOR}</pattern>-->
         </encoder>
     </appender>
 
