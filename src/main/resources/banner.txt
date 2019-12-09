@@ -1,4 +1,4 @@
-${AnsiColor.BRIGHT_GREEN}
+
    mmmmmmm    mmmmmmm     aaaaaaaaaaaaa  nnnn  nnnnnnnn       ggggggggg   ggggg   ooooooooooo
  mm:::::::m  m:::::::mm   a::::::::::::a n:::nn::::::::nn    g:::::::::ggg::::g oo:::::::::::oo
 m::::::::::mm::::::::::m  aaaaaaaaa:::::an::::::::::::::nn  g:::::::::::::::::go:::::::::::::::o

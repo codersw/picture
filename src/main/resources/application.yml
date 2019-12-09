@@ -1,5 +1,8 @@
 spring:
   profiles:
-    active: acm-prod
+    active: acm-dev
+  output:
+    ansi:
+      enabled: always
   application:
     name: photoalbum
