@@ -26,6 +26,7 @@ alibaba:
     endpoint: oss-cn-beijing.aliyuncs.com
     bucketName: attach-mango
     httpPrefix: https://
+    cdnHost: photoalbum.517cdn.com
   ots:
     accessKeyId: LTAI4Fd66vvuVj31seQ2YbQQ
     accessKeySecret: AgUkSMWtlICI7lY2oBFM0aD94ZlqYt
