@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: acm-dev
+    active: acm-prod
   output:
     ansi:
       enabled: always

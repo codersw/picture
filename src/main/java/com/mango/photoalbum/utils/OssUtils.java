@@ -35,6 +35,12 @@ public class OssUtils {
     @Value("${alibaba.oss.httpPrefix}")
     private String httpPrefix;
 
+    @Value("${alibaba.oss.cdnHost}")
+    private String cdnHost;
+
+    @Value("${spring.profiles.active}")
+    private String active;
+
     private OSS oss;
 
     /**
@@ -119,6 +125,10 @@ public class OssUtils {
      * @return
      */
     public String getViewUrl(String path) {
+        //生产环境使用cdn
+        if(active.contains("prod")) {
+            return httpPrefix + cdnHost + "/" + path;
+        }
         return httpPrefix + bucketName + "." + endpoint + "/" + path;
     }
 
