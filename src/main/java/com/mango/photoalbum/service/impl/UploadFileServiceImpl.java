@@ -119,13 +119,13 @@ public class UploadFileServiceImpl implements UploadFileService {
                             .IsCover(IsCoverEnum.TRUE.getValue())
                             .build());
                 }
-            } else {
-                ots.updataRow(PhotoAlbum.builder()
-                        .albumId(uploadFileMultiCo.getAlbumId())
-                        .modifyTime(new Date())
-                        .modifyUserId(uploadFileMultiCo.getUserId())
-                        .build());
             }
+            //更新最后上传时间
+            ots.updataRow(PhotoAlbum.builder()
+                    .albumId(uploadFileMultiCo.getAlbumId())
+                    .modifyTime(new Date())
+                    .modifyUserId(uploadFileMultiCo.getUserId())
+                    .build());
         }
         return result;
     }
