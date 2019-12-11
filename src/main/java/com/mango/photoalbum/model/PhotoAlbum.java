@@ -63,14 +63,14 @@ public class PhotoAlbum {
     /**
      * 上传日期
      */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;
 
     /**
      * 修改时间
      */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date modifyTime;
 

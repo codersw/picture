@@ -30,7 +30,9 @@ public class StartedUpRunner implements ApplicationRunner {
         if (context.isActive()) {
             ots.creatTable(PhotoAlbum.class);
             ots.creatTable(UploadFile.class);
+            ots.deleteSearchIndex(PhotoAlbum.class);
             ots.createSearchIndex(PhotoAlbum.class);
+            ots.deleteSearchIndex(UploadFile.class);
             ots.createSearchIndex(UploadFile.class);
             log.info("  _   _   _   _   _   _   _   _");
             log.info(" / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\");

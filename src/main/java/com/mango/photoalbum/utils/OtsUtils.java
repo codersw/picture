@@ -202,23 +202,24 @@ public class OtsUtils {
 
     /**
      * 删除联合索引
-     * @param tableName
-     * @param searchIndexName
+     * @param c
      */
-    public void deleteSearchIndex(String tableName, String searchIndexName) {
+    public void deleteSearchIndex(Class<?> c) {
         try {
-            log.info("删除联合索引开始:表{}索引{}", tableName, searchIndexName);
+            if(!getTableIndex(c)) return;
+            String tableName = getTableName(c);
             DeleteSearchIndexRequest request = new DeleteSearchIndexRequest();
             request.setTableName(tableName);
-            request.setIndexName(searchIndexName);
-            client.deleteSearchIndex(request);
-            log.info("删除联合成功:表{}索引{}", tableName, searchIndexName);
+            request.setIndexName(tableName);
+            log.info("删除多元索引开始:{}", JSONObject.toJSONString(request, SerializerFeature.IgnoreNonFieldGetter));
+            DeleteSearchIndexResponse response = client.deleteSearchIndex(request);
+            log.info("删除多元索引成功:{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
-            log.info("删除联合失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            log.info("删除多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("删除联合失败!请求失败详情：{}",e.getMessage());
+            log.error("删除多元索引!请求失败详情：{}",e.getMessage());
         }
     }
 

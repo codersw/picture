@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
         if (log.isErrorEnabled()) {
             log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
         }
-        return ResultGenerator.genFailResult(DEFAULT_MESSAGE);
+        return ResultGenerator.genFailResult(e.getMessage());
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)

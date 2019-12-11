@@ -34,6 +34,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Override
     public PhotoAlbum save(PhotoAlbumCo photoAlbumCo) {
+        //checkTitle(photoAlbumCo.getTitle());
         PhotoAlbum photoAlbum = PhotoAlbum.builder()
                 .albumId(photoAlbumCo.getAlbumId())
                 .shootTime(photoAlbumCo.getShootTime())
@@ -107,7 +108,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         query.setOffset(offset);
         query.setLimit(pageSize);
         query.setGetTotalCount(false);// 设置返回总条数
-        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.DESC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("modifyTime", SortOrder.DESC))));//排序
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(PhotoAlbum.class))
                 .indexName(ots.getTableName(PhotoAlbum.class))
@@ -146,7 +147,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
      */
     private BoolQuery formatQuery(PhotoAlbumListCo photoAlbumListCo) {
         BoolQuery boolQuery = new BoolQuery();
-        TermQuery termQuery = new TermQuery(); // 设置查询类型为RangeQuery
+        TermQuery termQuery = new TermQuery(); // 设置查询类型为精确查找
         termQuery.setFieldName("isDel");  // 设置针对哪个字段
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         boolQuery.setMustQueries(Collections.singletonList(termQuery));
@@ -176,5 +177,38 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
             boolQuery.setMinimumShouldMatch(1);
         }
         return boolQuery;
+    }
+
+    /**
+     * 校验标题是否被使用过
+     * @param title
+     * @return
+     */
+    private void checkTitle(String title) {
+        SearchQuery query = new SearchQuery();
+        //条件1
+        TermQuery termQuery = new TermQuery(); // 设置查询类型为精确查找
+        termQuery.setFieldName("isDel");  // 设置针对哪个字段
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        //条件2
+        TermQuery termQuery1 = new TermQuery(); // 设置查询类型为精确查找
+        termQuery1.setFieldName("title");  // 设置针对哪个字段
+        termQuery1.setTerm(ColumnValue.fromString(title));
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(Arrays.asList(termQuery,termQuery1));
+        query.setQuery(boolQuery);
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(PhotoAlbum.class))
+                .indexName(ots.getTableName(PhotoAlbum.class))
+                .searchQuery(query)
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse != null) {
+            if(searchResponse.getTotalCount() != 0) {
+                throw new RuntimeException("标题已经被使用过了");
+            }
+        }
     }
 }
