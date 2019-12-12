@@ -25,19 +25,19 @@ public class MnsUtils {
     @Value("${alibaba.mns.endpoint}")
     private String endpoint;
 
-    private MNSClient client;
+    private MNSClient mns;
 
     //@PostConstruct
     private void init() {
         try {
             CloudAccount account = new CloudAccount(accessKeyId, accessKeySecret, endpoint);
-            client = account.getMNSClient();
+            mns = account.getMNSClient();
             ThreadPoolHelper pool = new ThreadPoolHelper();
             pool.Executor(this::ThreadWork);
         } catch (Exception e){
             e.printStackTrace();
-            client = null;
-            log.error("创建mns client失败:{}", e.getMessage());
+            mns = null;
+            log.error("初始化mns出错:{}", e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public class MnsUtils {
         while (true) {
             log.info("MNS消息服务开始消费");
             try{
-                CloudQueue queue = client.getQueueRef(QueueConstant.FACEQUEUE);
+                CloudQueue queue = mns.getQueueRef(QueueConstant.FACEQUEUE);
                 Message popMsg = queue.popMessage();
                 if (popMsg != null) {
                     // 默认会做 base64 解码

@@ -3,7 +3,9 @@ package com.mango.photoalbum;
 import com.alibaba.fastjson.JSONObject;
 import com.alicloud.openservices.tablestore.model.search.*;
 import com.mango.photoalbum.enums.IsDelEnum;
+import com.mango.photoalbum.model.FaceInfo;
 import com.mango.photoalbum.model.PhotoAlbum;
+import com.mango.photoalbum.utils.FaceUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -20,6 +22,9 @@ public class PhotoalbumApplicationTests {
 
     @Autowired
     private OtsUtils ots;
+
+    @Autowired
+    private FaceUtils face;
 
     /**
      * 创建表格
@@ -102,5 +107,15 @@ public class PhotoalbumApplicationTests {
                 .albumId("798c67eff8f94441ba64f822c965066b")
                 .build());
         log.info(JSONObject.toJSONString(photoAlbum));
+    }
+
+    @Test
+    public void addFace() {
+        log.info(face.addFace(FaceInfo.builder()
+                .Group("default")
+                .Person("jackma")
+                .Image("1")
+                .ImageUrl("https://docs.alibabagroup.com/assets2/images/en/news/library_executives_jackma_large.jpg")
+                .build()));
     }
 }

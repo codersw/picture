@@ -46,7 +46,7 @@ public class OtsUtils {
     @Value("${alibaba.ots.instanceName}")
     private String instanceName ;
 
-    private SyncClient client;
+    private SyncClient ots;
 
     /**
      * 初始化OTS访问对象
@@ -54,9 +54,9 @@ public class OtsUtils {
     @PostConstruct
     private void init(){
         try {
-            client = new SyncClient(endpoint, accessKeyId, accessKeySecret, instanceName);
+            ots = new SyncClient(endpoint, accessKeyId, accessKeySecret, instanceName);
         } catch (Exception e){
-            client = null;
+            ots = null;
             e.printStackTrace();
             log.error("初始化ots出错:{}", e.getMessage());
         }
@@ -77,7 +77,7 @@ public class OtsUtils {
             CreateTableRequest request = new CreateTableRequest(toTable(c), tableOptions);
             log.info("创建表格开始:{}", JSONObject.toJSONString(request.getTableMeta(), SerializerFeature.IgnoreNonFieldGetter));
             //创建表格
-            CreateTableResponse response = client.createTable(request);
+            CreateTableResponse response = ots.createTable(request);
             log.info("创建表格成功:{}", response);
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -95,7 +95,7 @@ public class OtsUtils {
     public void deleteTable(Class<?> c) {
         DeleteTableRequest request = new DeleteTableRequest(getTableName(c));
         try {
-            client.deleteTable(request);
+            ots.deleteTable(request);
             log.info("删除表格成功:{}", request.getTableName());
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -116,7 +116,7 @@ public class OtsUtils {
             String tableName = getTableName(c);
             log.info("判断表格是否存在开始:{}", tableName);
             DescribeTableRequest request = new DescribeTableRequest(tableName);
-            DescribeTableResponse response = client.describeTable(request);
+            DescribeTableResponse response = ots.describeTable(request);
             TableMeta tableMeta = response.getTableMeta();
             if (tableMeta != null && tableMeta.getTableName() != null) {
                 log.info("判断表格是否存在成功:{}", tableName);
@@ -145,7 +145,7 @@ public class OtsUtils {
             IndexMeta indexMeta = new IndexMeta(indexName); // 要创建的索引表名称。
             indexMeta.addPrimaryKeyColumn(columnName); // 为索引表添加主键列。
             CreateIndexRequest request = new CreateIndexRequest(tableName, indexMeta, true);
-            client.createIndex(request);
+            ots.createIndex(request);
             log.info("创建索引成功:表{}索引{}列{}", tableName, indexName, columnName);
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -165,7 +165,7 @@ public class OtsUtils {
         try {
             log.info("删除索引开始:表{}索引{}", tableName, indexName);
             DeleteIndexRequest request = new DeleteIndexRequest(tableName, indexName); // 要删除的索引表及主表名
-            client.deleteIndex(request);
+            ots.deleteIndex(request);
             log.info("删除索引成功:表{}索引{}", tableName, indexName);
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -189,7 +189,7 @@ public class OtsUtils {
             request.setIndexName(tableName);
             request.setIndexSchema(toIndex(c));
             log.info("创建多元索引开始:{}", JSONObject.toJSONString(request, SerializerFeature.IgnoreNonFieldGetter));
-            CreateSearchIndexResponse response = client.createSearchIndex(request);
+            CreateSearchIndexResponse response = ots.createSearchIndex(request);
             log.info("创建多元索引成功:{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -212,7 +212,7 @@ public class OtsUtils {
             request.setTableName(tableName);
             request.setIndexName(tableName);
             log.info("删除多元索引开始:{}", JSONObject.toJSONString(request, SerializerFeature.IgnoreNonFieldGetter));
-            DeleteSearchIndexResponse response = client.deleteSearchIndex(request);
+            DeleteSearchIndexResponse response = ots.deleteSearchIndex(request);
             log.info("删除多元索引成功:{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -231,7 +231,7 @@ public class OtsUtils {
         try {
             PutRowRequest request = new PutRowRequest(toRow(t));
             log.info("添加数据开始:{}", request.getRowChange().getColumnsToPut());
-            PutRowResponse rowResponse = client.putRow(request);
+            PutRowResponse rowResponse = ots.putRow(request);
             log.info("添加数据成功:{}", JSON.toJSONString(rowResponse, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -256,7 +256,7 @@ public class OtsUtils {
             rowQueryCriteria.setMaxVersions(1);
             GetRowRequest rowRequest = new GetRowRequest(rowQueryCriteria);
             log.info("查找数据开始:{}", JSONObject.toJSONString(rowRequest.getRowQueryCriteria().getPrimaryKey()));
-            GetRowResponse getRowResponse = client.getRow(rowRequest);
+            GetRowResponse getRowResponse = ots.getRow(rowRequest);
             log.info("查找数据成功:{}", JSONObject.toJSONString(getRowResponse, SerializerFeature.IgnoreNonFieldGetter));
             Row responseRow = getRowResponse.getRow();
             if(responseRow != null){
@@ -291,7 +291,7 @@ public class OtsUtils {
             rangeRowQueryCriteria.setDirection(direction);
             //设置读取最新版本
             rangeRowQueryCriteria.setMaxVersions(1);
-            GetRangeResponse getRangeResponse = client.getRange(new GetRangeRequest(rangeRowQueryCriteria));
+            GetRangeResponse getRangeResponse = ots.getRange(new GetRangeRequest(rangeRowQueryCriteria));
             log.info("查找数据成功:{}", JSONObject.toJSONString(getRangeResponse, SerializerFeature.IgnoreNonFieldGetter));
             List<Row> rows = getRangeResponse.getRows();
             if(!rows.isEmpty()){
@@ -318,7 +318,7 @@ public class OtsUtils {
     public SearchResponse searchQuery(SearchRequest request){
         try {
             log.info("多条件查找数据开始{}", JSONObject.toJSONString(request, SerializerFeature.IgnoreNonFieldGetter));
-            SearchResponse response = client.search(request);
+            SearchResponse response = ots.search(request);
             log.info("多条件查找数据成功{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
             return response;
         } catch (TableStoreException e) {
@@ -342,7 +342,7 @@ public class OtsUtils {
             rowUpdateChange.put(row.getColumnsToPut());
             UpdateRowRequest request = new UpdateRowRequest(rowUpdateChange);
             log.info("更新数据开始{}", request.getRowChange().getColumnsToUpdate());
-            UpdateRowResponse response = client.updateRow(request);
+            UpdateRowResponse response = ots.updateRow(request);
             log.info("更新数据成功{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -361,7 +361,7 @@ public class OtsUtils {
         try {
             RowPutChange row = toRow(t);
             RowDeleteChange rowDeleteChange = new RowDeleteChange(row.getTableName(), row.getPrimaryKey());
-            client.deleteRow(new DeleteRowRequest(rowDeleteChange));
+            ots.deleteRow(new DeleteRowRequest(rowDeleteChange));
             log.info("删除数据成功{}", row.getTableName());
         } catch (TableStoreException e) {
             e.printStackTrace();
@@ -603,7 +603,6 @@ public class OtsUtils {
             field.setAccessible(true);
             String name = field.getName(); // 获取属性的名字
             String type = field.getGenericType().toString(); // 获取属性的类型
-            field.setAccessible(true);
             Annotation[] annotations = field.getAnnotations();// 获取自定义注解
             for(Annotation annotation : annotations) {
                 if(annotation.annotationType() ==  OTSPrimaryKey.class) {
