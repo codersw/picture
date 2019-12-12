@@ -1,10 +1,7 @@
 package com.mango.photoalbum.Interceptor;
 
-import com.mango.photoalbum.constant.TokenConstant;
-import com.mango.photoalbum.exception.UnauthorizedException;
-import com.mango.photoalbum.utils.CookieUtil;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;

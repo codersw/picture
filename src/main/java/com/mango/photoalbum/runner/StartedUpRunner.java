@@ -28,12 +28,12 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            ots.creatTable(PhotoAlbum.class);
-            ots.creatTable(UploadFile.class);
-            ots.deleteSearchIndex(PhotoAlbum.class);
-            ots.createSearchIndex(PhotoAlbum.class);
-            ots.deleteSearchIndex(UploadFile.class);
-            ots.createSearchIndex(UploadFile.class);
+//            ots.creatTable(PhotoAlbum.class);
+//            ots.creatTable(UploadFile.class);
+//            ots.deleteSearchIndex(PhotoAlbum.class);
+//            ots.createSearchIndex(PhotoAlbum.class);
+//            ots.deleteSearchIndex(UploadFile.class);
+//            ots.createSearchIndex(UploadFile.class);
             log.info("  _   _   _   _   _   _   _   _");
             log.info(" / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\");
             log.info("( c | o | m | p | l | e | t | e )");

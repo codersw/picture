@@ -1,5 +1,7 @@
 package com.mango.photoalbum.controller;
 
+import com.mango.photoalbum.annotation.ApiVersion;
+import com.mango.photoalbum.constant.ApiVersionConstant;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import io.swagger.annotations.Api;
