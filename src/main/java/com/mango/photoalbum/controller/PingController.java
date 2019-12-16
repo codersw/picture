@@ -24,7 +24,12 @@ public class PingController {
     @Value("${project.version}")
     private String varsion;
 
-    @ApiOperation(value = "获取ip", notes = "获取ip")
+    /**
+     * 健康检测接口
+     * @param request
+     * @return
+     */
+    @ApiOperation(value = "健康检测接口", notes = "健康检测接口")
     @RequestMapping(method = { RequestMethod.GET, RequestMethod.HEAD})
     public Object ping(HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
