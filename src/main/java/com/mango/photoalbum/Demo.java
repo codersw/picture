@@ -10,7 +10,7 @@ import com.aliyuncs.profile.DefaultProfile;
 public class Demo {
 
     //DefaultProfile.getProfile的参数分别是地域，access_key_id, access_key_secret
-    private static DefaultProfile profile = DefaultProfile.getProfile("cn-shanghai", "LTAI4Fd66vvuVj31seQ2YbQQ", "AgUkSMWtlICI7lY2oBFM0aD94ZlqYt");
+    private static DefaultProfile profile = DefaultProfile.getProfile("cn-shanghai", "LTAIdgSZw4EFV1MB", "zC3BzQ8J8qZ9te0ykNMzHRKnujZbCe");
     private static DefaultAcsClient client = new DefaultAcsClient(profile);
 
     public static void main(String[] args) throws ClientException {

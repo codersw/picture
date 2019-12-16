@@ -166,6 +166,15 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .isDel(IsDelEnum.TRUE.getValue())
                 .modifyTime(new Date())
                 .build());
+        //TODO 因数据延迟插入可能会导致设置封面没有变化
+        List<UploadFile> uploadFiles = list(UploadFileListCo.builder()
+                .albumId(get(fileId).getAlbumId())
+                .pageIndex(1)
+                .pageSize(1)
+                .build());
+        if(!uploadFiles.isEmpty()) {
+            setCover(uploadFiles.get(0));
+        }
     }
 
     @Override

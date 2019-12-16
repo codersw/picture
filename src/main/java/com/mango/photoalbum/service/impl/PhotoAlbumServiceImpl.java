@@ -34,6 +34,10 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
 
     @Override
     public PhotoAlbum save(PhotoAlbumCo photoAlbumCo) {
+        //TODO 无法校验标题
+        // 原因：
+        // 1.ots的字段索引一旦启用分词等就没有办法精确匹配了。
+        // 2.ots数据插入延迟一旦连续插入数据没有办法校验。
         //checkTitle(photoAlbumCo.getTitle());
         PhotoAlbum photoAlbum = PhotoAlbum.builder()
                 .albumId(photoAlbumCo.getAlbumId())

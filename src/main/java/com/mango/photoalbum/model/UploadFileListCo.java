@@ -2,11 +2,18 @@ package com.mango.photoalbum.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.NotBlank;
 
 @Data
 @ApiModel("文件列表")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UploadFileListCo {
 
     @ApiModelProperty(value = "相册id", required = true)
