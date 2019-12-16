@@ -166,14 +166,26 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .isDel(IsDelEnum.TRUE.getValue())
                 .modifyTime(new Date())
                 .build());
-        //TODO 因数据延迟插入可能会导致设置封面没有变化
-        List<UploadFile> uploadFiles = list(UploadFileListCo.builder()
-                .albumId(get(fileId).getAlbumId())
-                .pageIndex(1)
-                .pageSize(1)
+        //因数据延迟插入可能会导致设置封面没有变化
+        // 所有手动判断下取不是要删除的封面以外的第一张
+        UploadFile uploadFile = get(fileId);
+        PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+                .albumId(uploadFile.getAlbumId())
                 .build());
-        if(!uploadFiles.isEmpty()) {
-            setCover(uploadFiles.get(0));
+        if(photoAlbum.getCover().equals(fileId)) {
+            List<UploadFile> uploadFiles = list(UploadFileListCo.builder()
+                    .albumId(photoAlbum.getAlbumId())
+                    .pageIndex(1)
+                    .pageSize(10)
+                    .build());
+            if(!uploadFiles.isEmpty()) {
+                for(UploadFile file : uploadFiles) {
+                    if(!file.getFileId().equals(fileId)) {
+                        setCover(file);
+                        break;
+                    }
+                }
+            }
         }
     }
 
