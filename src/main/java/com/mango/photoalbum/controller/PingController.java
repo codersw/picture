@@ -32,7 +32,7 @@ public class PingController {
         result.put("reqestIP", CommonUtils.getIpAddr(request));
         result.put("localHostName", OSUtils.localHostName());
         result.put("localIP", OSUtils.localIP());
-        result.put("cpuUsage", OSUtils.cpuUsage());
+        //result.put("cpuUsage", OSUtils.cpuUsage());
         result.put("memoryUsage", OSUtils.memoryUsage());
         result.putAll(OSUtils.cpuinfo());
         return result;
