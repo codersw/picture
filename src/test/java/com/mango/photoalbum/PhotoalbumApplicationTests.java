@@ -1,5 +1,6 @@
 package com.mango.photoalbum;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alicloud.openservices.tablestore.model.search.*;
 import com.mango.photoalbum.enums.IsDelEnum;
@@ -117,5 +118,15 @@ public class PhotoalbumApplicationTests {
                 .Image("1")
                 .ImageUrl("https://docs.alibabagroup.com/assets2/images/en/news/library_executives_jackma_large.jpg")
                 .build());
+    }
+
+    @Test
+    public void groupList() {
+        log.info(JSON.toJSONString(face.listGroup()));
+    }
+
+    @Test
+    public void recognizeFace() {
+        face.recognizeFace("https://attach-mango.oss-cn-beijing.aliyuncs.com/lADPDgQ9q8L6V9vNByDNBVg_1368_1824.jpg", "default");
     }
 }

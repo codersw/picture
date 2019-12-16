@@ -1,6 +1,7 @@
 package com.mango.photoalbum.utils;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
@@ -8,12 +9,14 @@ import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
+import com.mango.photoalbum.model.FaceGroup;
 import com.mango.photoalbum.model.FaceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
+import java.util.List;
 
 /**
  * face工具类
@@ -53,7 +56,7 @@ public class FaceUtils {
     @PostConstruct
     private void init() {
         try {
-            DefaultProfile profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
+            DefaultProfile profile = DefaultProfile.getProfile(regionId, "LTAIP1JGgPXqt5sq", "Cs8Vo6zoCT7YArfdf9JlQG2MFLGZiA");
             face = new DefaultAcsClient(profile);
         } catch (Exception e){
             e.printStackTrace();
@@ -127,7 +130,7 @@ public class FaceUtils {
     /**
      * 接口用于列举人脸组
      */
-    public void listGroup() {
+    public List<String> listGroup() {
         try {
             CommonRequest request = new CommonRequest();
             request.setMethod(MethodType.POST);
@@ -136,10 +139,13 @@ public class FaceUtils {
             request.setAction(ACTION_LIST_GROUP);
             CommonResponse response = face.getCommonResponse(request);
             log.info("列举人脸组成功:{}", response.getData());
+            JSONObject json = JSONObject.parseObject(response.getData());
+            return JSONObject.parseArray(json.getString("Data"), String.class);
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("列举人脸组发生错误:{}", e.getMessage());
         }
+        return null;
     }
 
     /**
