@@ -1,8 +1,18 @@
 spring:
   profiles:
     active: acm-dev
+  #控制台日志输出取消颜色
   output:
     ansi:
       enabled: always
   application:
     name: photoalbum
+    group: com.alibaba.cloud.acm
+#开启actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+project:
+  version: @project.version@

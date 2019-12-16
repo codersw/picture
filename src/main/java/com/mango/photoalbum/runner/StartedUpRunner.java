@@ -19,7 +19,7 @@ public class StartedUpRunner implements ApplicationRunner {
     @Resource
     private ConfigurableApplicationContext context;
 
-    @Value("${spring.application.name:-photoalbum}")
+    @Value("${spring.application.name:photoalbum}")
     private String applicationName;
 
     @Resource

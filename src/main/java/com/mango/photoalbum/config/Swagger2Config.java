@@ -1,15 +1,11 @@
 package com.mango.photoalbum.config;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
+
 import com.mango.photoalbum.annotation.ApiVersion;
 import com.mango.photoalbum.constant.ApiVersionConstant;
 import com.mango.photoalbum.utils.CommonUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.ClassUtils;
-import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;

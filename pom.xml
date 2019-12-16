@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mango</groupId>
     <artifactId>photoalbum</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.4</version>
     <name>photoalbum</name>
     <description>photoalbum project for Spring Boot</description>
 
@@ -142,11 +142,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
         </dependency>
+        <!-- actuator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <!-- 人脸识别 -->
+        <!-- 人脸识别/阿里云SDK -->
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>

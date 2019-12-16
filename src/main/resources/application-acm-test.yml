@@ -1,6 +1,3 @@
-spring:
-  application:
-    group: com.alibaba.cloud.acm
 alibaba:
   acm:
     file-extension: yml

@@ -34,7 +34,7 @@ public class CommonUtils {
      * @return true/false
      */
     public static boolean isNullOrEmpty(final Object str){
-        return str==null||"".equals(str.toString());
+        return str == null || "".equals(str.toString());
     }
 
     /**
