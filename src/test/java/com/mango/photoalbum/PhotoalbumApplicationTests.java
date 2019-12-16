@@ -111,11 +111,11 @@ public class PhotoalbumApplicationTests {
 
     @Test
     public void addFace() {
-        log.info(face.addFace(FaceInfo.builder()
+        face.addFace(FaceInfo.builder()
                 .Group("default")
                 .Person("jackma")
                 .Image("1")
                 .ImageUrl("https://docs.alibabagroup.com/assets2/images/en/news/library_executives_jackma_large.jpg")
-                .build()));
+                .build());
     }
 }
