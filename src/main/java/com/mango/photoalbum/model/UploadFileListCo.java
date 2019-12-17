@@ -33,8 +33,15 @@ public class UploadFileListCo {
     private Integer pageSize = 0;
 
     /**
+     * 用户id
+     */
+    @ApiModelProperty(value = "用户id")
+    private String userId;
+
+    /**
      * 总条数
      */
     @ApiModelProperty(hidden = true)
     private Integer total;
+
 }
