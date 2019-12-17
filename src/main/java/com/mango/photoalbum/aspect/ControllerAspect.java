@@ -2,7 +2,7 @@ package com.mango.photoalbum.aspect;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.mango.photoalbum.constant.MDCConstant;
+import com.mango.photoalbum.constant.MdcConstant;
 import com.mango.photoalbum.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -34,7 +34,7 @@ public class ControllerAspect {
     @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) {
         String requestId = CommonUtils.UUID();
-        MDC.put(MDCConstant.REQUEST_ID,requestId);
+        MDC.put(MdcConstant.REQUEST_ID,requestId);
         // 开始打印请求日志
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         assert attributes != null;
@@ -58,7 +58,7 @@ public class ControllerAspect {
      */
     @After("webLog()")
     public void doAfter() {
-        log.info("End RequestId : {}", MDC.get(MDCConstant.REQUEST_ID));
+        log.info("End RequestId : {}", MDC.get(MdcConstant.REQUEST_ID));
         // 每个请求之间空一行
         log.info("");
         MDC.clear();

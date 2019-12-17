@@ -8,10 +8,13 @@ import com.alicloud.openservices.tablestore.model.search.query.BoolQuery;
 import com.alicloud.openservices.tablestore.model.search.query.MatchPhraseQuery;
 import com.alicloud.openservices.tablestore.model.search.query.MatchQuery;
 import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
+import com.mango.photoalbum.constant.FaceConstant;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.FaceInfo;
 import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.model.UploadFile;
+import com.mango.photoalbum.model.UploadFileFace;
+import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.FaceUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +58,7 @@ public class PhotoalbumApplicationTests {
     @Test
     public void save() {
         PhotoAlbum photoAlbum = PhotoAlbum.builder()
+                .albumId(CommonUtils.UUID())
                 .cover("12313213")
                 .createTime(new Date())
                 .modifyTime(new Date())
@@ -66,6 +70,7 @@ public class PhotoalbumApplicationTests {
                 .modifyUserId(123444)
                 .build();
         ots.creatRow(photoAlbum);
+        log.info(JSONObject.toJSONString(photoAlbum));
     }
 
     /**
@@ -77,7 +82,7 @@ public class PhotoalbumApplicationTests {
                 .albumId("31fed80c0435448b983f1b28ea6f2d45")
                 .build();
         photoAlbum = ots.retrieveRow(photoAlbum);
-        log.info(photoAlbum.toString());
+        log.info(JSONObject.toJSONString(photoAlbum));
     }
 
     /**
@@ -88,6 +93,9 @@ public class PhotoalbumApplicationTests {
         ots.createIndex(ots.getTableName(PhotoAlbum.class), "z_albumId", "albumId");
     }
 
+    /**
+     * 创建多元索引
+     */
     @Test
     public void createSearchIndex() {
         ots.createSearchIndex(PhotoAlbum.class);
@@ -108,6 +116,9 @@ public class PhotoalbumApplicationTests {
         log.info(searchResponse.toString());
     }
 
+    /**
+     * 获取详情
+     */
     @Test
     public void retrieveRow() {
         PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
@@ -116,44 +127,62 @@ public class PhotoalbumApplicationTests {
         log.info(JSONObject.toJSONString(photoAlbum));
     }
 
+    /**
+     * 添加到人脸库中
+     */
     @Test
     public void addFace() {
         face.addFace(FaceInfo.builder()
-                .Group("default")
+                .Group(FaceConstant.GROUP_DEFAUlT)
                 .Person("jackma")
                 .Image("1")
                 .ImageUrl("https://docs.alibabagroup.com/assets2/images/en/news/library_executives_jackma_large.jpg")
                 .build());
     }
 
+    /**
+     * 获取库中的所有分组
+     */
     @Test
     public void groupList() {
-        log.info(JSON.toJSONString(face.listGroup()));
+        List<String> group = face.listGroup();
+        log.info(JSON.toJSONString(group));
     }
 
+    /**
+     * n：1 匹配人脸识别结果
+     */
     @Test
     public void recognizeFace() {
-        face.recognizeFace("https://attach-mango.oss-cn-beijing.aliyuncs.com/lADPDgQ9q8L6V9vNByDNBVg_1368_1824.jpg", "default");
+        List<UploadFileFace> uploadFileFaces = face.recognizeFace("https://attach-mango.oss-cn-beijing.aliyuncs.com/4039e7b9005243b1904fcbd30f437b03.jpg",
+                FaceConstant.GROUP_DEFAUlT);
+        log.info(JSONObject.toJSONString(uploadFileFaces));
     }
 
+    /**
+     * 获取有我的图片
+     */
     @Test
     public void listByFace() {
-        MatchQuery matchQuery1 = new MatchQuery();
-        matchQuery1.setFieldName("persons");
-        matchQuery1.setText("57564");
-//
-//        TermQuery termQuery = new TermQuery();
-//        termQuery.setFieldName("isDel");
-//        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
-
+        //条件1
+        MatchQuery matchQuery = new MatchQuery();
+        matchQuery.setFieldName("persons");
+        matchQuery.setText("57564");
+        //条件2
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        //整合条件
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(Arrays.asList(matchQuery, termQuery));
         SearchQuery query = new SearchQuery();
-        query.setQuery(matchQuery1);
+        query.setQuery(boolQuery);
         query.setOffset(0);
         query.setLimit(10);
         query.setGetTotalCount(true);
         SearchRequest searchRequest = SearchRequest.newBuilder()
-                .tableName("upload_file")
-                .indexName("upload_file")
+                .tableName(ots.getTableName(UploadFile.class))
+                .indexName(ots.getTableName(UploadFile.class))
                 .searchQuery(query)
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);

@@ -47,7 +47,7 @@ public class FaceServiceImpl implements FaceService {
                 String bodyStr = mns.getMessage(QueueConstant.FACEQUEUE);
                 if(!StringUtils.isEmpty(bodyStr)) {
                     UploadFile file = JSONObject.parseObject(bodyStr, UploadFile.class);
-                    List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceConstant.DEFAUlT, file.getFilePath());
+                    List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceConstant.GROUP_DEFAUlT, file.getFilePath());
                     if(!CommonUtils.isNullOrEmpty(uploadFileFaces)) {
                         uploadFileFaces.forEach(uploadFileFace -> {
                             uploadFileFace.setFileId(file.getFileId());

@@ -1,6 +1,6 @@
 package com.mango.photoalbum.constant;
 
-public class MDCConstant {
+public class MdcConstant {
 
     public static final String REQUEST_ID = "requestId";
 }
