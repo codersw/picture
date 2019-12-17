@@ -1,17 +1,17 @@
 package com.mango.photoalbum.utils;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.aliyun.mns.client.CloudAccount;
 import com.aliyun.mns.client.CloudQueue;
 import com.aliyun.mns.client.MNSClient;
-import com.aliyun.mns.common.ClientException;
-import com.aliyun.mns.common.ServiceException;
 import com.aliyun.mns.model.Message;
+import com.aliyun.mns.model.QueueMeta;
 import com.mango.photoalbum.config.ThreadPoolHelper;
 import com.mango.photoalbum.constant.QueueConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
 
 @Slf4j
@@ -29,13 +29,11 @@ public class MnsUtils {
 
     private MNSClient mns;
 
-    //@PostConstruct
+    @PostConstruct
     private void init() {
         try {
             CloudAccount account = new CloudAccount(accessKeyId, accessKeySecret, endpoint);
             mns = account.getMNSClient();
-            ThreadPoolHelper pool = new ThreadPoolHelper();
-            pool.Executor(this::ThreadWork);
         } catch (Exception e){
             e.printStackTrace();
             mns = null;
@@ -44,52 +42,97 @@ public class MnsUtils {
     }
 
     /**
-     * 消费服务
+     * 创建队列
+     * @param queueName
      */
-    private void ThreadWork() {
-        log.info("MNS消息服务消费端启动成功");
-        while (true) {
-            log.info("MNS消息服务开始消费");
-            try{
-                CloudQueue queue = mns.getQueueRef(QueueConstant.FACEQUEUE);
-                Message popMsg = queue.popMessage();
-                if (popMsg != null) {
-                    // 默认会做 base64 解码
-                    String bodyStr = popMsg.getMessageBodyAsString();
-                    String msgId = popMsg.getMessageId();
-                    log.info("message id:{},message body:{}", msgId, bodyStr);
-                    // TODO:进行消费处理，人脸识别，成功则删除消息
+    public void createQueue(String queueName) {
+        try {
+            log.info("MNS创建队列开始:{}", queueName);
+            QueueMeta meta = new QueueMeta(); //生成本地QueueMeta属性，有关队列属性详细介绍见https://help.aliyun.com/document_detail/27476.html
+            meta.setQueueName(queueName);  // 设置队列名
+            meta.setPollingWaitSeconds(15); //设置队列消息的长轮询等待时间，单位是秒
+            meta.setMaxMessageSize(2048L); //设置队列消息的最大长度，单位是byte long
+            CloudQueue queue = mns.createQueue(meta);
+            log.info("MNS创建队列成功:{}", JSONObject.toJSONString(queue, SerializerFeature.IgnoreNonFieldGetter));
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("MNS创建队列出现错误:{}", e.getMessage());
+        }
+    }
 
-                    //删除已经消费的消息
-                    queue.deleteMessage(popMsg.getReceiptHandle());
-                    log.info("删除MNS消息服务成功");
-                } else {
-                    log.info("MNS消息服务不存在");
-                }
-                log.info("MNS消息服务消费完成");
-            } catch (ClientException ce) {
-                log.error("MMS链接异常:{}", ce.getMessage());
-                ce.printStackTrace();
-            }  catch (ServiceException se) {
-                se.printStackTrace();
-                log.error("MNS业务异常:{},requestId:{}", se.getMessage(), se.getRequestId());
-                if (se.getErrorCode() != null) {
-                    if (se.getErrorCode().equals("QueueNotExist")) {
-                        log.error("MNS队列不存在:{}", se.getMessage());
-                    } else if (se.getErrorCode().equals("TimeExpired")) {
-                        log.error("MNS认证已过期:{}", se.getMessage());
-                    }
-                }
-            } catch (Exception e) {
-                log.error("MNS发生异常:{}", e.getMessage());
-                e.printStackTrace();
+    /**
+     * 删除队列
+     * @param queueName
+     */
+    public void deleteQueue(String queueName) {
+        try {
+            log.info("MNS删除队列开始:{}", queueName);
+            CloudQueue queue = mns.getQueueRef(queueName);
+            queue.delete();
+            log.info("MNS删除队列成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("MNS删除队列出现错误:{}", e.getMessage());
+        }
+    }
+
+    /**
+     * 接收消息
+     * @param queueName
+     * @return
+     */
+    public String getMessage(String queueName) {
+        String result = "";
+        try {
+            log.info("MNS接收消息开始:{}", queueName);
+            CloudQueue queue = mns.getQueueRef(queueName);
+            Message popMsg = queue.popMessage();
+            if (!CommonUtils.isNullOrEmpty(popMsg)) {
+                result = popMsg.getMessageBodyAsString();
+                //删除已经取出消费的消息
+                queue.deleteMessage(popMsg.getReceiptHandle());
             }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error("MNS暂停发生异常:{}", e.getMessage());
-                e.printStackTrace();
-            }
+            log.info("MNS接收消息成功:{}", JSONObject.toJSONString(popMsg, SerializerFeature.IgnoreNonFieldGetter));
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("MNS创建队列出现错误:{}", e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 发送消息
+     * @param queueName
+     * @param bodyStr
+     */
+    public void setMessage(String queueName, String bodyStr) {
+        try {
+            log.info("MNS发送消息开始:{}, {}", queueName, bodyStr);
+            CloudQueue queue = mns.getQueueRef(queueName);
+            Message message = new Message();
+            message.setMessageBody(bodyStr);
+            Message putMsg = queue.putMessage(message);
+            log.info("MNS发送消息成功:{}", JSONObject.toJSONString(putMsg, SerializerFeature.IgnoreNonFieldGetter));
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("MNS发送消息出现错误:{}", e.getMessage());
+        }
+    }
+
+    /**
+     * 删除消息
+     * @param queueName
+     * @param receiptHandle
+     */
+    public void deleteMessage(String queueName, String receiptHandle) {
+        try {
+            log.info("MNS删除消息开始:{}", receiptHandle);
+            CloudQueue queue = mns.getQueueRef(queueName);
+            queue.deleteMessage(receiptHandle);
+            log.info("MNS删除消息成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("MNS删除消息出现错误:{}", e.getMessage());
         }
     }
 }

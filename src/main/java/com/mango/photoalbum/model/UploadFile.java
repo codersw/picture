@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import com.mango.photoalbum.enums.AnalyzerEnum;
 import com.mango.photoalbum.enums.IndexTypeEnum;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -114,7 +115,7 @@ public class UploadFile {
     /**
      * 照片内包扣的人
      */
-    @OTSColumn(indexType = IndexTypeEnum.TEXT)
+    @OTSColumn(indexType = IndexTypeEnum.TEXT, analyzer = AnalyzerEnum.Split, splitAnalyzerDelimiter = ",")
     private String persons;
 
     /**

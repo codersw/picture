@@ -8,6 +8,7 @@ import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.mango.photoalbum.model.FaceInfo;
+import com.mango.photoalbum.model.UploadFileFace;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,10 +24,10 @@ import java.util.List;
 @Component
 public class FaceUtils {
 
-    @Value("${alibaba.face.accessKeyId}")
+    @Value("${alibaba.face.accessKeyId:LTAIP1JGgPXqt5sq}")
     private String accessKeyId;
 
-    @Value("${alibaba.face.accessKeySecret}")
+    @Value("${alibaba.face.accessKeySecret:Cs8Vo6zoCT7YArfdf9JlQG2MFLGZiA}")
     private String accessKeySecret;
 
     @Value("${alibaba.face.regionId:cn-shanghai}")
@@ -53,7 +54,7 @@ public class FaceUtils {
     @PostConstruct
     private void init() {
         try {
-            DefaultProfile profile = DefaultProfile.getProfile(regionId, "LTAIP1JGgPXqt5sq", "Cs8Vo6zoCT7YArfdf9JlQG2MFLGZiA");
+            DefaultProfile profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
             face = new DefaultAcsClient(profile);
         } catch (Exception e){
             e.printStackTrace();
@@ -147,9 +148,11 @@ public class FaceUtils {
 
     /**
      * 接口用于查找注册库中的人脸
-     * @param recognizeFaceImageUrl 需要查询的人类图片URL
+     * @param groupName
+     * @param recognizeFaceImageUrl
+     * @return
      */
-    public void recognizeFace(String recognizeFaceImageUrl, String groupName) {
+    public List<UploadFileFace> recognizeFace(String groupName, String recognizeFaceImageUrl) {
         try {
             CommonRequest request = new CommonRequest();
             request.setMethod(MethodType.POST);
@@ -160,10 +163,13 @@ public class FaceUtils {
             request.putBodyParameter("ImageUrl", recognizeFaceImageUrl);
             CommonResponse response = face.getCommonResponse(request);
             log.info("查找注册库中的人脸成功:{}", response.getData());
+            JSONObject json = JSONObject.parseObject(response.getData());
+            return JSONObject.parseArray(json.getString("Data"), UploadFileFace.class);
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("查找注册库中的人脸发生错误:{}", e.getMessage());
         }
+        return null;
     }
 
     /**

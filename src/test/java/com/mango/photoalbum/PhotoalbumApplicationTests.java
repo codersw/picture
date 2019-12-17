@@ -2,10 +2,15 @@ package com.mango.photoalbum;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.search.*;
+import com.alicloud.openservices.tablestore.model.search.query.BoolQuery;
+import com.alicloud.openservices.tablestore.model.search.query.MatchPhraseQuery;
+import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.FaceInfo;
 import com.mango.photoalbum.model.PhotoAlbum;
+import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.utils.FaceUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -128,5 +133,28 @@ public class PhotoalbumApplicationTests {
     @Test
     public void recognizeFace() {
         face.recognizeFace("https://attach-mango.oss-cn-beijing.aliyuncs.com/lADPDgQ9q8L6V9vNByDNBVg_1368_1824.jpg", "default");
+    }
+
+    @Test
+    public void listByFace() {
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        MatchPhraseQuery matchQuery1 = new MatchPhraseQuery();
+        matchQuery1.setFieldName("persons");
+        matchQuery1.setText("45087");
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(Arrays.asList(termQuery, matchQuery1));
+        query.setQuery(boolQuery);
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(UploadFile.class))
+                .indexName(ots.getTableName(UploadFile.class))
+                .searchQuery(query)
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        log.info(JSONObject.toJSONString(searchResponse));
     }
 }

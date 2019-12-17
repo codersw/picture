@@ -1,5 +1,6 @@
 package com.mango.photoalbum.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.Row;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
@@ -9,14 +10,12 @@ import com.alicloud.openservices.tablestore.model.search.query.*;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
+import com.mango.photoalbum.constant.QueueConstant;
 import com.mango.photoalbum.enums.IsCoverEnum;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.UploadFileService;
-import com.mango.photoalbum.utils.CommonUtils;
-import com.mango.photoalbum.utils.FileUtils;
-import com.mango.photoalbum.utils.OssUtils;
-import com.mango.photoalbum.utils.OtsUtils;
+import com.mango.photoalbum.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,9 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Resource
     private OssUtils oss;
+
+    @Resource
+    private MnsUtils mns;
 
     @Override
     public UploadFile save(UploadFileCo uploadFileCo) {
@@ -104,7 +106,9 @@ public class UploadFileServiceImpl implements UploadFileService {
                 if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
                     isCover = IsCoverEnum.TRUE.getValue();
                 }
-                result.add(save(uploadFileCo));
+                UploadFile file = save(uploadFileCo);
+                result.add(file);
+                mns.setMessage(QueueConstant.FACEQUEUE, JSONObject.toJSONString(file));
             }
             //如果没有封面修改封面
             if(isCover.equals(IsCoverEnum.FALSE.getValue())) {
@@ -176,7 +180,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             List<UploadFile> uploadFiles = list(UploadFileListCo.builder()
                     .albumId(photoAlbum.getAlbumId())
                     .pageIndex(1)
-                    .pageSize(10)
+                    .pageSize(2)
                     .build());
             if(!uploadFiles.isEmpty()) {
                 for(UploadFile file : uploadFiles) {

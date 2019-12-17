@@ -8,6 +8,9 @@ import com.alicloud.openservices.tablestore.SyncClient;
 import com.alicloud.openservices.tablestore.TableStoreException;
 import com.alicloud.openservices.tablestore.model.*;
 import com.alicloud.openservices.tablestore.model.search.*;
+import com.alicloud.openservices.tablestore.model.search.analysis.FuzzyAnalyzerParameter;
+import com.alicloud.openservices.tablestore.model.search.analysis.SingleWordAnalyzerParameter;
+import com.alicloud.openservices.tablestore.model.search.analysis.SplitAnalyzerParameter;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
@@ -557,6 +560,28 @@ public class OtsUtils {
                         case NULL:
                             break;
                         case TEXT:
+                            switch (column.analyzer()) {
+                                case NULL:
+                                    break;
+                                case Split:
+                                    fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true).setAnalyzer(FieldSchema.Analyzer.Split)
+                                            .setAnalyzerParameter(new SplitAnalyzerParameter(column.splitAnalyzerDelimiter())));
+                                    break;
+                                case Fuzzy:
+                                    fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true).setAnalyzer(FieldSchema.Analyzer.Fuzzy)
+                                            .setAnalyzerParameter(new FuzzyAnalyzerParameter(column.fuzzyAnalyzerMinChars(), column.fuzzyAnalyzerMaxChars())));
+                                    break;
+                                case MaxWord:
+                                    fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true).setAnalyzer(FieldSchema.Analyzer.MaxWord));
+                                    break;
+                                case MinWord:
+                                    fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true).setAnalyzer(FieldSchema.Analyzer.MinWord));
+                                    break;
+                                case SingleWord:
+                                    fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true).setAnalyzer(FieldSchema.Analyzer.SingleWord)
+                                    .setAnalyzerParameter(new SingleWordAnalyzerParameter(column.singleWordAnalyzerCaseSensitive(), column.singleWordAnalyzerDelimitWord())));
+                                    break;
+                            }
                             fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true));
                             break;
                         case LONG:
