@@ -233,9 +233,16 @@ public class UploadFileServiceImpl implements UploadFileService {
         TermQuery termQuery1 = new TermQuery();
         termQuery1.setFieldName("albumId");
         termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
+        List<Query> mustQueries = Arrays.asList(termQuery, termQuery1);
+        if(!StringUtils.isEmpty(uploadFileListCo.getUserId())) {
+            MatchQuery matchQuery = new MatchQuery();
+            matchQuery.setFieldName("persons");
+            matchQuery.setText(uploadFileListCo.getUserId());
+            mustQueries.add(matchQuery);
+        }
         SearchQuery query = new SearchQuery();
         BoolQuery boolQuery = new BoolQuery();
-        boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
+        boolQuery.setMustQueries(mustQueries);
         query.setQuery(boolQuery);
         query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
         Integer pageSize = uploadFileListCo.getPageSize();
