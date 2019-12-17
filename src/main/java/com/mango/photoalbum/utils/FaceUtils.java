@@ -24,10 +24,10 @@ import java.util.List;
 @Component
 public class FaceUtils {
 
-    @Value("${alibaba.face.accessKeyId:LTAIP1JGgPXqt5sq}")
+    @Value("${alibaba.face.accessKeyId}")
     private String accessKeyId;
 
-    @Value("${alibaba.face.accessKeySecret:Cs8Vo6zoCT7YArfdf9JlQG2MFLGZiA}")
+    @Value("${alibaba.face.accessKeySecret}")
     private String accessKeySecret;
 
     @Value("${alibaba.face.regionId:cn-shanghai}")
