@@ -20,13 +20,13 @@ import javax.annotation.PostConstruct;
 @Component
 public class MnsUtils {
 
-    @Value("${alibaba.mns.accessKeyId}")
+    @Value("${alibaba.mns.accessKeyId:LTAI4Fd66vvuVj31seQ2YbQQ}")
     private String accessKeyId;
 
-    @Value("${alibaba.mns.accessKeySecret}")
+    @Value("${alibaba.mns.accessKeySecret:AgUkSMWtlICI7lY2oBFM0aD94ZlqYt}")
     private String accessKeySecret;
 
-    @Value("${alibaba.mns.endpoint}")
+    @Value("${alibaba.mns.endpoint:http://1948640781844768.mns.cn-hangzhou.aliyuncs.com}")
     private String endpoint;
 
     private MNSClient mns;

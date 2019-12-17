@@ -1,9 +1,6 @@
 spring:
   profiles:
     active: acm-dev
-  mvc:
-    async:
-      request-timeout: 10000
   #控制台日志输出取消颜色
   output:
     ansi:
