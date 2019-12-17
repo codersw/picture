@@ -6,6 +6,7 @@ import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.search.*;
 import com.alicloud.openservices.tablestore.model.search.query.BoolQuery;
 import com.alicloud.openservices.tablestore.model.search.query.MatchPhraseQuery;
+import com.alicloud.openservices.tablestore.model.search.query.MatchQuery;
 import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.FaceInfo;
@@ -137,21 +138,22 @@ public class PhotoalbumApplicationTests {
 
     @Test
     public void listByFace() {
-        TermQuery termQuery = new TermQuery();
-        termQuery.setFieldName("isDel");
-        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
-        MatchPhraseQuery matchQuery1 = new MatchPhraseQuery();
+        MatchQuery matchQuery1 = new MatchQuery();
         matchQuery1.setFieldName("persons");
-        matchQuery1.setText("45087");
+        matchQuery1.setText("57564");
+//
+//        TermQuery termQuery = new TermQuery();
+//        termQuery.setFieldName("isDel");
+//        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+
         SearchQuery query = new SearchQuery();
-        BoolQuery boolQuery = new BoolQuery();
-        boolQuery.setMustQueries(Arrays.asList(termQuery, matchQuery1));
-        query.setQuery(boolQuery);
-        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
-        query.setGetTotalCount(true);// 设置返回总条数
+        query.setQuery(matchQuery1);
+        query.setOffset(0);
+        query.setLimit(10);
+        query.setGetTotalCount(true);
         SearchRequest searchRequest = SearchRequest.newBuilder()
-                .tableName(ots.getTableName(UploadFile.class))
-                .indexName(ots.getTableName(UploadFile.class))
+                .tableName("upload_file")
+                .indexName("upload_file")
                 .searchQuery(query)
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);

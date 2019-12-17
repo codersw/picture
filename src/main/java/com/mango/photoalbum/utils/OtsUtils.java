@@ -204,7 +204,7 @@ public class OtsUtils {
     }
 
     /**
-     * 删除联合索引
+     * 删除多元索引
      * @param c
      */
     public void deleteSearchIndex(Class<?> c) {
@@ -562,6 +562,7 @@ public class OtsUtils {
                         case TEXT:
                             switch (column.analyzer()) {
                                 case NULL:
+                                    fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true));
                                     break;
                                 case Split:
                                     fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true).setAnalyzer(FieldSchema.Analyzer.Split)
@@ -582,7 +583,6 @@ public class OtsUtils {
                                     .setAnalyzerParameter(new SingleWordAnalyzerParameter(column.singleWordAnalyzerCaseSensitive(), column.singleWordAnalyzerDelimitWord())));
                                     break;
                             }
-                            fieldSchemas.add(new FieldSchema(name, FieldType.TEXT).setStore(true).setIndex(true));
                             break;
                         case LONG:
                             fieldSchemas.add(new FieldSchema(name, FieldType.LONG).setIndex(true).setEnableSortAndAgg(true).setStore(true));

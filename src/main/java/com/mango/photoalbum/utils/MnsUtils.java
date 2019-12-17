@@ -7,13 +7,15 @@ import com.aliyun.mns.client.CloudQueue;
 import com.aliyun.mns.client.MNSClient;
 import com.aliyun.mns.model.Message;
 import com.aliyun.mns.model.QueueMeta;
-import com.mango.photoalbum.config.ThreadPoolHelper;
-import com.mango.photoalbum.constant.QueueConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
+/**
+ * mns工具类
+ * @author swen
+ */
 @Slf4j
 @Component
 public class MnsUtils {
