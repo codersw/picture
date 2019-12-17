@@ -3,10 +3,7 @@ package com.mango.photoalbum.config;
 import com.mango.photoalbum.Interceptor.AuthorizationInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.*;
 import javax.annotation.Resource;
 
 /**

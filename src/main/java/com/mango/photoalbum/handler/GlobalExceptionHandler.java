@@ -7,6 +7,7 @@ import com.mango.photoalbum.model.Result;
 import com.mango.photoalbum.model.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -14,12 +15,11 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
@@ -39,9 +39,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     public Result defaultErrorHandler(HttpServletRequest req, Exception e) {
-        if (log.isErrorEnabled()) {
-            log.error(String.format(SYSTEM_EXCEPTION, e.getMessage()), e);
-        }
+        log.error(String.format(SYSTEM_EXCEPTION, e.getMessage()), e);
         return ResultGenerator.genFailResult(DEFAULT_MESSAGE);
     }
 
@@ -49,9 +47,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     public Result applicationExceptionHandler(HttpServletRequest req, Exception e) {
-        if (log.isErrorEnabled()) {
-            log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
-        }
+        log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
         return ResultGenerator.genFailResult(e.getMessage());
     }
 
@@ -83,12 +79,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     public Result applicationUnauthorizedException(UnauthorizedException e) {
-        if (log.isErrorEnabled()) {
-            log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
-        }
-        Result result = new Result();
-        result.setCode(ResultCodeEnum.UNAUTHORIZED.getValue());
-        result.setMessage(e.getMessage());
-        return result;
+        log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
+        return ResultGenerator.genResult(ResultCodeEnum.UNAUTHORIZED, e.getMessage());
     }
 }

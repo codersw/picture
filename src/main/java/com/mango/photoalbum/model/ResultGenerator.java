@@ -1,7 +1,9 @@
 package com.mango.photoalbum.model;
 
 
+import com.mango.photoalbum.constant.MDCConstant;
 import com.mango.photoalbum.enums.ResultCodeEnum;
+import org.slf4j.MDC;
 
 /**
  * 接口返回值生成工具
@@ -17,6 +19,7 @@ public class ResultGenerator {
         Result result = new Result();
         result.setCode(ResultCodeEnum.SUCCESS.getValue());
         result.setMessage(ResultCodeEnum.SUCCESS.getName());
+        result.setRequestId(MDC.get(MDCConstant.REQUEST_ID));
         return result;
     }
 
@@ -31,6 +34,7 @@ public class ResultGenerator {
         result.setCode(ResultCodeEnum.SUCCESS.getValue());
         result.setMessage(ResultCodeEnum.SUCCESS.getName());
         result.setData(data);
+        result.setRequestId(MDC.get(MDCConstant.REQUEST_ID));
         return result;
     }
 
@@ -42,6 +46,7 @@ public class ResultGenerator {
         Result result = new Result();
         result.setCode(ResultCodeEnum.FAIL.getValue());
         result.setMessage(ResultCodeEnum.FAIL.getName());
+        result.setRequestId(MDC.get(MDCConstant.REQUEST_ID));
         return result;
     }
 
@@ -54,6 +59,15 @@ public class ResultGenerator {
         Result<?> result = new Result<>();
         result.setCode(ResultCodeEnum.FAIL.getValue());
         result.setMessage(message);
+        result.setRequestId(MDC.get(MDCConstant.REQUEST_ID));
+        return result;
+    }
+
+    public static Result<?> genResult(ResultCodeEnum codeEnum, String message) {
+        Result<?> result = new Result<>();
+        result.setCode(codeEnum.getValue());
+        result.setMessage(message);
+        result.setRequestId(MDC.get(MDCConstant.REQUEST_ID));
         return result;
     }
 }

@@ -2,11 +2,13 @@ package com.mango.photoalbum.aspect;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.mango.photoalbum.constant.MDCConstant;
 import com.mango.photoalbum.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -31,13 +33,14 @@ public class ControllerAspect {
      */
     @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) {
+        String requestId = CommonUtils.UUID();
+        MDC.put(MDCConstant.REQUEST_ID,requestId);
         // 开始打印请求日志
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         assert attributes != null;
         HttpServletRequest request = attributes.getRequest();
-
         // 打印请求相关参数
-        log.info("========================================== Start ==========================================");
+        log.info("Start RequestId : {}", requestId);
         // 打印请求 url
         log.info("URL            : {}", request.getRequestURL().toString());
         // 打印 Http method
@@ -52,13 +55,13 @@ public class ControllerAspect {
 
     /**
      * 在切点之后织入
-     * @throws Throwable
      */
     @After("webLog()")
-    public void doAfter() throws Throwable {
-        log.info("=========================================== End ===========================================");
+    public void doAfter() {
+        log.info("End RequestId : {}", MDC.get(MDCConstant.REQUEST_ID));
         // 每个请求之间空一行
         log.info("");
+        MDC.clear();
     }
 
     /**
@@ -75,6 +78,7 @@ public class ControllerAspect {
         log.info("Response Args  : {}", JSONObject.toJSONString(result, SerializerFeature.IgnoreNonFieldGetter));
         // 执行耗时
         log.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
+        // 处理完请求，返回内容
         return result;
     }
 

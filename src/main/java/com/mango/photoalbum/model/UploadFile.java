@@ -112,6 +112,12 @@ public class UploadFile {
     private Integer height;
 
     /**
+     * 照片内包扣的人
+     */
+    @OTSColumn(indexType = IndexTypeEnum.TEXT)
+    private String persons;
+
+    /**
      * 是否是封面
      */
     @JsonIgnore

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.slf4j.MDC;
 
 import java.io.Serializable;
 
@@ -41,6 +42,9 @@ public class Result<T> implements Serializable {
     @ApiModelProperty(value = "内容")
     private T data;
 
+    @ApiModelProperty(value = "请求唯一id")
+    private String requestId;
+
     /**
      * 返回json
      * @return
@@ -49,5 +53,7 @@ public class Result<T> implements Serializable {
     public String toString() {
         return JSONObject.toJSONString(this, SerializerFeature.IgnoreNonFieldGetter);
     }
+
+
 
 }
