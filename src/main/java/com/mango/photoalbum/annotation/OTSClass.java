@@ -14,13 +14,13 @@ import java.lang.annotation.Target;
 public @interface OTSClass {
 
     /**
-     * ots表名
+     * ots表名 默认取类名
      * @return
      */
     String name() default "";
 
     /**
-     * 是否开启多元索引
+     * 是否开启多元索引 默认开启
      * @return
      */
     boolean searchIndex() default true;

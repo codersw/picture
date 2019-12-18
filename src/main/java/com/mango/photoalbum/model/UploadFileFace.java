@@ -28,13 +28,13 @@ public class UploadFileFace {
     /**
      * 照片
      */
-    @OTSColumn
+    @OTSPrimaryKey
     private String image;
 
     /**
      * 识别到的人
      */
-    @OTSPrimaryKey
+    @OTSColumn
     private String person;
 
     /**
@@ -50,7 +50,7 @@ public class UploadFileFace {
     private String rect;
 
     /**
-     * 添加事件
+     * 添加时间
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
