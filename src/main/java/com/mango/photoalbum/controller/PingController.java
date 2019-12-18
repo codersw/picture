@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.management.ManagementFactory;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 健康检测接口
@@ -35,8 +32,8 @@ public class PingController {
      */
     @ApiOperation(value = "健康检测接口", notes = "健康检测接口")
     @RequestMapping(method = { RequestMethod.GET, RequestMethod.HEAD})
-    public Object ping(HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
+    public Map ping(HttpServletRequest request) {
+        Map<String, Object> result = new LinkedHashMap<>();
         result.put("项目版本号", varsion);
         result.put("访问者IP", CommonUtils.getIpAddr(request));
         result.put("服务器Host", OSUtils.localHostName());
