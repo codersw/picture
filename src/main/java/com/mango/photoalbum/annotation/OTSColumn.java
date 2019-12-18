@@ -16,40 +16,56 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OTSColumn {
 
+    /**
+     * 列字段名 默认取字段名
+     * @return
+     */
     String name() default "";
 
+    /**
+     * 字段类型 默认字符串
+     * @return
+     */
     DefinedColumnType definedColumnType() default DefinedColumnType.STRING;
 
+    /**
+     * 索引类型 默认不开启
+     * @return
+     */
     IndexTypeEnum indexType() default IndexTypeEnum.NULL;
 
+    /**
+     * 分词类型 默认不开启
+     * @return
+     */
     AnalyzerEnum analyzer() default AnalyzerEnum.NULL;
 
     /**
-     * 分隔符
+     * 分隔符 默认空
      * @return
      */
     String splitAnalyzerDelimiter() default "";
 
     /**
-     * 最小字符切分单元（minChars）
+     * 最小字符切分单元（minChars）默认0
      * @return
      */
     int fuzzyAnalyzerMinChars() default 0;
 
     /**
-     * 最大字符切分单元（maxChars）
+     * 最大字符切分单元（maxChars） 默认0
      * @return
      */
     int fuzzyAnalyzerMaxChars() default 0;
 
     /**
-     * 参数caseSensitive 默认是false（所有英文字母会转为小写）
+     * 所有英文字母会转为小写 默认是false
      * @return
      */
     boolean singleWordAnalyzerCaseSensitive() default false;
 
     /**
-     * delimitWord代表是否分割英文和数字
+     * 代表是否分割英文和数字 默认是false
      * @return
      */
     boolean singleWordAnalyzerDelimitWord() default false;

@@ -14,11 +14,27 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OTSPrimaryKey {
 
+    /**
+     * 主键字段名字 默认取字段名
+     * @return
+     */
     String name() default "";
 
+    /**
+     * 主键类型 默认字符串
+     * @return
+     */
     PrimaryKeyType primaryKeyType() default PrimaryKeyType.STRING;
 
+    /**
+     * 是否为自增主键 默认不开启必须为INTEGER才可以开启
+     * @return
+     */
     boolean primaryKeyAuto() default false;
 
+    /**
+     * 主键索引只支持 txt keyword integer 默认空
+     * @return
+     */
     IndexTypeEnum indexType() default IndexTypeEnum.NULL;
 }

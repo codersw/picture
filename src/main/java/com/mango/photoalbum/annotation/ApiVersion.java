@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 public @interface ApiVersion {
 
     /**
-     * 接口版本号(对应swagger中的group)
+     * 接口版本号(对应swagger中的group) 默认v1
      * @return String[]
      */
     String[] value() default ApiVersionConstant.V1;

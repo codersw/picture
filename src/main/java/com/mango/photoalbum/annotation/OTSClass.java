@@ -13,7 +13,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OTSClass {
 
+    /**
+     * ots表名
+     * @return
+     */
     String name() default "";
 
+    /**
+     * 是否开启多元索引
+     * @return
+     */
     boolean searchIndex() default true;
 }
