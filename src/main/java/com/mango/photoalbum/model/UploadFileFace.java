@@ -1,10 +1,15 @@
 package com.mango.photoalbum.model;
 
 import com.alicloud.openservices.tablestore.model.DefinedColumnType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import com.mango.photoalbum.enums.IndexTypeEnum;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
 
 @Data
 @Builder
@@ -43,5 +48,13 @@ public class UploadFileFace {
      */
     @OTSColumn
     private String rect;
+
+    /**
+     * 添加事件
+     */
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    private Date createTime;
 
 }
