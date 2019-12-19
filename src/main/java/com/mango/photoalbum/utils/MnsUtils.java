@@ -63,7 +63,7 @@ public class MnsUtils {
             log.info("MNS创建队列开始:{}", queueName);
             QueueMeta meta = new QueueMeta(); //生成本地QueueMeta属性，有关队列属性详细介绍见https://help.aliyun.com/document_detail/27476.html
             meta.setQueueName(queueName);  // 设置队列名
-            meta.setPollingWaitSeconds(15); //设置队列消息的长轮询等待时间，单位是秒
+            meta.setPollingWaitSeconds(30); //设置队列消息的长轮询等待时间，单位是秒
             meta.setMaxMessageSize(2048L); //设置队列消息的最大长度，单位是byte long
             CloudQueue queue = mns.createQueue(meta);
             log.info("MNS创建队列成功:{}", JSONObject.toJSONString(queue, SerializerFeature.IgnoreNonFieldGetter));
