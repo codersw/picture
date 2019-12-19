@@ -55,6 +55,8 @@ public class PingController {
 
     /**
      * 服务器CPU信息
+     * @param processor
+     * @param result
      */
     private void setCpuInfo(CentralProcessor processor, Map<String, Object> result) {
         Map<String, Object> cpuInfo = new LinkedHashMap<>();
@@ -97,6 +99,7 @@ public class PingController {
 
     /**
      * Java虚拟机信息
+     * @param result
      */
     private void setJvmInfo(Map<String, Object> result) {
         Map<String, Object> jvmInfo = new LinkedHashMap<>();
@@ -117,6 +120,8 @@ public class PingController {
 
     /**
      * 磁盘信息
+     * @param os
+     * @param result
      */
     private void setSysFiles(OperatingSystem os, Map<String, Object> result) {
         FileSystem fileSystem = os.getFileSystem();
@@ -141,6 +146,8 @@ public class PingController {
 
     /**
      * 服务器信息
+     * @param request
+     * @param result
      */
     private void setSysInfo(HttpServletRequest request, Map<String, Object> result) {
         Properties props = System.getProperties();
