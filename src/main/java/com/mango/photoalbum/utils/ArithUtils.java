@@ -75,8 +75,7 @@ public class ArithUtils {
             throw new IllegalArgumentException("精确度不能小于0");
         }
         BigDecimal b = new BigDecimal(Double.toString(v));
-        BigDecimal one = BigDecimal.ONE;
-        return b.divide(one, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b.divide(BigDecimal.ONE, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**
@@ -97,7 +96,7 @@ public class ArithUtils {
      * @param scale 小数点后保留几位
      * @return 两个参数的求差之后，按精度四舍五入的结果
      */
-    public static double sub(double value1, double value2, int scale) {
+    public static double subtract(double value1, double value2, int scale) {
         return round(subtract(value1, value2), scale);
     }
 
@@ -108,7 +107,7 @@ public class ArithUtils {
      * @param scale 小数点后保留几位
      * @return 两个参数的乘积之后，按精度四舍五入的结果
      */
-    public static double mul(double value1, double value2, int scale) {
+    public static double multiply(double value1, double value2, int scale) {
         return round(multiply(value1, value2), scale);
     }
 }

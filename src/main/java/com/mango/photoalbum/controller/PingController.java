@@ -69,13 +69,12 @@ public class PingController {
         long user = ticks[CentralProcessor.TickType.USER.getIndex()] - prevTicks[CentralProcessor.TickType.USER.getIndex()];
         long iowait = ticks[CentralProcessor.TickType.IOWAIT.getIndex()] - prevTicks[CentralProcessor.TickType.IOWAIT.getIndex()];
         long idle = ticks[CentralProcessor.TickType.IDLE.getIndex()] - prevTicks[CentralProcessor.TickType.IDLE.getIndex()];
-        float totalCpu = user + nice + cSys + idle + iowait + irq + softirq + steal;
+        double totalCpu = user + nice + cSys + idle + iowait + irq + softirq + steal;
         cpuInfo.put("核心数", processor.getLogicalProcessorCount() + "个");
-        cpuInfo.put("CPU总的使用率", ArithUtils.mul(totalCpu, 100, 2) + "%");
-        cpuInfo.put("CPU系统使用率", ArithUtils.mul(cSys, 100, 2) + "%");
-        cpuInfo.put("CPU用户使用率", ArithUtils.mul(user, 100, 2) + "%");
-        cpuInfo.put("CPU当前等待率", ArithUtils.mul(iowait, 100, 2) + "%");
-        cpuInfo.put("CPU当前空闲率", ArithUtils.mul(idle, 100, 2) + "%");
+        cpuInfo.put("CPU系统使用率", ArithUtils.multiply(cSys / totalCpu, 100, 2) + "%");
+        cpuInfo.put("CPU用户使用率", ArithUtils.multiply(user / totalCpu, 100, 2) + "%");
+        cpuInfo.put("CPU当前等待率", ArithUtils.multiply(iowait / totalCpu, 100, 2) + "%");
+        cpuInfo.put("CPU当前空闲率", ArithUtils.multiply(idle / totalCpu, 100, 2) + "%");
         result.put("CPU信息", cpuInfo);
     }
 
@@ -88,11 +87,11 @@ public class PingController {
         Map<String, Object> memInfo = new LinkedHashMap<>();
         double total = ArithUtils.divide(memory.getTotal(), (1024 * 1024 * 1024), 2);
         double free = ArithUtils.divide(memory.getAvailable(), (1024 * 1024 * 1024), 2);
-        double used = total - free;
+        double used = ArithUtils.subtract(total, free, 2);
         memInfo.put("内存总量", total + "G");
         memInfo.put("已用内存", used + "G");
         memInfo.put("剩余内存", free + "G");
-        memInfo.put("使用率", ArithUtils.multiply(ArithUtils.divide(used, total, 4), 100) + "%");
+        memInfo.put("使用率", ArithUtils.multiply(ArithUtils.divide(used, total, 4), 100, 2) + "%");
         result.put("服务器内存", memInfo);
     }
 

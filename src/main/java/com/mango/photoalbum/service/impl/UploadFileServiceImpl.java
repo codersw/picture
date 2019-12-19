@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -91,6 +92,57 @@ public class UploadFileServiceImpl implements UploadFileService {
     }
 
     @Override
+    public UploadFile saveV1(UploadFileCo uploadFileCo) {
+        UploadFile uploadFile = UploadFile.builder()
+                .fileId(uploadFileCo.getFileId())
+                .createTime(new Date())
+                .modifyTime(new Date())
+                .albumId(uploadFileCo.getAlbumId())
+                .remark(uploadFileCo.getRemark())
+                .createUserId(uploadFileCo.getUserId())
+                .modifyUserId(uploadFileCo.getUserId())
+                .isDel(IsDelEnum.FALSE.getValue())
+                .IsCover(uploadFileCo.getIsCover())
+                .build();
+        try {
+            MultipartFile file = uploadFileCo.getFile();
+            String fileName = file.getOriginalFilename();
+            String fileType = FileUtils.getFileType(fileName);
+            uploadFile.setFileType(fileType);
+            uploadFile.setFileSize((int)file.getSize());
+            uploadFile.setFileName(fileName);
+            BufferedImage img = FileUtils.toImage(file);
+            uploadFile.setHeight(img.getHeight());
+            uploadFile.setWidth(img.getWidth());
+            if(StringUtils.isBlank(uploadFileCo.getFileId())) {
+                uploadFile.setFileId(CommonUtils.UUID());
+            }
+            String ossFileName = uploadFile.getFileId() + fileType;
+            //oss上传图片
+            oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+            //oss文件路径获取
+            uploadFile.setFilePath(oss.getViewUrl(ossFileName));
+            //ots保存文件信息
+            ots.creatRow(uploadFile);
+            log.info("文件保存成功:{}", uploadFile.toString());
+            //如果是封面修改相册封面
+            setCover(UploadFile.builder()
+                    .fileId(uploadFile.getFileId())
+                    .albumId(uploadFile.getAlbumId())
+                    .modifyUserId(uploadFile.getCreateUserId())
+                    .IsCover(uploadFileCo.getIsCover())
+                    .build());
+            //发起图片识别
+            mns.setMessage(QueueConstant.FACEQUEUE, JSONObject.toJSONString(file));
+            return uploadFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("文件保存失败:{}", e.getMessage());
+        }
+        return uploadFile;
+    }
+
+    @Override
     public List<UploadFile> save(UploadFileMultiCo uploadFileMultiCo) {
         List<UploadFile> result = new ArrayList<>();
         List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
@@ -106,9 +158,49 @@ public class UploadFileServiceImpl implements UploadFileService {
                 if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
                     isCover = IsCoverEnum.TRUE.getValue();
                 }
-                UploadFile file = save(uploadFileCo);
-                result.add(file);
-                mns.setMessage(QueueConstant.FACEQUEUE, JSONObject.toJSONString(file));
+                result.add(save(uploadFileCo));
+            }
+            //如果没有封面修改封面
+            if(isCover.equals(IsCoverEnum.FALSE.getValue())) {
+                PhotoAlbum photoAlbum = ots.retrieveRow(PhotoAlbum.builder()
+                        .albumId(uploadFileMultiCo.getAlbumId())
+                        .build());
+                if(photoAlbum != null && StringUtils.isEmpty(photoAlbum.getCover())) {
+                    setCover(UploadFile.builder()
+                            .fileId(result.get(0).getFileId())
+                            .albumId(result.get(0).getAlbumId())
+                            .modifyUserId(result.get(0).getCreateUserId())
+                            .IsCover(IsCoverEnum.TRUE.getValue())
+                            .build());
+                }
+            }
+            //更新最后上传时间
+            ots.updataRow(PhotoAlbum.builder()
+                    .albumId(uploadFileMultiCo.getAlbumId())
+                    .modifyTime(new Date())
+                    .modifyUserId(uploadFileMultiCo.getUserId())
+                    .build());
+        }
+        return result;
+    }
+
+    @Override
+    public List<UploadFile> saveV1(UploadFileMultiCo uploadFileMultiCo) {
+        List<UploadFile> result = new ArrayList<>();
+        List<UploadFileCo> uploadFileCos = uploadFileMultiCo.getUploadFileCos();
+        if(uploadFileCos != null && uploadFileCos.size() > 0) {
+            Integer isCover = IsCoverEnum.FALSE.getValue();
+            for(UploadFileCo uploadFileCo : uploadFileCos) {
+                if (StringUtils.isEmpty(uploadFileCo.getAlbumId())) {
+                    uploadFileCo.setAlbumId(uploadFileMultiCo.getAlbumId());
+                }
+                if (uploadFileCo.getUserId() == null) {
+                    uploadFileCo.setUserId(uploadFileMultiCo.getUserId());
+                }
+                if (uploadFileCo.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
+                    isCover = IsCoverEnum.TRUE.getValue();
+                }
+                result.add(saveV1(uploadFileCo));
             }
             //如果没有封面修改封面
             if(isCover.equals(IsCoverEnum.FALSE.getValue())) {
@@ -145,22 +237,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .IsCover(uploadFileUpdateCo.getIsCover())
                 .build();
         ots.updataRow(uploadFile);
-        //如果是封面修改相册封面
         setCover(uploadFile);
-    }
-
-    /**
-     * 修改相册封面
-     * @param uploadFile
-     */
-    private void setCover(UploadFile uploadFile) {
-        ots.updataRow(PhotoAlbum.builder()
-                .modifyUserId(uploadFile.getModifyUserId())
-                .modifyTime(new Date())
-                .albumId(uploadFile.getAlbumId())
-                .cover(uploadFile.getFileId())
-                .build());
-        log.info("修改相册封面成功:{}", uploadFile.toString());
     }
 
     @Override
@@ -185,6 +262,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             if(!uploadFiles.isEmpty()) {
                 for(UploadFile file : uploadFiles) {
                     if(!file.getFileId().equals(fileId)) {
+                        file.setIsCover(IsCoverEnum.TRUE.getValue());
                         setCover(file);
                         break;
                     }
@@ -233,6 +311,83 @@ public class UploadFileServiceImpl implements UploadFileService {
         TermQuery termQuery1 = new TermQuery();
         termQuery1.setFieldName("albumId");
         termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
+        query.setQuery(boolQuery);
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
+        Integer pageSize = uploadFileListCo.getPageSize();
+        if(pageSize == 0) {
+            query.setLimit(uploadFileListCo.getTotal());
+        } else {
+            int offset = (uploadFileListCo.getPageIndex() - 1) * pageSize;
+            query.setOffset(offset);
+            query.setLimit(pageSize);
+        }
+        query.setGetTotalCount(false);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(UploadFile.class))
+                .indexName(ots.getTableName(UploadFile.class))
+                .searchQuery(query)
+                .returnAllColumns(true) // 设置返回所有列
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return result;
+        try {
+            List<Row> rows = searchResponse.getRows();
+            if(rows.size() > 0){
+                for(Row row : rows) {
+                    result.add(ots.formatRow(row, UploadFile.class));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取列表出错：{}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+        return result;
+    }
+
+    @Override
+    public Integer totalV1(UploadFileListCo uploadFileListCo) {
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        TermQuery termQuery1 = new TermQuery();
+        termQuery1.setFieldName("albumId");
+        termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
+        List<Query> mustQueries = Arrays.asList(termQuery, termQuery1);
+        if(!StringUtils.isEmpty(uploadFileListCo.getUserId())) {
+            MatchQuery matchQuery = new MatchQuery();
+            matchQuery.setFieldName("persons");
+            matchQuery.setText(uploadFileListCo.getUserId());
+            mustQueries.add(matchQuery);
+        }
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(mustQueries);
+        query.setQuery(boolQuery);
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(UploadFile.class))
+                .indexName(ots.getTableName(UploadFile.class))
+                .searchQuery(query)
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return 0;
+        return (int) searchResponse.getTotalCount();
+    }
+
+    @Override
+    public List<UploadFile> listV1(UploadFileListCo uploadFileListCo) {
+        List<UploadFile> result = new ArrayList<>();
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        TermQuery termQuery1 = new TermQuery();
+        termQuery1.setFieldName("albumId");
+        termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
         List<Query> mustQueries = Arrays.asList(termQuery, termQuery1);
         if(!StringUtils.isEmpty(uploadFileListCo.getUserId())) {
             MatchQuery matchQuery = new MatchQuery();
@@ -271,25 +426,50 @@ public class UploadFileServiceImpl implements UploadFileService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("获取列表报错：{}", e.getMessage());
+            log.error("获取列表出错：{}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
         return result;
     }
 
     @Override
-    public void download(String fileId, HttpServletResponse response) throws Exception {
+    public void download(String fileId, HttpServletResponse response) {
         UploadFile file = get(fileId);
         if(file != null) {
             String path = fileId + file.getFileType();
             if(!oss.exists(path)) {
                 response.setHeader("Content-Disposition",
                         "attachment;filename=" + new String(file.getFileName().getBytes(), StandardCharsets.ISO_8859_1));
-                oss.load(path, response.getOutputStream());
+                try {
+                    oss.load(path, response.getOutputStream());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.error("下载文件出错：{}", e.getMessage());
+                    throw new RuntimeException(e.getMessage());
+                }
             } else {
                 throw new RuntimeException("想要下载的文件不存在" + fileId);
             }
         } else {
             throw new RuntimeException("想要下载的文件不存在" + fileId);
         }
+    }
+
+    /**
+     * 修改相册封面
+     * @param uploadFile
+     */
+    private void setCover(UploadFile uploadFile) {
+        PhotoAlbum photoAlbum = PhotoAlbum.builder()
+                .modifyUserId(uploadFile.getModifyUserId())
+                .modifyTime(new Date())
+                .albumId(uploadFile.getAlbumId())
+                .build();
+        //如果是封面修改相册封面
+        if(uploadFile.getIsCover().equals(IsCoverEnum.TRUE.getValue())) {
+            photoAlbum.setCover(uploadFile.getFileId());
+        }
+        ots.updataRow(photoAlbum);
+        log.info("修改相册封面成功:{}", uploadFile.toString());
     }
 }

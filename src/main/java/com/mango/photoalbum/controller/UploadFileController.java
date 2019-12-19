@@ -29,7 +29,7 @@ public class UploadFileController {
     private PhotoAlbumService photoAlbumService;
 
     /**
-     * 上传图片
+     * 文件上传接口
      * @param uploadFileCo
      * @return
      */
@@ -38,52 +38,60 @@ public class UploadFileController {
             value = "文件", required = true)})
     @PostMapping(value = "/file", headers = "content-type=multipart/form-data")
     public Result file(@ModelAttribute UploadFileCo uploadFileCo) {
-        try {
-            return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileCo));
-        } catch (Exception e){
-            e.printStackTrace();
-            log.error("上传文件发生异常{}", e.getMessage());
-            return ResultGenerator.genFailResult("上传文件发生异常");
-        }
+        return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileCo));
     }
 
     /**
-     * 文件详情修改接口
+     * 文件上传接口
+     * @param uploadFileCo
+     * @return
+     */
+    @ApiVersion
+    @ApiOperation(value = "文件上传接口", notes = "文件上传接口")
+    @ApiImplicitParams({@ApiImplicitParam(paramType = "form", dataType="__file", name = "file",
+            value = "文件", required = true)})
+    @PostMapping(value = "/v1/file", headers = "content-type=multipart/form-data")
+    public Result fileV1(@ModelAttribute UploadFileCo uploadFileCo) {
+        return ResultGenerator.genSuccessResult(uploadFileService.saveV1(uploadFileCo));
+    }
+
+    /**
+     * 修改文件接口
      * @param uploadFileUpdateCo
      * @return
      */
     @ApiOperation(value = "修改文件接口", notes = "修改文件接口")
     @PostMapping(value = "/file/update")
     public Result fileUpdate(@RequestBody UploadFileUpdateCo uploadFileUpdateCo) {
-        try {
-            uploadFileService.update(uploadFileUpdateCo);
-            return ResultGenerator.genSuccessResult();
-        } catch (Exception e){
-            e.printStackTrace();
-            log.error("修改文件发生异常{}", e.getMessage());
-            return ResultGenerator.genFailResult("修改文件发生异常");
-        }
+        uploadFileService.update(uploadFileUpdateCo);
+        return ResultGenerator.genSuccessResult();
     }
 
     /**
-     * 上传图片
+     * 文件批量上传接口
      * @param uploadFileMultiCo
      * @return
      */
     @ApiOperation(value = "文件批量上传接口", notes = "swagger批量文件上传不好用请用postman等工具测试")
     @PostMapping(value = "/files", headers = "content-type=multipart/form-data")
     public Result files(@ModelAttribute UploadFileMultiCo uploadFileMultiCo) {
-        try {
-            return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileMultiCo));
-        } catch (Exception e){
-            e.printStackTrace();
-            log.error("上传文件发生异常{}", e.getMessage());
-            return ResultGenerator.genFailResult(e.getMessage());
-        }
+        return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileMultiCo));
     }
 
     /**
-     * 相册详情
+     * 文件批量上传接口
+     * @param uploadFileMultiCo
+     * @return
+     */
+    @ApiVersion
+    @ApiOperation(value = "文件批量上传接口", notes = "swagger批量文件上传不好用请用postman等工具测试")
+    @PostMapping(value = "/v1/files", headers = "content-type=multipart/form-data")
+    public Result filesV1(@ModelAttribute UploadFileMultiCo uploadFileMultiCo) {
+        return ResultGenerator.genSuccessResult(uploadFileService.saveV1(uploadFileMultiCo));
+    }
+
+    /**
+     * 文件详情
      * @param fileId
      * @return
      */
@@ -94,7 +102,7 @@ public class UploadFileController {
     }
 
     /**
-     * 删除相册
+     * 删除文件
      * @param fileId
      * @return
      */
@@ -106,7 +114,7 @@ public class UploadFileController {
     }
 
     /**
-     * 相册列表
+     * 文件列表
      * @return
      */
     @ApiOperation(value = "文件列表", notes = "文件列表")
@@ -129,6 +137,31 @@ public class UploadFileController {
     }
 
     /**
+     * 相册列表
+     * @return
+     */
+    @ApiVersion
+    @ApiOperation(value = "文件列表", notes = "文件列表")
+    @ApiImplicitParams({@ApiImplicitParam(name = "userId", value = "用户id", required = true)})
+    @GetMapping("/v1/list")
+    public Result listV1(@ModelAttribute UploadFileListCo uploadFileListCo) {
+        uploadFileListCo.setTotal(uploadFileService.totalV1(uploadFileListCo));
+        List<UploadFile> fileList = uploadFileService.listV1(uploadFileListCo);
+        PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListCo.getAlbumId());
+        fileList.forEach(file ->{
+            file.setIsCover(IsCoverEnum.FALSE.getValue());
+            if(file.getFileId().equals(photoAlbum.getCover())) {
+                file.setIsCover(IsCoverEnum.TRUE.getValue());
+            }
+        });
+        return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
+                .total(uploadFileListCo.getTotal())
+                .list(fileList)
+                .data(photoAlbum)
+                .build());
+    }
+
+    /**
      * 下载文件
      * @param fileId
      * @param response
@@ -136,12 +169,7 @@ public class UploadFileController {
     @ApiOperation(value = "下载文件", notes = "文件文件")
     @RequestMapping(value = "/download/{fileId}" , method = { RequestMethod.GET, RequestMethod.POST})
     public void download(@PathVariable @ApiParam("文件id") String fileId, HttpServletResponse response) {
-        try {
-            uploadFileService.download(fileId, response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("下载文件发生异常{}", e.getMessage());
-        }
+        uploadFileService.download(fileId, response);
     }
 
 }
