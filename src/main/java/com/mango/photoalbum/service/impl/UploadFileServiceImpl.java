@@ -383,8 +383,8 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public List<UploadFile> listV1(UploadFileListCo uploadFileListCo) {
-        List<Query> mustQueries = new ArrayList<>();
         List<UploadFile> result = new ArrayList<>();
+        List<Query> mustQueries = new ArrayList<>();
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));

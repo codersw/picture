@@ -13,4 +13,10 @@ public class FaceInfoListCo {
 
     @ApiModelProperty(value = "文件id")
     private String fileId;
+
+    @ApiModelProperty(value = "当前页")
+    private Integer pageIndex = 1;
+
+    @ApiModelProperty(value = "每页总条数")
+    private Integer pageSize = 20;
 }

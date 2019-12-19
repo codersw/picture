@@ -1,8 +1,6 @@
 package com.mango.photoalbum.controller;
 
-import com.mango.photoalbum.model.FaceInfoCo;
-import com.mango.photoalbum.model.Result;
-import com.mango.photoalbum.model.ResultGenerator;
+import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -12,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
-@Api(value = "脸部识别接口", tags = {"脸部识别接口"})
+@Api(value = "人脸信息接口", tags = {"人脸信息接口"})
 @Slf4j
 @RestController
 @RequestMapping("/face")
@@ -35,4 +33,12 @@ public class FaceController {
         return ResultGenerator.genSuccessResult();
     }
 
+    @ApiOperation(value = "人脸库记录", notes = "人脸库记录")
+    @GetMapping("/list")
+    public Result list(FaceInfoListCo faceInfoListCo) {
+        return ResultGenerator.genSuccessResult(PageResponse.<FaceInfo>builder()
+                .total(faceService.total(faceInfoListCo))
+                .list(faceService.list(faceInfoListCo))
+                .build());
+    }
 }

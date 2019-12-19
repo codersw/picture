@@ -1,24 +1,33 @@
 package com.mango.photoalbum.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alicloud.openservices.tablestore.model.ColumnValue;
+import com.alicloud.openservices.tablestore.model.Row;
+import com.alicloud.openservices.tablestore.model.search.SearchQuery;
+import com.alicloud.openservices.tablestore.model.search.SearchRequest;
+import com.alicloud.openservices.tablestore.model.search.SearchResponse;
+import com.alicloud.openservices.tablestore.model.search.query.BoolQuery;
+import com.alicloud.openservices.tablestore.model.search.query.Query;
+import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
+import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
+import com.alicloud.openservices.tablestore.model.search.sort.Sort;
+import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.config.ThreadPoolHelper;
 import com.mango.photoalbum.constant.FaceConstant;
 import com.mango.photoalbum.constant.QueueConstant;
 import com.mango.photoalbum.enums.IsDelEnum;
-import com.mango.photoalbum.model.FaceInfo;
-import com.mango.photoalbum.model.FaceInfoCo;
-import com.mango.photoalbum.model.UploadFile;
-import com.mango.photoalbum.model.UploadFileFace;
+import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
 import com.mango.photoalbum.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -133,5 +142,84 @@ public class FaceServiceImpl implements FaceService {
         } else {
             throw new RuntimeException("图片不可以为空");
         }
+    }
+
+    @Override
+    public Integer total(FaceInfoListCo faceInfoListCo) {
+        List<Query> mustQueries = new ArrayList<>();
+        if(!CommonUtils.isNullOrEmpty(faceInfoListCo.getUserId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("person");
+            termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getUserId().toString()));
+            mustQueries.add(termQuery);
+        }
+        if(!StringUtils.isEmpty(faceInfoListCo.getFileId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("fileId");
+            termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getFileId()));
+            mustQueries.add(termQuery);
+        }
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(mustQueries);
+        query.setQuery(boolQuery);
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(FaceInfo.class))
+                .indexName(ots.getTableName(FaceInfo.class))
+                .searchQuery(query)
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return 0;
+        return (int) searchResponse.getTotalCount();
+    }
+
+    @Override
+    public List<FaceInfo> list(FaceInfoListCo faceInfoListCo) {
+        List<FaceInfo> result = new ArrayList<>();
+        List<Query> mustQueries = new ArrayList<>();
+        if(!CommonUtils.isNullOrEmpty(faceInfoListCo.getUserId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("person");
+            termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getUserId().toString()));
+            mustQueries.add(termQuery);
+        }
+        if(!StringUtils.isEmpty(faceInfoListCo.getFileId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("fileId");
+            termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getFileId()));
+            mustQueries.add(termQuery);
+        }
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(mustQueries);
+        query.setQuery(boolQuery);
+        int offset = (faceInfoListCo.getPageIndex() - 1) * faceInfoListCo.getPageSize();
+        query.setOffset(offset);
+        query.setLimit(faceInfoListCo.getPageSize());
+        query.setGetTotalCount(false);// 设置返回总条数
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(FaceInfo.class))
+                .indexName(ots.getTableName(FaceInfo.class))
+                .searchQuery(query)
+                .returnAllColumns(true) // 设置返回所有列
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return result;
+        try {
+            List<Row> rows = searchResponse.getRows();
+            if(!CommonUtils.isNullOrEmpty(rows)){
+                for(Row row : rows) {
+                    result.add(ots.formatRow(row, FaceInfo.class));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取列表出错：{}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+        return result;
     }
 }
