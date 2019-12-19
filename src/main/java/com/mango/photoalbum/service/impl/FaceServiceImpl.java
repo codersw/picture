@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.mango.photoalbum.config.ThreadPoolHelper;
 import com.mango.photoalbum.constant.FaceConstant;
 import com.mango.photoalbum.constant.QueueConstant;
+import com.mango.photoalbum.model.FaceInfoCo;
 import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.model.UploadFileFace;
 import com.mango.photoalbum.service.FaceService;
@@ -66,5 +67,15 @@ public class FaceServiceImpl implements FaceService {
                 log.error("MNS获取消息发生错误:{}" , e.getMessage());
             }
         }
+    }
+
+    @Override
+    public void save(FaceInfoCo faceInfoCo) {
+
+    }
+
+    @Override
+    public void delete(String Person, String Image) {
+
     }
 }

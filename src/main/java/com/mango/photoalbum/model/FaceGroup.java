@@ -9,5 +9,5 @@ import lombok.*;
 @NoArgsConstructor
 public class FaceGroup {
 
-    private String Group;
+    private String group;
 }

@@ -123,12 +123,9 @@ public class UploadFileController {
         uploadFileListCo.setTotal(uploadFileService.total(uploadFileListCo));
         List<UploadFile> fileList = uploadFileService.list(uploadFileListCo);
         PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListCo.getAlbumId());
-        fileList.forEach(file ->{
-            file.setIsCover(IsCoverEnum.FALSE.getValue());
-            if(file.getFileId().equals(photoAlbum.getCover())) {
-                file.setIsCover(IsCoverEnum.TRUE.getValue());
-            }
-        });
+        fileList.stream()
+                .filter(file -> file.getFileId().equals(photoAlbum.getCover()))
+                .forEach(file -> file.setIsCover(IsCoverEnum.TRUE.getValue()));
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
                 .total(uploadFileListCo.getTotal())
                 .list(fileList)
@@ -148,12 +145,9 @@ public class UploadFileController {
         uploadFileListCo.setTotal(uploadFileService.totalV1(uploadFileListCo));
         List<UploadFile> fileList = uploadFileService.listV1(uploadFileListCo);
         PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListCo.getAlbumId());
-        fileList.forEach(file ->{
-            file.setIsCover(IsCoverEnum.FALSE.getValue());
-            if(file.getFileId().equals(photoAlbum.getCover())) {
-                file.setIsCover(IsCoverEnum.TRUE.getValue());
-            }
-        });
+        fileList.stream()
+                .filter(file -> file.getFileId().equals(photoAlbum.getCover()))
+                .forEach(file -> file.setIsCover(IsCoverEnum.TRUE.getValue()));
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
                 .total(uploadFileListCo.getTotal())
                 .list(fileList)

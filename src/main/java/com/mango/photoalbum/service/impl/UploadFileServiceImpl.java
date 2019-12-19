@@ -335,7 +335,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         if(searchResponse == null) return result;
         try {
             List<Row> rows = searchResponse.getRows();
-            if(rows.size() > 0){
+            if(!CommonUtils.isNullOrEmpty(rows)){
                 for(Row row : rows) {
                     result.add(ots.formatRow(row, UploadFile.class));
                 }
@@ -350,17 +350,19 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public Integer totalV1(UploadFileListCo uploadFileListCo) {
+        List<Query> mustQueries = new ArrayList<>();
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        mustQueries.add(termQuery);
         TermQuery termQuery1 = new TermQuery();
         termQuery1.setFieldName("albumId");
         termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
-        List<Query> mustQueries = Arrays.asList(termQuery, termQuery1);
-        if(!StringUtils.isEmpty(uploadFileListCo.getUserId())) {
+        mustQueries.add(termQuery1);
+        if(!CommonUtils.isNullOrEmpty(uploadFileListCo.getUserId())) {
             MatchQuery matchQuery = new MatchQuery();
             matchQuery.setFieldName("persons");
-            matchQuery.setText(uploadFileListCo.getUserId());
+            matchQuery.setText(uploadFileListCo.getUserId().toString());
             mustQueries.add(matchQuery);
         }
         SearchQuery query = new SearchQuery();
@@ -381,18 +383,20 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public List<UploadFile> listV1(UploadFileListCo uploadFileListCo) {
+        List<Query> mustQueries = new ArrayList<>();
         List<UploadFile> result = new ArrayList<>();
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        mustQueries.add(termQuery);
         TermQuery termQuery1 = new TermQuery();
         termQuery1.setFieldName("albumId");
         termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
-        List<Query> mustQueries = Arrays.asList(termQuery, termQuery1);
-        if(!StringUtils.isEmpty(uploadFileListCo.getUserId())) {
+        mustQueries.add(termQuery1);
+        if(!CommonUtils.isNullOrEmpty(uploadFileListCo.getUserId())) {
             MatchQuery matchQuery = new MatchQuery();
             matchQuery.setFieldName("persons");
-            matchQuery.setText(uploadFileListCo.getUserId());
+            matchQuery.setText(uploadFileListCo.getUserId().toString());
             mustQueries.add(matchQuery);
         }
         SearchQuery query = new SearchQuery();
@@ -419,7 +423,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         if(searchResponse == null) return result;
         try {
             List<Row> rows = searchResponse.getRows();
-            if(rows.size() > 0){
+            if(!CommonUtils.isNullOrEmpty(rows)){
                 for(Row row : rows) {
                     result.add(ots.formatRow(row, UploadFile.class));
                 }

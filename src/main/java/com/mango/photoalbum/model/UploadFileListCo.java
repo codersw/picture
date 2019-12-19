@@ -36,7 +36,7 @@ public class UploadFileListCo {
      * 用户id
      */
     @ApiModelProperty(value = "用户id")
-    private String userId;
+    private Integer userId;
 
     /**
      * 总条数

@@ -9,6 +9,7 @@ import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
 import com.mango.photoalbum.enums.AnalyzerEnum;
 import com.mango.photoalbum.enums.IndexTypeEnum;
+import com.mango.photoalbum.enums.IsCoverEnum;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
@@ -122,6 +123,6 @@ public class UploadFile {
      * 是否是封面
      */
     @JsonIgnore
-    private Integer IsCover;
+    private Integer IsCover = IsCoverEnum.FALSE.getValue();
 
 }
