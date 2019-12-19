@@ -1,5 +1,6 @@
 package com.mango.photoalbum.runner;
 
+import com.mango.photoalbum.model.FaceInfo;
 import com.mango.photoalbum.model.PhotoAlbum;
 import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.model.UploadFileFace;
@@ -30,18 +31,22 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-//            //相册
-//            ots.creatTable(PhotoAlbum.class);
-//            ots.deleteSearchIndex(PhotoAlbum.class);
-//            ots.createSearchIndex(PhotoAlbum.class);
-//            //文件
-//            ots.creatTable(UploadFile.class);
-//            ots.deleteSearchIndex(UploadFile.class);
-//            ots.createSearchIndex(UploadFile.class);
-//            //文件识别
-//            ots.creatTable(UploadFileFace.class);
-//            ots.deleteSearchIndex(UploadFileFace.class);
-//            ots.createSearchIndex(UploadFileFace.class);
+            //相册
+            ots.creatTable(PhotoAlbum.class);
+            ots.deleteSearchIndex(PhotoAlbum.class);
+            ots.createSearchIndex(PhotoAlbum.class);
+            //文件
+            ots.creatTable(UploadFile.class);
+            ots.deleteSearchIndex(UploadFile.class);
+            ots.createSearchIndex(UploadFile.class);
+            //文件识别
+            ots.creatTable(UploadFileFace.class);
+            ots.deleteSearchIndex(UploadFileFace.class);
+            ots.createSearchIndex(UploadFileFace.class);
+            //人脸信息
+            ots.creatTable(FaceInfo.class);
+            ots.deleteSearchIndex(FaceInfo.class);
+            ots.createSearchIndex(FaceInfo.class);
             log.info("  _   _   _   _   _   _   _   _");
             log.info(" / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\");
             log.info("( c | o | m | p | l | e | t | e )");
