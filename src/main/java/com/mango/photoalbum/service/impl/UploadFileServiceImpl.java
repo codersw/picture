@@ -68,7 +68,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             }
             String ossFileName = uploadFile.getFileId() + fileType;
             //oss上传图片
-            oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+            oss.save(file.getInputStream(), ossFileName);
             //oss文件路径获取
             uploadFile.setFilePath(oss.getViewUrl(ossFileName));
             //ots保存文件信息
@@ -119,7 +119,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             }
             String ossFileName = uploadFile.getFileId() + fileType;
             //oss上传图片
-            oss.save(uploadFileCo.getFile().getInputStream(), ossFileName);
+            oss.save(file.getInputStream(), ossFileName);
             //oss文件路径获取
             uploadFile.setFilePath(oss.getViewUrl(ossFileName));
             //ots保存文件信息
@@ -133,7 +133,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .IsCover(uploadFileCo.getIsCover())
                     .build());
             //发起图片识别
-            mns.setMessage(QueueConstant.FACEQUEUE, JSONObject.toJSONString(file));
+            mns.setMessage(QueueConstant.FACEQUEUE, JSONObject.toJSONString(uploadFile));
             return uploadFile;
         } catch (Exception e) {
             e.printStackTrace();

@@ -132,10 +132,10 @@ public class PhotoalbumApplicationTests {
     @Test
     public void addFace() {
         face.addFace(FaceInfo.builder()
-                .Group(FaceConstant.GROUP_DEFAUlT)
-                .Person("jackma")
-                .Image("1")
-                .ImageUrl("https://docs.alibabagroup.com/assets2/images/en/news/library_executives_jackma_large.jpg")
+                .group(FaceConstant.GROUP_DEFAUlT)
+                .person("jackma")
+                .image("1")
+                .imageUrl("https://docs.alibabagroup.com/assets2/images/en/news/library_executives_jackma_large.jpg")
                 .build());
     }
 
@@ -153,8 +153,10 @@ public class PhotoalbumApplicationTests {
      */
     @Test
     public void recognizeFace() {
-        List<UploadFileFace> uploadFileFaces = face.recognizeFace("https://attach-mango.oss-cn-beijing.aliyuncs.com/4039e7b9005243b1904fcbd30f437b03.jpg",
-                FaceConstant.GROUP_DEFAUlT);
+        List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
+                .imageUrl("https://attach-mango.oss-cn-beijing.aliyuncs.com/4039e7b9005243b1904fcbd30f437b03.jpg")
+                .group(FaceConstant.GROUP_DEFAUlT)
+                .build());
         log.info(JSONObject.toJSONString(uploadFileFaces));
     }
 

@@ -10,7 +10,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 
 @Api(value = "脸部识别接口", tags = {"脸部识别接口"})
@@ -35,19 +34,5 @@ public class FaceController {
         faceService.save(faceInfoCo);
         return ResultGenerator.genSuccessResult();
     }
-
-    /**
-     * 删除人脸库
-     * @param Person
-     * @param Image
-     * @return
-     */
-    @ApiOperation(value = "删除人脸库", notes = "删除人脸库")
-    @DeleteMapping("/{Person}/{Image}")
-    public Result delete(@PathVariable String Person, @PathVariable String Image) {
-        faceService.delete(Person, Image);
-        return ResultGenerator.genSuccessResult();
-    }
-
 
 }

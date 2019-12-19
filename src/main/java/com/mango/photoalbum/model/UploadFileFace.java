@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
-import com.mango.photoalbum.enums.IndexTypeEnum;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.util.Date;
 
 @Data
@@ -20,16 +18,17 @@ import java.util.Date;
 public class UploadFileFace {
 
     /**
-     * 文件id
-     */
-    @OTSPrimaryKey
-    private String fileId;
-
-    /**
      * 照片
      */
     @OTSPrimaryKey
     private String image;
+
+
+    /**
+     * 文件id
+     */
+    @OTSPrimaryKey
+    private String fileId;
 
     /**
      * 识别到的人

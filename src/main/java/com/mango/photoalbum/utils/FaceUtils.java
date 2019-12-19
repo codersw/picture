@@ -10,6 +10,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.mango.photoalbum.model.FaceInfo;
 import com.mango.photoalbum.model.UploadFileFace;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
@@ -76,10 +77,18 @@ public class FaceUtils {
             request.setDomain(domain);
             request.setVersion(version);
             request.setAction(ACTION_ADD_FACE);
-            putBodyParameter(request, faceInfo);
+            request.putBodyParameter("Group", faceInfo.getGroup()); //添加人脸的分组
+            request.putBodyParameter("Person", faceInfo.getPerson()); //添加人脸的姓名
+            request.putBodyParameter("Image", faceInfo.getImage());   //添加人脸的编号
+            if(!StringUtils.isEmpty(faceInfo.getImageUrl())) {
+                request.putBodyParameter("ImageUrl", faceInfo.getImageUrl()); //检测图片的URL
+            }
+            if(!StringUtils.isEmpty(faceInfo.getContent())) {
+                request.putBodyParameter("Content", faceInfo.getContent()); //检测图片的内容，Base64编码
+            }
             CommonResponse response = face.getCommonResponse(request);
             log.info("添加face成功:{}", response.getData());
-        } catch (ClientException | IllegalAccessException e) {
+        } catch (ClientException e) {
             e.printStackTrace();
             log.error("添加face发生错误:{}", e.getMessage());
         }
@@ -96,10 +105,12 @@ public class FaceUtils {
             request.setDomain(domain);
             request.setVersion(version);
             request.setAction(ACTION_DELETE_FACE);
-            putBodyParameter(request, faceInfo);
+            request.putBodyParameter("Group", faceInfo.getGroup()); //添加人脸的分组
+            request.putBodyParameter("Person", faceInfo.getPerson()); //添加人脸的姓名
+            request.putBodyParameter("Image", faceInfo.getImage());   //添加人脸的编号
             CommonResponse response = face.getCommonResponse(request);
             log.info("删除face成功:{}", response.getData());
-        } catch (ClientException | IllegalAccessException e) {
+        } catch (ClientException e) {
             e.printStackTrace();
             log.error("删除face发生错误:{}", e.getMessage());
         }
@@ -148,19 +159,18 @@ public class FaceUtils {
 
     /**
      * 接口用于查找注册库中的人脸
-     * @param groupName
-     * @param recognizeFaceImageUrl
+     * @param faceInfo
      * @return
      */
-    public List<UploadFileFace> recognizeFace(String groupName, String recognizeFaceImageUrl) {
+    public List<UploadFileFace> recognizeFace(FaceInfo faceInfo) {
         try {
             CommonRequest request = new CommonRequest();
             request.setMethod(MethodType.POST);
             request.setDomain(domain);
             request.setVersion(version);
             request.setAction(ACTION_RECOGNIZE_FACE);
-            request.putBodyParameter("Group", groupName);
-            request.putBodyParameter("ImageUrl", recognizeFaceImageUrl);
+            request.putBodyParameter("Group", faceInfo.getGroup());
+            request.putBodyParameter("ImageUrl", faceInfo.getImageUrl());
             CommonResponse response = face.getCommonResponse(request);
             log.info("查找注册库中的人脸成功:{}", response.getData());
             JSONObject json = JSONObject.parseObject(response.getData());
@@ -172,21 +182,4 @@ public class FaceUtils {
         return null;
     }
 
-    /**
-     * 格式化参数
-     * @param request
-     * @param faceInfo
-     * @throws IllegalAccessException
-     */
-    private void putBodyParameter(CommonRequest request, FaceInfo faceInfo) throws IllegalAccessException {
-        Field[] fields = faceInfo.getClass().getDeclaredFields();
-        for(Field field : fields) {
-            field.setAccessible(true);
-            String name = field.getName(); // 获取属性的名字
-            Object value = field.get(faceInfo);//获取属性值
-            if(!CommonUtils.isNullOrEmpty(value)){
-                request.putBodyParameter(name, value);
-            }
-        }
-    }
 }

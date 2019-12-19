@@ -16,7 +16,7 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@OTSClass(name = "face_info")
+@OTSClass(name = "face_info", searchIndex = false)
 public class FaceInfo {
 
     /**
@@ -62,24 +62,6 @@ public class FaceInfo {
     private String content;
 
     /**
-     * 创建人
-     */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
-    private Integer createUserId;
-
-    /**
-     * 最后修改人
-     */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
-    private Integer modifyUserId;
-
-    /**
-     * 是否删除
-     */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
-    private Integer isDel;
-
-    /**
      * 创建时间
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
@@ -87,11 +69,4 @@ public class FaceInfo {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;
 
-    /**
-     * 最后修改时间
-     */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
-    private Date modifyTime;
 }
