@@ -24,7 +24,6 @@ public class UploadFileFace {
     @OTSPrimaryKey
     private String image;
 
-
     /**
      * 文件id
      */

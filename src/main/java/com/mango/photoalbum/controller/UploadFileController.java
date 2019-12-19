@@ -166,4 +166,17 @@ public class UploadFileController {
         uploadFileService.download(fileId, response);
     }
 
+    /**
+     * 文件人脸信息列表
+     * @param uploadFileFaceListCo
+     * @return
+     */
+    @ApiOperation(value = "文件人脸信息列表", notes = "文件人脸信息列表")
+    @GetMapping("/listFileFace")
+    public Result listFileFace(UploadFileFaceListCo uploadFileFaceListCo) {
+        return ResultGenerator.genSuccessResult(PageResponse.<UploadFileFace>builder()
+                .total(uploadFileService.totalFileFace(uploadFileFaceListCo))
+                .list(uploadFileService.listFileFace(uploadFileFaceListCo))
+                .build());
+    }
 }

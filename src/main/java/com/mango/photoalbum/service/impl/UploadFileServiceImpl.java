@@ -459,6 +459,85 @@ public class UploadFileServiceImpl implements UploadFileService {
         }
     }
 
+    @Override
+    public Integer totalFileFace(UploadFileFaceListCo uploadFileFaceListCo) {
+        List<Query> mustQueries = new ArrayList<>();
+        if(!CommonUtils.isNullOrEmpty(uploadFileFaceListCo.getUserId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("person");
+            termQuery.setTerm(ColumnValue.fromString(uploadFileFaceListCo.getUserId().toString()));
+            mustQueries.add(termQuery);
+        }
+        if(!StringUtils.isEmpty(uploadFileFaceListCo.getFileId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("fileId");
+            termQuery.setTerm(ColumnValue.fromString(uploadFileFaceListCo.getFileId()));
+            mustQueries.add(termQuery);
+        }
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(mustQueries);
+        query.setQuery(boolQuery);
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(UploadFileFace.class))
+                .indexName(ots.getTableName(UploadFileFace.class))
+                .searchQuery(query)
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return 0;
+        return (int) searchResponse.getTotalCount();
+    }
+
+    @Override
+    public List<UploadFileFace> listFileFace(UploadFileFaceListCo uploadFileFaceListCo) {
+        List<UploadFileFace> result = new ArrayList<>();
+        List<Query> mustQueries = new ArrayList<>();
+        if(!CommonUtils.isNullOrEmpty(uploadFileFaceListCo.getUserId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("person");
+            termQuery.setTerm(ColumnValue.fromString(uploadFileFaceListCo.getUserId().toString()));
+            mustQueries.add(termQuery);
+        }
+        if(!StringUtils.isEmpty(uploadFileFaceListCo.getFileId())) {
+            TermQuery termQuery = new TermQuery();
+            termQuery.setFieldName("fileId");
+            termQuery.setTerm(ColumnValue.fromString(uploadFileFaceListCo.getFileId()));
+            mustQueries.add(termQuery);
+        }
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(mustQueries);
+        query.setQuery(boolQuery);
+        int offset = (uploadFileFaceListCo.getPageIndex() - 1) * uploadFileFaceListCo.getPageSize();
+        query.setOffset(offset);
+        query.setLimit(uploadFileFaceListCo.getPageSize());
+        query.setGetTotalCount(false);// 设置返回总条数
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(UploadFileFace.class))
+                .indexName(ots.getTableName(UploadFileFace.class))
+                .searchQuery(query)
+                .returnAllColumns(true) // 设置返回所有列
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return result;
+        try {
+            List<Row> rows = searchResponse.getRows();
+            if(!CommonUtils.isNullOrEmpty(rows)){
+                for(Row row : rows) {
+                    result.add(ots.formatRow(row, UploadFileFace.class));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取列表出错：{}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+        return result;
+    }
+
     /**
      * 修改相册封面
      * @param uploadFile
