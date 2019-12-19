@@ -30,7 +30,7 @@ public class FaceController {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "form", dataType="__file", name = "file",
             value = "文件", required = true)})
     @PostMapping(headers = "content-type=multipart/form-data")
-    public Result save(@RequestBody FaceInfoCo faceInfoCo) {
+    public Result save(@ModelAttribute FaceInfoCo faceInfoCo) {
         faceService.save(faceInfoCo);
         return ResultGenerator.genSuccessResult();
     }

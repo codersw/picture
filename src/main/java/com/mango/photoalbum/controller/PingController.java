@@ -72,11 +72,11 @@ public class PingController {
         long iowait = ticks[CentralProcessor.TickType.IOWAIT.getIndex()] - prevTicks[CentralProcessor.TickType.IOWAIT.getIndex()];
         long idle = ticks[CentralProcessor.TickType.IDLE.getIndex()] - prevTicks[CentralProcessor.TickType.IDLE.getIndex()];
         double totalCpu = user + nice + cSys + idle + iowait + irq + softirq + steal;
-        cpuInfo.put("核心数", processor.getLogicalProcessorCount() + "个");
-        cpuInfo.put("CPU系统使用率", ArithUtils.multiply(cSys / totalCpu, 100, 2) + "%");
-        cpuInfo.put("CPU用户使用率", ArithUtils.multiply(user / totalCpu, 100, 2) + "%");
-        cpuInfo.put("CPU当前等待率", ArithUtils.multiply(iowait / totalCpu, 100, 2) + "%");
-        cpuInfo.put("CPU当前空闲率", ArithUtils.multiply(idle / totalCpu, 100, 2) + "%");
+        cpuInfo.put("核心数", processor.getLogicalProcessorCount() + " 个");
+        cpuInfo.put("CPU系统使用率", ArithUtils.multiply(cSys / totalCpu, 100, 2) + " %");
+        cpuInfo.put("CPU用户使用率", ArithUtils.multiply(user / totalCpu, 100, 2) + " %");
+        cpuInfo.put("CPU当前等待率", ArithUtils.multiply(iowait / totalCpu, 100, 2) + " %");
+        cpuInfo.put("CPU当前空闲率", ArithUtils.multiply(idle / totalCpu, 100, 2) + " %");
         result.put("CPU信息", cpuInfo);
     }
 
@@ -90,10 +90,10 @@ public class PingController {
         double total = ArithUtils.divide(memory.getTotal(), (1024 * 1024 * 1024), 2);
         double free = ArithUtils.divide(memory.getAvailable(), (1024 * 1024 * 1024), 2);
         double used = ArithUtils.subtract(total, free, 2);
-        memInfo.put("内存总量", total + "G");
-        memInfo.put("已用内存", used + "G");
-        memInfo.put("剩余内存", free + "G");
-        memInfo.put("使用率", ArithUtils.multiply(ArithUtils.divide(used, total, 4), 100, 2) + "%");
+        memInfo.put("内存总量", total + " G");
+        memInfo.put("已用内存", used + " G");
+        memInfo.put("剩余内存", free + " G");
+        memInfo.put("使用率", ArithUtils.multiply(ArithUtils.divide(used, total, 4), 100, 2) + " %");
         result.put("服务器内存", memInfo);
     }
 
@@ -107,9 +107,9 @@ public class PingController {
         double total = ArithUtils.divide(Runtime.getRuntime().totalMemory(), (1024 * 1024), 2);
         double max = ArithUtils.divide(Runtime.getRuntime().maxMemory(), (1024 * 1024), 2);
         double free = ArithUtils.divide(Runtime.getRuntime().freeMemory(), (1024 * 1024), 2);
-        jvmInfo.put("JVM内存总量", total + "M");
-        jvmInfo.put("JVM最大可用内存", max + "M");
-        jvmInfo.put("JVM空闲内存", free + "M");
+        jvmInfo.put("JVM内存总量", total + " M");
+        jvmInfo.put("JVM最大可用内存", max + " M");
+        jvmInfo.put("JVM空闲内存", free + " M");
         jvmInfo.put("JDK版本", props.getProperty("java.version"));
         jvmInfo.put("JDK路径", props.getProperty("java.home"));
         jvmInfo.put("JDK名字", ManagementFactory.getRuntimeMXBean().getVmName());
@@ -138,7 +138,7 @@ public class PingController {
             sysFile.put("总大小", convertFileSize(total));
             sysFile.put("剩余大小", convertFileSize(free));
             sysFile.put("已经使用量", convertFileSize(used));
-            sysFile.put("资源的使用率", ArithUtils.multiply(ArithUtils.divide(used, total, 4), 100));
+            sysFile.put("资源的使用率", ArithUtils.multiply(ArithUtils.divide(used, total, 4), 100) + " %");
             sysFiles.add(sysFile);
         }
         result.put("磁盘信息", sysFiles);
