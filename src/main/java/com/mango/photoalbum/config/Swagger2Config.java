@@ -25,25 +25,15 @@ import java.util.Arrays;
 public class Swagger2Config {
 
     /**
-     * 默认分组
-     * 不包括有注解标明版本号的
+     * 默认分组 返回所有接口
      * @return
      */
     @Bean
-    @SuppressWarnings("deprecation")
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.mango.photoalbum"))
-                .apis(p -> {
-                    assert p != null;
-                    ApiVersion apiVersion = p.declaringClass().getAnnotation(ApiVersion.class);
-                    if(CommonUtils.isNullOrEmpty(apiVersion)) {
-                        apiVersion = p.getHandlerMethod().getMethodAnnotation(ApiVersion.class);
-                    }
-                    return apiVersion == null;
-                })
                 .paths(PathSelectors.any())
                 .build();
     }
