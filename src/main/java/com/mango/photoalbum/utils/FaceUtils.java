@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
 /**
  * face工具类
@@ -120,7 +121,7 @@ public class FaceUtils {
      * 列举注册库中的人脸
      * @param groupName 需要查询的库
      */
-    public void listFace(String groupName) {
+    public Map listFace(String groupName) {
         try {
             CommonRequest request = new CommonRequest();
             request.setMethod(MethodType.POST);
@@ -129,11 +130,14 @@ public class FaceUtils {
             request.setAction(ACTION_LIST_FACE);
             request.putBodyParameter("Group", groupName);
             CommonResponse response = face.getCommonResponse(request);
-            log.info("注册库中的face成功:{}", response.getData());
+            log.info("列举注册库中的face成功:{}", response.getData());
+            JSONObject json = JSONObject.parseObject(response.getData());
+            return JSONObject.parseObject(json.getString("Data"), Map.class);
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("注册库中的face发生错误:{}", e.getMessage());
+            log.error("列举注册库中的face发生错误:{}", e.getMessage());
         }
+        return null;
     }
 
     /**

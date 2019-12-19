@@ -26,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -221,5 +218,10 @@ public class FaceServiceImpl implements FaceService {
             throw new RuntimeException(e.getMessage());
         }
         return result;
+    }
+
+    @Override
+    public Map listFace() {
+        return face.listFace(FaceConstant.GROUP_DEFAUlT);
     }
 }

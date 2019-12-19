@@ -33,6 +33,11 @@ public class FaceController {
         return ResultGenerator.genSuccessResult();
     }
 
+    /**
+     * 人脸库记录
+     * @param faceInfoListCo
+     * @return
+     */
     @ApiOperation(value = "人脸库记录", notes = "人脸库记录")
     @GetMapping("/list")
     public Result list(FaceInfoListCo faceInfoListCo) {
@@ -40,5 +45,15 @@ public class FaceController {
                 .total(faceService.total(faceInfoListCo))
                 .list(faceService.list(faceInfoListCo))
                 .build());
+    }
+
+    /**
+     * 人脸库列表
+     * @return
+     */
+    @ApiOperation(value = "人脸库列表", notes = "人脸库列表")
+    @GetMapping("/listFace")
+    public Result listFace() {
+        return ResultGenerator.genSuccessResult(faceService.listFace());
     }
 }

@@ -5,6 +5,7 @@ import com.mango.photoalbum.model.FaceInfoCo;
 import com.mango.photoalbum.model.FaceInfoListCo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FaceService {
 
@@ -13,4 +14,6 @@ public interface FaceService {
     Integer total(FaceInfoListCo faceInfoListCo);
 
     List<FaceInfo> list(FaceInfoListCo faceInfoListCo);
+
+    Map listFace();
 }
