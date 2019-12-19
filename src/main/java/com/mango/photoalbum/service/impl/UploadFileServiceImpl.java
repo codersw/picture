@@ -133,7 +133,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .IsCover(uploadFileCo.getIsCover())
                     .build());
             //发起图片识别
-            mns.setMessage(QueueConstant.FACEQUEUE, JSONObject.toJSONString(uploadFile));
+            mns.setMessage(QueueConstant.FACE_QUEUE, JSONObject.toJSONString(uploadFile));
             return uploadFile;
         } catch (Exception e) {
             e.printStackTrace();
