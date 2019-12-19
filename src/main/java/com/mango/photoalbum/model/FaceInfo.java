@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import com.mango.photoalbum.enums.IndexTypeEnum;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.util.Date;
 
 @Data
@@ -16,7 +16,7 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@OTSClass(name = "face_info", searchIndex = false)
+@OTSClass(name = "face_info")
 public class FaceInfo {
 
     /**
@@ -34,13 +34,13 @@ public class FaceInfo {
     /**
      * 人脸的人信息
      */
-    @OTSColumn
+    @OTSColumn(indexType = IndexTypeEnum.KEYWORD)
     private String person;
 
     /**
      * 上传后的文件id
      */
-    @OTSColumn
+    @OTSColumn(indexType = IndexTypeEnum.KEYWORD)
     private String fileId;
 
     /**
@@ -64,7 +64,7 @@ public class FaceInfo {
     /**
      * 创建时间
      */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;
