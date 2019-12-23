@@ -133,6 +133,12 @@
             <version>1.1.8</version>
             <classifier>jar-with-dependencies</classifier>
         </dependency>
+        <!-- rocketmq -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>2.0.4</version>
+        </dependency>
         <!-- acm -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

@@ -39,7 +39,7 @@ public class MnsUtils {
 
     private MNSClient mns;
 
-    @PostConstruct
+    //@PostConstruct
     private void init() {
         try {
             ClientConfiguration clientConfiguration = new ClientConfiguration();

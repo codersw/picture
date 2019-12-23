@@ -45,7 +45,7 @@ public class FaceServiceImpl implements FaceService {
     @Resource
     private OssUtils oss;
 
-    @PostConstruct
+    //@PostConstruct
     private void init() {
         ThreadPoolHelper pool = new ThreadPoolHelper();
         pool.Executor(this::getMessage);
