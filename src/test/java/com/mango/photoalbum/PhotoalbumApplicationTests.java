@@ -17,6 +17,12 @@ import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.FaceUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,5 +194,18 @@ public class PhotoalbumApplicationTests {
                 .build();
         SearchResponse searchResponse = ots.searchQuery(searchRequest);
         log.info(JSONObject.toJSONString(searchResponse));
+    }
+
+    @Test
+    public void producerTest() throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
+        DefaultMQProducer producer = new DefaultMQProducer("producer_group");
+        producer.setNamesrvAddr("localhost:9876");
+        producer.start();
+        for (int i = 0; i < 10; i++) {
+            byte[] message = ("hello RocketMQ" + i).getBytes();
+            Message msg = new Message("TopicTest",message);
+            SendResult sendResult = producer.send(msg);
+            System.out.printf("%s%n",sendResult);
+        }
     }
 }

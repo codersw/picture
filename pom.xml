@@ -126,13 +126,6 @@
             <artifactId>tablestore</artifactId>
             <version>5.4.0</version>
         </dependency>
-        <!--mns-->
-        <dependency>
-            <groupId>com.aliyun.mns</groupId>
-            <artifactId>aliyun-sdk-mns</artifactId>
-            <version>1.1.8</version>
-            <classifier>jar-with-dependencies</classifier>
-        </dependency>
         <!-- rocketmq -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>

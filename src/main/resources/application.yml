@@ -16,3 +16,5 @@ management:
         include: '*'
 project:
   version: @project.version@
+rocketmq:
+  name-server: ${aliyun.mq.nameServer}

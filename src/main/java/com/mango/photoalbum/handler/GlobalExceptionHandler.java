@@ -7,7 +7,6 @@ import com.mango.photoalbum.model.Result;
 import com.mango.photoalbum.model.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
@@ -35,22 +33,37 @@ public class GlobalExceptionHandler {
     private static final String SYSTEM_EXCEPTION = "########## SYSTEM_EXCEPTION ############  %s";
     private static final String APPLICATION_EXCEPTION = "########## APPLICATION_EXCEPTION ############  %s";
 
+    /**
+     *  Exception异常处理
+     * @param e
+     * @return
+     */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    public Result defaultErrorHandler(HttpServletRequest req, Exception e) {
+    public Result defaultErrorHandler(Exception e) {
         log.error(String.format(SYSTEM_EXCEPTION, e.getMessage()), e);
         return ResultGenerator.genFailResult(DEFAULT_MESSAGE);
     }
 
+    /**
+     * RuntimeException异常处理
+     * @param e
+     * @return
+     */
     @ExceptionHandler(value = RuntimeException.class)
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    public Result applicationExceptionHandler(HttpServletRequest req, Exception e) {
+    public Result applicationExceptionHandler(Exception e) {
         log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
         return ResultGenerator.genFailResult(e.getMessage());
     }
 
+    /**
+     * MethodArgumentNotValidException异常处理
+     * @param e
+     * @return
+     */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     @ResponseBody
     public Result handleBindException(MethodArgumentNotValidException e) {
@@ -63,6 +76,11 @@ public class GlobalExceptionHandler {
         }
     }
 
+    /**
+     * BindException异常处理
+     * @param e
+     * @return
+     */
     @ExceptionHandler(value = BindException.class)
     @ResponseBody
     public Result handleBindException(BindException e) {
@@ -75,6 +93,11 @@ public class GlobalExceptionHandler {
         }
     }
 
+    /**
+     * UnauthorizedException异常处理
+     * @param e
+     * @return
+     */
     @ExceptionHandler(value = UnauthorizedException.class)
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)

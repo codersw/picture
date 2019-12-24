@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
+/**
+ * 人脸库接口
+ * @author swen
+ */
 @Api(value = "人脸库接口", tags = {"人脸库接口"})
 @Slf4j
 @RestController

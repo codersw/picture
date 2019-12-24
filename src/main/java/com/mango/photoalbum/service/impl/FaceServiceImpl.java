@@ -1,6 +1,5 @@
 package com.mango.photoalbum.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.Row;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
@@ -12,9 +11,7 @@ import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
-import com.mango.photoalbum.config.ThreadPoolHelper;
 import com.mango.photoalbum.constant.FaceConstant;
-import com.mango.photoalbum.constant.QueueConstant;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
@@ -23,11 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import javax.annotation.PostConstruct;
+
 import javax.annotation.Resource;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,52 +33,43 @@ public class FaceServiceImpl implements FaceService {
     private FaceUtils face;
 
     @Resource
-    private MnsUtils mns;
-
-    @Resource
     private OtsUtils ots;
 
     @Resource
     private OssUtils oss;
 
-    //@PostConstruct
-    private void init() {
-        ThreadPoolHelper pool = new ThreadPoolHelper();
-        pool.Executor(this::getMessage);
-    }
-
     /**
      * 获取消息
      */
-    private void getMessage() {
-        while (true) {
-            try {
-                String bodyStr = mns.getMessage(QueueConstant.FACE_QUEUE);
-                if(!StringUtils.isEmpty(bodyStr)) {
-                    UploadFile file = JSONObject.parseObject(bodyStr, UploadFile.class);
-                    List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
-                            .imageUrl(file.getFilePath())
-                            .group(FaceConstant.GROUP_DEFAUlT)
-                            .build());
-                    if(!CommonUtils.isNullOrEmpty(uploadFileFaces)) {
-                        uploadFileFaces.forEach(uploadFileFace -> {
-                            uploadFileFace.setFileId(file.getFileId());
-                            ots.creatRow(uploadFileFace);
-                        });
-                        List<String> persons = uploadFileFaces.stream().filter(x -> x.getScore() >= FaceConstant.SCORE).map(UploadFileFace::getPerson).collect(Collectors.toList());
-                        ots.updataRow(UploadFile.builder()
-                                .fileId(file.getFileId())
-                                .persons(String.join(",", persons))
-                                .build());
-                    }
-                }
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error("MNS获取消息发生错误:{}" , e.getMessage());
-            }
-        }
-    }
+//    private void getMessage() {
+//        while (true) {
+//            try {
+//
+//                if(!StringUtils.isEmpty(bodyStr)) {
+//                    UploadFile file = JSONObject.parseObject(bodyStr, UploadFile.class);
+//                    List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
+//                            .imageUrl(file.getFilePath())
+//                            .group(FaceConstant.GROUP_DEFAUlT)
+//                            .build());
+//                    if(!CommonUtils.isNullOrEmpty(uploadFileFaces)) {
+//                        uploadFileFaces.forEach(uploadFileFace -> {
+//                            uploadFileFace.setFileId(file.getFileId());
+//                            ots.creatRow(uploadFileFace);
+//                        });
+//                        List<String> persons = uploadFileFaces.stream().filter(x -> x.getScore() >= FaceConstant.SCORE).map(UploadFileFace::getPerson).collect(Collectors.toList());
+//                        ots.updataRow(UploadFile.builder()
+//                                .fileId(file.getFileId())
+//                                .persons(String.join(",", persons))
+//                                .build());
+//                    }
+//                }
+//                Thread.sleep(1000);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                log.error("MNS获取消息发生错误:{}" , e.getMessage());
+//            }
+//        }
+//    }
 
     @Override
     public void save(FaceInfoCo faceInfoCo) {

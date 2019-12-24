@@ -10,7 +10,6 @@ import com.alicloud.openservices.tablestore.model.search.query.*;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
-import com.mango.photoalbum.constant.QueueConstant;
 import com.mango.photoalbum.enums.IsCoverEnum;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.model.*;
@@ -23,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 

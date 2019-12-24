@@ -14,9 +14,6 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
-/**
- * 文件实体
- */
 @Data
 @Builder
 @ToString

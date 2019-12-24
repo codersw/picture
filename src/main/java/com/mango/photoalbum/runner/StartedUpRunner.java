@@ -1,17 +1,11 @@
 package com.mango.photoalbum.runner;
 
-import com.mango.photoalbum.constant.QueueConstant;
-import com.mango.photoalbum.model.FaceInfo;
-import com.mango.photoalbum.model.PhotoAlbum;
-import com.mango.photoalbum.model.UploadFile;
-import com.mango.photoalbum.model.UploadFileFace;
-import com.mango.photoalbum.utils.MnsUtils;
 import com.mango.photoalbum.utils.OtsUtils;
+import com.mango.photoalbum.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
@@ -52,8 +46,6 @@ public class StartedUpRunner implements ApplicationRunner {
             ots.creatTable(FaceInfo.class);
             ots.deleteSearchIndex(FaceInfo.class);
             ots.createSearchIndex(FaceInfo.class);
-            //创建队列
-            mns.createQueue(QueueConstant.FACE_QUEUE);
             log.info("  _   _   _   _   _   _   _   _");
             log.info(" / \\ / \\ / \\ / \\ / \\ / \\ / \\ / \\");
             log.info("( c | o | m | p | l | e | t | e )");

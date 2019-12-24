@@ -1,5 +1,9 @@
 package com.mango.photoalbum.enums;
 
+/**
+ * 多元索引类型
+ * @author swen
+ */
 public enum IndexTypeEnum {
     LONG,
     DOUBLE,

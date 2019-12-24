@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
 
 /**
  * 用于注解在表格存储数据类的头部，传入列的标识
+ * @author swen
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

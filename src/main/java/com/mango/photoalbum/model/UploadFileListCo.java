@@ -39,6 +39,12 @@ public class UploadFileListCo {
     private Integer userId;
 
     /**
+     * 查询类型
+     */
+    @ApiModelProperty(value = "查询类型")
+    private Integer type;
+
+    /**
      * 总条数
      */
     @ApiModelProperty(hidden = true)

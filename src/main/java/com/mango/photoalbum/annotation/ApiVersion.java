@@ -6,6 +6,7 @@ import java.lang.annotation.*;
 
 /**
  * 用于标记版本号
+ * @author swen
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
