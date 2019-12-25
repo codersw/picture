@@ -107,7 +107,7 @@ public class FaceServiceImpl implements FaceService {
             termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getUserId().toString()));
             mustQueries.add(termQuery);
         }
-        if(!StringUtils.isEmpty(faceInfoListCo.getFileId())) {
+        if(StringUtils.isNotEmpty(faceInfoListCo.getFileId())) {
             TermQuery termQuery = new TermQuery();
             termQuery.setFieldName("fileId");
             termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getFileId()));
@@ -141,7 +141,7 @@ public class FaceServiceImpl implements FaceService {
             termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getUserId().toString()));
             mustQueries.add(termQuery);
         }
-        if(!StringUtils.isEmpty(faceInfoListCo.getFileId())) {
+        if(StringUtils.isNotEmpty(faceInfoListCo.getFileId())) {
             TermQuery termQuery = new TermQuery();
             termQuery.setFieldName("fileId");
             termQuery.setTerm(ColumnValue.fromString(faceInfoListCo.getFileId()));
