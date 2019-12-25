@@ -35,7 +35,7 @@ public class UploadFileListV1Co {
     /**
      * 用户id
      */
-    @ApiModelProperty(value = "用户id", required = true)
+    @ApiModelProperty(value = "用户id")
     private Integer userId;
 
     /**
@@ -47,7 +47,7 @@ public class UploadFileListV1Co {
     /**
      * 时间排序
      */
-    @ApiModelProperty(value = "时间排序")
+    @ApiModelProperty(value = "时间排序 0 升 1 降 ")
     private Integer order = OrderEnum.DESC.getValue();
 
     /**

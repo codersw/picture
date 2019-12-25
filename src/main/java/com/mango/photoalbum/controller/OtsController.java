@@ -1,6 +1,7 @@
 package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.annotation.RequiredPermission;
+import com.mango.photoalbum.constant.PermissionConst;
 import com.mango.photoalbum.model.Result;
 import com.mango.photoalbum.model.ResultGenerator;
 import com.mango.photoalbum.utils.OtsUtils;
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @RestController
 @RequestMapping("/ots")
-@RequiredPermission
+@RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
 public class OtsController {
 
     @Resource

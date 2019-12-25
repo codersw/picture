@@ -2,6 +2,7 @@ package com.mango.photoalbum.controller;
 
 
 import com.mango.photoalbum.annotation.RequiredPermission;
+import com.mango.photoalbum.constant.PermissionConst;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import io.swagger.annotations.Api;
@@ -18,7 +19,6 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping("/album")
-@RequiredPermission
 public class PhotoAlbumController {
 
     @Resource
@@ -31,7 +31,20 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "相册详情", notes = "相册详情")
     @GetMapping("/{albumId}")
+    @RequiredPermission
     public Result get(@PathVariable String albumId) {
+        return ResultGenerator.genSuccessResult(photoAlbumService.get(albumId));
+    }
+
+    /**
+     * 相册详情
+     * @param albumId
+     * @return
+     */
+    @ApiOperation(value = "相册详情", notes = "相册详情")
+    @GetMapping("/admin/{albumId}")
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+    public Result getAdmin(@PathVariable String albumId) {
         return ResultGenerator.genSuccessResult(photoAlbumService.get(albumId));
     }
 
@@ -42,6 +55,7 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "删除相册", notes = "删除相册")
     @DeleteMapping("/{albumId}")
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result delete(@PathVariable String albumId) {
         photoAlbumService.delete(albumId);
         return ResultGenerator.genSuccessResult();
@@ -53,6 +67,7 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "保存相册", notes = "保存相册")
     @PostMapping
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result save(@RequestBody PhotoAlbumCo photoAlbumCo) {
         return ResultGenerator.genSuccessResult(photoAlbumService.save(photoAlbumCo));
     }
@@ -63,7 +78,22 @@ public class PhotoAlbumController {
      */
     @ApiOperation(value = "相册列表", notes = "相册列表")
     @GetMapping("/list")
+    @RequiredPermission
     public Result list(PhotoAlbumListCo photoAlbumListCo){
+        return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
+                .total(photoAlbumService.total(photoAlbumListCo))
+                .list(photoAlbumService.list(photoAlbumListCo))
+                .build());
+    }
+
+    /**
+     * 相册列表
+     * @return
+     */
+    @ApiOperation(value = "相册列表", notes = "相册列表")
+    @GetMapping("/admin/list")
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+    public Result listAdmin(PhotoAlbumListCo photoAlbumListCo){
         return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
                 .total(photoAlbumService.total(photoAlbumListCo))
                 .list(photoAlbumService.list(photoAlbumListCo))
