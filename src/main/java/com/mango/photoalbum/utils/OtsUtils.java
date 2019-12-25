@@ -17,6 +17,7 @@ import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import com.mango.photoalbum.exception.PhotoAlbumException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -103,9 +104,11 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("创建表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            throw new PhotoAlbumException("创建表格失败!");
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("创建表格失败!请求失败详情：{}", e.getMessage());
+            throw new PhotoAlbumException("创建表格失败!");
         }
     }
 
@@ -121,9 +124,11 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.error("删除表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            throw new PhotoAlbumException("删除表格失败!");
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("删除表格失败!请求失败详情：{}", e.getMessage());
+            throw new PhotoAlbumException("删除表格失败!");
         }
     }
 
@@ -171,9 +176,11 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.info("创建索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            throw new PhotoAlbumException("创建索引失败!");
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("创建索引失败!请求失败详情：{}", e.getMessage());
+            throw new PhotoAlbumException("创建索引失败!");
         }
     }
 
@@ -191,9 +198,11 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.info("删除索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            throw new PhotoAlbumException("删除索引失败!");
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("删除索引失败!请求失败详情：{}", e.getMessage());
+            throw new PhotoAlbumException("删除索引失败!");
         }
     }
 
@@ -215,9 +224,11 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.info("创建多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            throw new PhotoAlbumException("创建多元索引失败!");
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("创建多元索引失败!请求失败详情：{}", e.getMessage());
+            throw new PhotoAlbumException("创建多元索引失败!");
         }
     }
 
@@ -238,9 +249,11 @@ public class OtsUtils {
         } catch (TableStoreException e) {
             e.printStackTrace();
             log.info("删除多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+            throw new PhotoAlbumException("删除多元索引失败!");
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("删除多元索引!请求失败详情：{}", e.getMessage());
+            log.error("删除多元索引失败!请求失败详情：{}", e.getMessage());
+            throw new PhotoAlbumException("删除多元索引失败!");
         }
     }
 

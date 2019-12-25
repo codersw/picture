@@ -2,6 +2,7 @@ package com.mango.photoalbum.handler;
 
 
 import com.mango.photoalbum.enums.ResultCodeEnum;
+import com.mango.photoalbum.exception.PhotoAlbumException;
 import com.mango.photoalbum.exception.UnauthorizedException;
 import com.mango.photoalbum.model.Result;
 import com.mango.photoalbum.model.ResultGenerator;
@@ -104,5 +105,18 @@ public class GlobalExceptionHandler {
     public Result applicationUnauthorizedException(UnauthorizedException e) {
         log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
         return ResultGenerator.genResult(ResultCodeEnum.UNAUTHORIZED, e.getMessage());
+    }
+
+    /**
+     * PhotoAlbumException异常处理
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = PhotoAlbumException.class)
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    public Result applicationPhotoAlbumException(UnauthorizedException e) {
+        log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
+        return ResultGenerator.genResult(ResultCodeEnum.FAIL, e.getMessage());
     }
 }
