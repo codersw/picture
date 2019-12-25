@@ -182,8 +182,8 @@ public class FaceUtils {
         } catch (ClientException e) {
             e.printStackTrace();
             log.error("查找注册库中的人脸发生错误:{}", e.getMessage());
+            throw new RuntimeException("查找注册库中的人脸发生错误:" +  e.getMessage());
         }
-        return null;
     }
 
 }
