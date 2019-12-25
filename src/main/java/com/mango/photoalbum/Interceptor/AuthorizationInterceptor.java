@@ -3,6 +3,7 @@ package com.mango.photoalbum.Interceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mango.photoalbum.annotation.RequiredPermission;
+import com.mango.photoalbum.constant.PermissionConst;
 import com.mango.photoalbum.constant.TokenConstant;
 import com.mango.photoalbum.exception.UnauthorizedException;
 import com.mango.photoalbum.utils.CommonUtils;
@@ -50,19 +51,25 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         if (requiredPermission != null && StringUtils.isNotBlank(requiredPermission.value())) {
             //验证cookie中token的有效性
             String token = CookieUtil.get(request, TokenConstant.TOKEN);
-            if(StringUtils.isNotEmpty(token)){
-                JSONObject restResult = restTemplate.getForObject(String.format(misUrl, token), JSONObject.class);
-                if(!CommonUtils.isNullOrEmpty(restResult)){
-                    if(restResult.getBoolean("result")){
-                        return true;
-                    }else {
-                        log.info("您的权限不足！");
-                        throw new UnauthorizedException("您的权限不足");
+            if(StringUtils.isNotEmpty(token)) {
+                if(requiredPermission.value().equals(PermissionConst.SUPPERUSERFLAGENUM)) {
+                    JSONObject restResult = restTemplate.getForObject(String.format(misUrl, token), JSONObject.class);
+                    if (!CommonUtils.isNullOrEmpty(restResult)) {
+                        if (restResult.getBoolean("result")) {
+                            return true;
+                        } else {
+                            log.info("您的权限不足！");
+                            throw new UnauthorizedException("您的权限不足");
+                        }
                     }
+                    log.info("认证已失效，清重新登录！");
+                    throw new UnauthorizedException("认证已失效，清重新登录！");
+                } else {
+                    return true;
                 }
-                log.info("认证已失效，清重新登录！");
-                throw new UnauthorizedException("认证已失效，清重新登录！");
             }
+            log.info("认证已失效，清重新登录！");
+            throw new UnauthorizedException("认证已失效，清重新登录！");
         }
         return true;
     }

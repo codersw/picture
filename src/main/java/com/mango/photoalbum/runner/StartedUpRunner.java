@@ -1,10 +1,5 @@
 package com.mango.photoalbum.runner;
 
-import com.mango.photoalbum.model.FaceInfo;
-import com.mango.photoalbum.model.PhotoAlbum;
-import com.mango.photoalbum.model.UploadFile;
-import com.mango.photoalbum.model.UploadFileFace;
-import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -23,7 +18,6 @@ public class StartedUpRunner implements ApplicationRunner {
 
     @Value("${spring.application.name:photoalbum}")
     private String applicationName;
-
 
     @Override
     public void run(ApplicationArguments args) {

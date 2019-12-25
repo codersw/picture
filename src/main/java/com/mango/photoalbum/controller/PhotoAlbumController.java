@@ -30,7 +30,7 @@ public class PhotoAlbumController {
      * @return
      */
     @ApiOperation(value = "相册详情", notes = "相册详情")
-    @GetMapping("/admin/{albumId}")
+    @GetMapping("/{albumId}")
     @RequiredPermission
     public Result get(@PathVariable String albumId) {
         return ResultGenerator.genSuccessResult(photoAlbumService.get(albumId));
@@ -56,7 +56,7 @@ public class PhotoAlbumController {
     @ApiOperation(value = "删除相册", notes = "删除相册")
     @DeleteMapping("/admin/{albumId}")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
-    public Result delete(@PathVariable String albumId) {
+    public Result deleteAdmin(@PathVariable String albumId) {
         photoAlbumService.delete(albumId);
         return ResultGenerator.genSuccessResult();
     }
@@ -68,7 +68,7 @@ public class PhotoAlbumController {
     @ApiOperation(value = "保存相册", notes = "保存相册")
     @PostMapping("/admin")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
-    public Result save(@RequestBody PhotoAlbumCo photoAlbumCo) {
+    public Result saveAdmin(@RequestBody PhotoAlbumCo photoAlbumCo) {
         return ResultGenerator.genSuccessResult(photoAlbumService.save(photoAlbumCo));
     }
 
