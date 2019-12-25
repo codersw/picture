@@ -66,12 +66,30 @@ public class OtsUtils {
     }
 
     /**
+     * 获取表格列表
+     * @return
+     */
+    public List<String> listTable() {
+        try {
+            ListTableResponse response = ots.listTable();
+            log.info("获取表格列表成功:{}", response);
+            return response.getTableNames();
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.error("获取表格列表失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("获取表格列表失败!请求失败详情：{}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * 创建表格
      * @param c
      */
     public void creatTable(Class<?> c){
         try {
-            if(existTable(c)) return;
             int timeToLive = -1; // 数据的过期时间, 单位秒, -1代表永不过期. 假如设置过期时间为一年, 即为 365 * 24 * 3600
             int maxVersions = 1; // 最大保存版本数, maxVersions大于1时, 无法使用二级索引和多元索引功能
             //描述表的配置信息
@@ -87,7 +105,7 @@ public class OtsUtils {
             log.error("创建表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("创建表格失败!请求失败详情：{}",e.getMessage());
+            log.error("创建表格失败!请求失败详情：{}", e.getMessage());
         }
     }
 
@@ -105,7 +123,7 @@ public class OtsUtils {
             log.error("删除表格失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("删除表格失败!请求失败详情：{}",e.getMessage());
+            log.error("删除表格失败!请求失败详情：{}", e.getMessage());
         }
     }
 
@@ -130,7 +148,7 @@ public class OtsUtils {
             log.error("判断表格是否存在失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("判断表格是否存在失败!请求失败详情：{}",e.getMessage());
+            log.error("判断表格是否存在失败!请求失败详情：{}", e.getMessage());
         }
         return false;
     }
@@ -155,7 +173,7 @@ public class OtsUtils {
             log.info("创建索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("创建索引失败!请求失败详情：{}",e.getMessage());
+            log.error("创建索引失败!请求失败详情：{}", e.getMessage());
         }
     }
 
@@ -175,7 +193,7 @@ public class OtsUtils {
             log.info("删除索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("删除索引失败!请求失败详情：{}",e.getMessage());
+            log.error("删除索引失败!请求失败详情：{}", e.getMessage());
         }
     }
 
@@ -199,7 +217,7 @@ public class OtsUtils {
             log.info("创建多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("创建多元索引失败!请求失败详情：{}",e.getMessage());
+            log.error("创建多元索引失败!请求失败详情：{}", e.getMessage());
         }
     }
 
@@ -222,8 +240,53 @@ public class OtsUtils {
             log.info("删除多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("删除多元索引!请求失败详情：{}",e.getMessage());
+            log.error("删除多元索引!请求失败详情：{}", e.getMessage());
         }
+    }
+
+    /**
+     * 列出多元索引
+     * @param c
+     * @return
+     */
+    public List<SearchIndexInfo> listSearchIndex(Class<?> c) {
+        try {
+            ListSearchIndexRequest request = new ListSearchIndexRequest();
+            request.setTableName(getTableName(c)); // 设置表名
+            ListSearchIndexResponse response = ots.listSearchIndex(request); // 返回表下所有SearchIndex
+            log.info("列出多元索引成功:{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
+            return response.getIndexInfos();
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.info("列出多元索引失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("列出多元索引!请求失败详情：{}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 列出多元索引详情
+     * @param c
+     * @return
+     */
+    public DescribeSearchIndexResponse describeSearchIndex(Class<?> c) {
+        try {
+            DescribeSearchIndexRequest request = new DescribeSearchIndexRequest();
+            request.setTableName(getTableName(c)); // 设置表名
+            request.setIndexName(getTableName(c)); // 设置索引名
+            DescribeSearchIndexResponse response = ots.describeSearchIndex(request);
+            log.info("列出多元索引详情成功:{}", JSONObject.toJSONString(response, SerializerFeature.IgnoreNonFieldGetter));
+            return response;
+        } catch (TableStoreException e) {
+            e.printStackTrace();
+            log.info("列出多元索引详情失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            log.error("列出多元索引详情!请求失败详情：{}", e.getMessage());
+        }
+        return null;
     }
 
     /**
@@ -241,7 +304,7 @@ public class OtsUtils {
             log.error("添加数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException | IllegalAccessException e) {
             e.printStackTrace();
-            log.error("添加数据失败!请求失败详情：{}",e.getMessage());
+            log.error("添加数据失败!请求失败详情：{}", e.getMessage());
         }
     }
 
@@ -270,7 +333,7 @@ public class OtsUtils {
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException | IllegalAccessException | InstantiationException | ParseException e) {
             e.printStackTrace();
-            log.error("查找数据失败!请求失败详情：{}",e.getMessage());
+            log.error("查找数据失败!请求失败详情：{}", e.getMessage());
         }
         return null;
     }
@@ -309,7 +372,7 @@ public class OtsUtils {
             log.error("查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException | IllegalAccessException | ParseException | InstantiationException e) {
             e.printStackTrace();
-            log.error("查找数据失败!请求失败详情：{}",e.getMessage());
+            log.error("查找数据失败!请求失败详情：{}", e.getMessage());
         }
         return null;
     }
@@ -329,7 +392,7 @@ public class OtsUtils {
             log.error("多条件查找数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException e) {
             e.printStackTrace();
-            log.error("多条件查找失败!请求失败详情：{}",e.getMessage());
+            log.error("多条件查找失败!请求失败详情：{}", e.getMessage());
         }
         return null;
     }
@@ -352,7 +415,7 @@ public class OtsUtils {
             log.error("更新数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException | IllegalAccessException e) {
             e.printStackTrace();
-            log.error("更新数据失败!请求失败详情：{}",e.getMessage());
+            log.error("更新数据失败!请求失败详情：{}", e.getMessage());
         }
     }
 
@@ -370,7 +433,7 @@ public class OtsUtils {
             e.printStackTrace();
             log.error("删除数据失败!详情:{},Request ID:{}", e.getMessage(), e.getRequestId());
         } catch (ClientException | IllegalAccessException e) {
-            log.error("删除数据失败!请求失败详情：{}",e.getMessage());
+            log.error("删除数据失败!请求失败详情：{}", e.getMessage());
         }
     }
 

@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
  * 文件接口
  * @author swen
  */
-@Api(value = "ACM动态配置测试接口", tags = {"ACM动态配置测试接口"})
+@Api(value = "动态配置测试接口", tags = {"动态配置测试接口"})
 @RestController
-@RequestMapping("/sample")
+@RequestMapping("/acm")
 @RefreshScope
-class SampleController {
+public class AcmController {
 
     @Value("${alibaba.oss.httpPrefix}")
     private String httpPrefix;

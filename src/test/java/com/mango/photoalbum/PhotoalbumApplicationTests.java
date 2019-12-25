@@ -220,4 +220,9 @@ public class PhotoalbumApplicationTests {
         producer.shutdown();
     }
 
+    @Test
+    public void testClass() throws ClassNotFoundException {
+        log.info("{}", ClassLoader.getSystemClassLoader().loadClass("com.mango.photoalbum.model.UploadFile"));
+        log.info("{}", Class.forName("com.mango.photoalbum.model.UploadFile"));
+    }
 }
