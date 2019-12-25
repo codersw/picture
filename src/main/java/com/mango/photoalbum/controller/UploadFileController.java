@@ -1,6 +1,7 @@
 package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.annotation.ApiVersion;
+import com.mango.photoalbum.annotation.RequiredPermission;
 import com.mango.photoalbum.enums.IsCoverEnum;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
@@ -20,6 +21,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/upload")
+@RequiredPermission
 public class UploadFileController {
 
     @Resource

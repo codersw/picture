@@ -1,6 +1,7 @@
 package com.mango.photoalbum.controller;
 
 
+import com.mango.photoalbum.annotation.RequiredPermission;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import io.swagger.annotations.Api;
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping("/album")
+@RequiredPermission
 public class PhotoAlbumController {
 
     @Resource

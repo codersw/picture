@@ -1,5 +1,6 @@
 package com.mango.photoalbum.controller;
 
+import com.mango.photoalbum.annotation.RequiredPermission;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,7 @@ public class AcmController {
     private String httpPrefix;
 
     @ApiOperation(value = "ACM测试接口", notes = "ACM测试接口")
-    @GetMapping("/acm")
+    @GetMapping
     public String simple() {
         return httpPrefix;
     }

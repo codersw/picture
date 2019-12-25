@@ -5,4 +5,6 @@ package com.mango.photoalbum.constant;
  * @author swen
  */
 public class TokenConstant {
+
+    public final static String TOKEN = "userId";
 }

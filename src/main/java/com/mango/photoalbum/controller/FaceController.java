@@ -1,5 +1,6 @@
 package com.mango.photoalbum.controller;
 
+import com.mango.photoalbum.annotation.RequiredPermission;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
 import io.swagger.annotations.Api;
@@ -18,6 +19,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping("/face")
+@RequiredPermission
 public class FaceController {
 
     @Resource
