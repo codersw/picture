@@ -1,6 +1,7 @@
 package com.mango.photoalbum.model;
 
 
+import com.mango.photoalbum.enums.OrderEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -20,4 +21,7 @@ public class UploadFileFaceListCo {
 
     @ApiModelProperty(value = "每页总条数")
     private Integer pageSize = 20;
+
+    @ApiModelProperty(value = "时间排序 0 升 1 降 ")
+    private Integer order = OrderEnum.DESC.getValue();
 }

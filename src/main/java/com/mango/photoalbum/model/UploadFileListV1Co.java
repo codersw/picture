@@ -20,39 +20,21 @@ public class UploadFileListV1Co {
     @ApiModelProperty(value = "相册id")
     private String albumId;
 
-    /**
-     * 当前页
-     */
     @ApiModelProperty(value = "当前页")
     private Integer pageIndex = PageEnum.PAGEINDEX.getValue();
 
-    /**
-     * 每页总条数
-     */
     @ApiModelProperty(value = "每页总条数")
     private Integer pageSize = PageEnum.PAGESIZE.getValue();
 
-    /**
-     * 用户id
-     */
     @ApiModelProperty(value = "用户id")
     private Integer userId;
 
-    /**
-     * 查询类型
-     */
     @ApiModelProperty(value = "查询类型")
     private Integer type = TypeEnum.MY.getValue();
 
-    /**
-     * 时间排序
-     */
     @ApiModelProperty(value = "时间排序 0 升 1 降 ")
     private Integer order = OrderEnum.DESC.getValue();
 
-    /**
-     * 总条数
-     */
     @ApiModelProperty(hidden = true)
     private Integer total;
 

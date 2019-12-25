@@ -62,4 +62,14 @@ public class FaceController {
     public Result listFace() {
         return ResultGenerator.genSuccessResult(faceService.listFace());
     }
+
+    /**
+     * 当前人脸
+     * @return
+     */
+    @ApiOperation(value = "当前人脸", notes = "当前人脸")
+    @GetMapping("/{userId}")
+    public Result getFace(@PathVariable Integer userId) {
+        return ResultGenerator.genSuccessResult(faceService.getFace(userId));
+    }
 }

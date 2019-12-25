@@ -15,5 +15,7 @@ public interface FaceService {
 
     Map listFace();
 
-    List<UploadFileFace> handleFace(UploadFile uploadFile);
+    void handleFace(UploadFile uploadFile);
+
+    FaceInfo getFace(Integer userId);
 }

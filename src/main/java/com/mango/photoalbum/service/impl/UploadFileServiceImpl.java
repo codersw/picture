@@ -523,7 +523,8 @@ public class UploadFileServiceImpl implements UploadFileService {
         query.setOffset(offset);
         query.setLimit(uploadFileFaceListCo.getPageSize());
         query.setGetTotalCount(false);// 设置返回总条数
-        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",
+                Objects.requireNonNull(EnumUtils.getByValue(OrderEnum.class, uploadFileFaceListCo.getOrder())).getName()))));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFileFace.class))
                 .indexName(ots.getTableName(UploadFileFace.class))

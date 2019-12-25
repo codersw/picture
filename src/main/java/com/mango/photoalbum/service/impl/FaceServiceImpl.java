@@ -13,6 +13,7 @@ import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.constant.FaceConstant;
 import com.mango.photoalbum.enums.IsDelEnum;
+import com.mango.photoalbum.enums.OrderEnum;
 import com.mango.photoalbum.exception.PhotoAlbumException;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
@@ -157,7 +158,8 @@ public class FaceServiceImpl implements FaceService {
         query.setOffset(offset);
         query.setLimit(faceInfoListCo.getPageSize());
         query.setGetTotalCount(false);// 设置返回总条数
-        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",
+                Objects.requireNonNull(EnumUtils.getByValue(OrderEnum.class, faceInfoListCo.getOrder())).getName()))));
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(FaceInfo.class))
                 .indexName(ots.getTableName(FaceInfo.class))
@@ -187,7 +189,7 @@ public class FaceServiceImpl implements FaceService {
     }
 
     @Override
-    public List<UploadFileFace> handleFace(UploadFile uploadFile) {
+    public void handleFace(UploadFile uploadFile) {
         if(StringUtils.isNotEmpty(uploadFile.getFilePath())) {
             throw new PhotoAlbumException("处理图片发生异常: uploadFile.getFilePath() is null or is empty");
         }
@@ -205,6 +207,18 @@ public class FaceServiceImpl implements FaceService {
                     .fileId(uploadFile.getFileId())
                     .persons(String.join(",", persons))
                     .build());
+        }
+    }
+
+    @Override
+    public FaceInfo getFace(Integer userId) {
+        List<FaceInfo> faceInfos = this.list(FaceInfoListCo.builder()
+                .pageIndex(1)
+                .pageSize(1)
+                .userId(userId)
+                .build());
+        if(CollectionUtils.isNotEmpty(faceInfos)) {
+            return faceInfos.get(0);
         }
         return null;
     }
