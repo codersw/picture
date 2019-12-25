@@ -115,7 +115,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = PhotoAlbumException.class)
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    public Result applicationPhotoAlbumException(UnauthorizedException e) {
+    public Result applicationPhotoAlbumException(PhotoAlbumException e) {
         log.error(String.format(APPLICATION_EXCEPTION, e.getMessage()), e);
         return ResultGenerator.genResult(ResultCodeEnum.FAIL, e.getMessage());
     }

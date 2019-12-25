@@ -13,6 +13,7 @@ import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.constant.FaceConstant;
 import com.mango.photoalbum.enums.IsDelEnum;
+import com.mango.photoalbum.exception.PhotoAlbumException;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
 import com.mango.photoalbum.utils.*;
@@ -90,10 +91,10 @@ public class FaceServiceImpl implements FaceService {
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("保存人脸信息出错:{}", e.getMessage());
-                throw new RuntimeException(e);
+                throw new PhotoAlbumException("保存人脸信息出错!");
             }
         } else {
-            throw new RuntimeException("图片不可以为空");
+            throw new PhotoAlbumException("图片不可以为空!");
         }
     }
 
@@ -171,7 +172,7 @@ public class FaceServiceImpl implements FaceService {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("获取列表出错：{}", e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            throw new PhotoAlbumException("获取列表出错");
         }
         return result;
     }
@@ -184,7 +185,7 @@ public class FaceServiceImpl implements FaceService {
     @Override
     public List<UploadFileFace> handleFace(UploadFile uploadFile) {
         if(StringUtils.isEmpty(uploadFile.getFilePath())) {
-            throw new RuntimeException("处理图片发生异常: uploadFile.getFilePath() is null or is empty");
+            throw new PhotoAlbumException("处理图片发生异常: uploadFile.getFilePath() is null or is empty");
         }
         List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
                 .imageUrl(uploadFile.getFilePath())

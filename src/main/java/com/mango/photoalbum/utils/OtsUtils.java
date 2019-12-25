@@ -210,7 +210,7 @@ public class OtsUtils {
      * 创建多元索引
      * @param c
      */
-    public void createSearchIndex(Class<?> c){
+    public void createSearchIndex(Class<?> c) {
         try {
             if(!getTableIndex(c)) return;
             String tableName = getTableName(c);
