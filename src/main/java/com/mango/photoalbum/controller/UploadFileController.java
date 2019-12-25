@@ -139,17 +139,16 @@ public class UploadFileController {
      */
     @ApiVersion
     @ApiOperation(value = "文件列表", notes = "文件列表")
-    @ApiImplicitParams({@ApiImplicitParam(name = "userId", value = "用户id", required = true)})
     @GetMapping("/v1/list")
-    public Result listV1(@ModelAttribute UploadFileListCo uploadFileListCo) {
-        uploadFileListCo.setTotal(uploadFileService.totalV1(uploadFileListCo));
-        List<UploadFile> fileList = uploadFileService.listV1(uploadFileListCo);
-        PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListCo.getAlbumId());
+    public Result listV1(@ModelAttribute UploadFileListV1Co uploadFileListV1Co) {
+        uploadFileListV1Co.setTotal(uploadFileService.totalV1(uploadFileListV1Co));
+        List<UploadFile> fileList = uploadFileService.listV1(uploadFileListV1Co);
+        PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV1Co.getAlbumId());
         fileList.stream()
                 .filter(file -> file.getFileId().equals(photoAlbum.getCover()))
                 .forEach(file -> file.setIsCover(IsCoverEnum.TRUE.getValue()));
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
-                .total(uploadFileListCo.getTotal())
+                .total(uploadFileListV1Co.getTotal())
                 .list(fileList)
                 .data(photoAlbum)
                 .build());

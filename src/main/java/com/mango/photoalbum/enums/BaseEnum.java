@@ -9,5 +9,5 @@ public interface BaseEnum<T> {
 
     T getValue();
 
-    String getName();
+    T getName();
 }

@@ -11,10 +11,12 @@ import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.enums.IsCoverEnum;
 import com.mango.photoalbum.enums.IsDelEnum;
+import com.mango.photoalbum.enums.OrderEnum;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.UploadFileService;
 import com.mango.photoalbum.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -351,16 +353,18 @@ public class UploadFileServiceImpl implements UploadFileService {
     }
 
     @Override
-    public Integer totalV1(UploadFileListCo uploadFileListCo) {
+    public Integer totalV1(UploadFileListV1Co uploadFileListCo) {
         List<Query> mustQueries = new ArrayList<>();
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         mustQueries.add(termQuery);
-        TermQuery termQuery1 = new TermQuery();
-        termQuery1.setFieldName("albumId");
-        termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
-        mustQueries.add(termQuery1);
+        if(StringUtils.isNotEmpty(uploadFileListCo.getAlbumId())) {
+            TermQuery termQuery1 = new TermQuery();
+            termQuery1.setFieldName("albumId");
+            termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
+            mustQueries.add(termQuery1);
+        }
         if(!CommonUtils.isNullOrEmpty(uploadFileListCo.getUserId())) {
             MatchQuery matchQuery = new MatchQuery();
             matchQuery.setFieldName("persons");
@@ -384,17 +388,19 @@ public class UploadFileServiceImpl implements UploadFileService {
     }
 
     @Override
-    public List<UploadFile> listV1(UploadFileListCo uploadFileListCo) {
+    public List<UploadFile> listV1(UploadFileListV1Co uploadFileListCo) {
         List<UploadFile> result = new ArrayList<>();
         List<Query> mustQueries = new ArrayList<>();
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         mustQueries.add(termQuery);
-        TermQuery termQuery1 = new TermQuery();
-        termQuery1.setFieldName("albumId");
-        termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
-        mustQueries.add(termQuery1);
+        if(StringUtils.isNotEmpty(uploadFileListCo.getAlbumId())) {
+            TermQuery termQuery1 = new TermQuery();
+            termQuery1.setFieldName("albumId");
+            termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
+            mustQueries.add(termQuery1);
+        }
         if(!CommonUtils.isNullOrEmpty(uploadFileListCo.getUserId())) {
             MatchQuery matchQuery = new MatchQuery();
             matchQuery.setFieldName("persons");
@@ -405,15 +411,12 @@ public class UploadFileServiceImpl implements UploadFileService {
         BoolQuery boolQuery = new BoolQuery();
         boolQuery.setMustQueries(mustQueries);
         query.setQuery(boolQuery);
-        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",
+                Objects.requireNonNull(EnumUtils.getByValue(OrderEnum.class, uploadFileListCo.getOrder())).getName()))));
         Integer pageSize = uploadFileListCo.getPageSize();
-        if(pageSize == 0) {
-            query.setLimit(uploadFileListCo.getTotal());
-        } else {
-            int offset = (uploadFileListCo.getPageIndex() - 1) * pageSize;
-            query.setOffset(offset);
-            query.setLimit(pageSize);
-        }
+        int offset = (uploadFileListCo.getPageIndex() - 1) * pageSize;
+        query.setOffset(offset);
+        query.setLimit(pageSize);
         query.setGetTotalCount(false);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
@@ -477,9 +480,11 @@ public class UploadFileServiceImpl implements UploadFileService {
             mustQueries.add(termQuery);
         }
         SearchQuery query = new SearchQuery();
-        BoolQuery boolQuery = new BoolQuery();
-        boolQuery.setMustQueries(mustQueries);
-        query.setQuery(boolQuery);
+        if(CollectionUtils.isNotEmpty(mustQueries)) {
+            BoolQuery boolQuery = new BoolQuery();
+            boolQuery.setMustQueries(mustQueries);
+            query.setQuery(boolQuery);
+        }
         query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
         query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
@@ -509,9 +514,11 @@ public class UploadFileServiceImpl implements UploadFileService {
             mustQueries.add(termQuery);
         }
         SearchQuery query = new SearchQuery();
-        BoolQuery boolQuery = new BoolQuery();
-        boolQuery.setMustQueries(mustQueries);
-        query.setQuery(boolQuery);
+        if(CollectionUtils.isNotEmpty(mustQueries)) {
+            BoolQuery boolQuery = new BoolQuery();
+            boolQuery.setMustQueries(mustQueries);
+            query.setQuery(boolQuery);
+        }
         int offset = (uploadFileFaceListCo.getPageIndex() - 1) * uploadFileFaceListCo.getPageSize();
         query.setOffset(offset);
         query.setLimit(uploadFileFaceListCo.getPageSize());

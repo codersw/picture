@@ -109,7 +109,7 @@ public class EnumUtils {
      * @return 枚举对象
      */
 
-    public static <T extends BaseEnum> T getByValue(Class<T> enumClass, String value) {
+    public static <T extends BaseEnum> T getByValue(Class<T> enumClass, Object value) {
         //通过反射取出Enum所有常量的属性值
         for (T each: enumClass.getEnumConstants()) {
             //利用value进行循环比较，获取对应的枚举
