@@ -17,6 +17,7 @@ import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
 import com.mango.photoalbum.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,39 +39,6 @@ public class FaceServiceImpl implements FaceService {
 
     @Resource
     private OssUtils oss;
-
-    /**
-     * 获取消息
-     */
-//    private void getMessage() {
-//        while (true) {
-//            try {
-//
-//                if(!StringUtils.isEmpty(bodyStr)) {
-//                    UploadFile file = JSONObject.parseObject(bodyStr, UploadFile.class);
-//                    List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
-//                            .imageUrl(file.getFilePath())
-//                            .group(FaceConstant.GROUP_DEFAUlT)
-//                            .build());
-//                    if(!CommonUtils.isNullOrEmpty(uploadFileFaces)) {
-//                        uploadFileFaces.forEach(uploadFileFace -> {
-//                            uploadFileFace.setFileId(file.getFileId());
-//                            ots.creatRow(uploadFileFace);
-//                        });
-//                        List<String> persons = uploadFileFaces.stream().filter(x -> x.getScore() >= FaceConstant.SCORE).map(UploadFileFace::getPerson).collect(Collectors.toList());
-//                        ots.updataRow(UploadFile.builder()
-//                                .fileId(file.getFileId())
-//                                .persons(String.join(",", persons))
-//                                .build());
-//                    }
-//                }
-//                Thread.sleep(1000);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                log.error("MNS获取消息发生错误:{}" , e.getMessage());
-//            }
-//        }
-//    }
 
     @Override
     public void save(FaceInfoCo faceInfoCo) {
@@ -210,5 +179,28 @@ public class FaceServiceImpl implements FaceService {
     @Override
     public Map listFace() {
         return face.listFace(FaceConstant.GROUP_DEFAUlT);
+    }
+
+    @Override
+    public List<UploadFileFace> handleFace(UploadFile uploadFile) {
+        if(StringUtils.isEmpty(uploadFile.getFilePath())) {
+            throw new RuntimeException("处理图片发生异常: uploadFile.getFilePath() is null or is empty");
+        }
+        List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
+                .imageUrl(uploadFile.getFilePath())
+                .group(FaceConstant.GROUP_DEFAUlT)
+                .build());
+        if(! CollectionUtils.isEmpty(uploadFileFaces)) {
+            uploadFileFaces.forEach(uploadFileFace -> {
+                uploadFileFace.setFileId(uploadFile.getFileId());
+                ots.creatRow(uploadFileFace);
+            });
+            List<String> persons = uploadFileFaces.stream().filter(x -> x.getScore() >= FaceConstant.SCORE).map(UploadFileFace::getPerson).collect(Collectors.toList());
+            ots.updataRow(UploadFile.builder()
+                    .fileId(uploadFile.getFileId())
+                    .persons(String.join(",", persons))
+                    .build());
+        }
+        return null;
     }
 }

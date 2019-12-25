@@ -1,21 +1,31 @@
 package com.mango.photoalbum.service.impl;
 
-import com.mango.photoalbum.constant.FaceConstant;
+import com.mango.photoalbum.model.UploadFile;
+import com.mango.photoalbum.service.FaceService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Service;
+import javax.annotation.Resource;
 
-
+/**
+ * topic消费
+ * 默认出现异常无限重试
+ * 如需修改实现 RocketMQPushConsumerLifecycleListener 重写
+ * @author swen
+ */
 @Slf4j
 @Service
-@RocketMQMessageListener(topic = FaceConstant.ROCKET_MQ_TOPIC_FACE, consumerGroup = FaceConstant.ROCKET_MQ_GROUP_FACE,
-        consumeMode = ConsumeMode.ORDERLY, accessKey = "${aliyun.mq.accessKey}", secretKey = "${aliyun.mq.secretKey}")
-public class FaceConsumer implements RocketMQListener {
+@RocketMQMessageListener(topic = "${alibaba.mq.topic}", consumerGroup = "${alibaba.mq.group}",
+        accessKey = "${alibaba.mq.accessKeyId}", secretKey = "${alibaba.mq.accessKeySecret}")
+public class FaceConsumer implements RocketMQListener<UploadFile> {
+
+    @Resource
+    private FaceService faceService;
 
     @Override
-    public void onMessage(Object message) {
-        log.info("监听到信息:{}", message.toString());
+    public void onMessage(UploadFile uploadFile) {
+        log.info("监听到信息:{}", uploadFile.toString());
+        faceService.handleFace(uploadFile);
     }
 }

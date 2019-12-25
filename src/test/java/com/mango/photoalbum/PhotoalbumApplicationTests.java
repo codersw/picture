@@ -17,17 +17,25 @@ import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.FaceUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.acl.common.AclClientRPCHook;
+import org.apache.rocketmq.acl.common.SessionCredentials;
+import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.*;
 
 @RunWith(SpringRunner.class)
@@ -197,15 +205,19 @@ public class PhotoalbumApplicationTests {
     }
 
     @Test
-    public void producerTest() throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
-        DefaultMQProducer producer = new DefaultMQProducer("producer_group");
-        producer.setNamesrvAddr("localhost:9876");
+    public void producer() throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+        //设置为云上创建的 GID, 以及替换为自己的 AccessKeyId 和 AccessKeySecret
+        DefaultMQProducer producer = new DefaultMQProducer("GID_default", new AclClientRPCHook(new SessionCredentials("LTAI4Fd66vvuVj31seQ2YbQQ","AgUkSMWtlICI7lY2oBFM0aD94ZlqYt")));
+        //设置为自己的云上接入点
+        producer.setNamesrvAddr("http://MQ_INST_1948640781844768_Bb2yJVY8.mq-internet-access.mq-internet.aliyuncs.com:80");
+        // 云上消息轨迹需要设置为 CLOUD
+        producer.setAccessChannel(AccessChannel.CLOUD);
         producer.start();
-        for (int i = 0; i < 10; i++) {
-            byte[] message = ("hello RocketMQ" + i).getBytes();
-            Message msg = new Message("TopicTest",message);
-            SendResult sendResult = producer.send(msg);
-            System.out.printf("%s%n",sendResult);
-        }
+        // 设置为云上创建的 Topic 名字
+        Message msg = new Message("topic_default", "Hello world".getBytes(RemotingHelper.DEFAULT_CHARSET));
+        SendResult sendResult = producer.send(msg);
+        log.info(JSONObject.toJSONString(sendResult));
+        producer.shutdown();
     }
+
 }

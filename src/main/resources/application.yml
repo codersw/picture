@@ -17,4 +17,9 @@ management:
 project:
   version: @project.version@
 rocketmq:
-  name-server: ${aliyun.mq.nameServer}
+  nameServer: ${alibaba.mq.nameServer}
+  producer:
+    group: ${alibaba.mq.group}
+    access-key: ${alibaba.mq.accessKeyId}
+    secret-key: ${alibaba.mq.accessKeySecret}
+  accessChannel: CLOUD

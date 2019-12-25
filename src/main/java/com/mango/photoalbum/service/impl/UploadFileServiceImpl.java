@@ -1,6 +1,5 @@
 package com.mango.photoalbum.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.Row;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
@@ -17,6 +16,8 @@ import com.mango.photoalbum.service.UploadFileService;
 import com.mango.photoalbum.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
@@ -36,7 +37,10 @@ public class UploadFileServiceImpl implements UploadFileService {
     private OssUtils oss;
 
     @Resource
-    private MnsUtils mns;
+    private RocketMQTemplate template;
+
+    @Value("${alibaba.mq.topic}")
+    private String topic;
 
     @Override
     public UploadFile save(UploadFileCo uploadFileCo) {
@@ -131,7 +135,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                     .IsCover(uploadFileCo.getIsCover())
                     .build());
             //发起图片识别
-            mns.setMessage(QueueConstant.FACE_QUEUE, JSONObject.toJSONString(uploadFile));
+            template.convertAndSend(topic, uploadFile);
             return uploadFile;
         } catch (Exception e) {
             e.printStackTrace();

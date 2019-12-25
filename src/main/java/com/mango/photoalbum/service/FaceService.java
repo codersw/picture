@@ -1,8 +1,6 @@
 package com.mango.photoalbum.service;
 
-import com.mango.photoalbum.model.FaceInfo;
-import com.mango.photoalbum.model.FaceInfoCo;
-import com.mango.photoalbum.model.FaceInfoListCo;
+import com.mango.photoalbum.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -16,4 +14,6 @@ public interface FaceService {
     List<FaceInfo> list(FaceInfoListCo faceInfoListCo);
 
     Map listFace();
+
+    List<UploadFileFace> handleFace(UploadFile uploadFile);
 }
