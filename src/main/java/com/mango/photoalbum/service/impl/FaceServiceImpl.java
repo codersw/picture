@@ -114,9 +114,11 @@ public class FaceServiceImpl implements FaceService {
             mustQueries.add(termQuery);
         }
         SearchQuery query = new SearchQuery();
-        BoolQuery boolQuery = new BoolQuery();
-        boolQuery.setMustQueries(mustQueries);
-        query.setQuery(boolQuery);
+        if(!CollectionUtils.isNotEmpty(mustQueries)) {
+            BoolQuery boolQuery = new BoolQuery();
+            boolQuery.setMustQueries(mustQueries);
+            query.setQuery(boolQuery);
+        }
         query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
         query.setGetTotalCount(true);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
@@ -146,9 +148,11 @@ public class FaceServiceImpl implements FaceService {
             mustQueries.add(termQuery);
         }
         SearchQuery query = new SearchQuery();
-        BoolQuery boolQuery = new BoolQuery();
-        boolQuery.setMustQueries(mustQueries);
-        query.setQuery(boolQuery);
+        if(CollectionUtils.isNotEmpty(mustQueries)) {
+            BoolQuery boolQuery = new BoolQuery();
+            boolQuery.setMustQueries(mustQueries);
+            query.setQuery(boolQuery);
+        }
         int offset = (faceInfoListCo.getPageIndex() - 1) * faceInfoListCo.getPageSize();
         query.setOffset(offset);
         query.setLimit(faceInfoListCo.getPageSize());
@@ -184,7 +188,7 @@ public class FaceServiceImpl implements FaceService {
 
     @Override
     public List<UploadFileFace> handleFace(UploadFile uploadFile) {
-        if(StringUtils.isEmpty(uploadFile.getFilePath())) {
+        if(StringUtils.isNotEmpty(uploadFile.getFilePath())) {
             throw new PhotoAlbumException("处理图片发生异常: uploadFile.getFilePath() is null or is empty");
         }
         List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
