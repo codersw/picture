@@ -38,7 +38,7 @@ public class UploadFileController {
     @ApiOperation(value = "文件上传接口", notes = "文件上传接口")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "form", dataType="__file", name = "file",
             value = "文件", required = true)})
-    @PostMapping(value = "/file", headers = "content-type=multipart/form-data")
+    @PostMapping(value = "/admin/file", headers = "content-type=multipart/form-data")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result file(@ModelAttribute UploadFileCo uploadFileCo) {
         return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileCo));
@@ -54,7 +54,7 @@ public class UploadFileController {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "form", dataType="__file", name = "file",
             value = "文件", required = true)})
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
-    @PostMapping(value = "/v1/file", headers = "content-type=multipart/form-data")
+    @PostMapping(value = "/admin/v1/file", headers = "content-type=multipart/form-data")
     public Result fileV1(@ModelAttribute UploadFileCo uploadFileCo) {
         return ResultGenerator.genSuccessResult(uploadFileService.saveV1(uploadFileCo));
     }
@@ -65,7 +65,7 @@ public class UploadFileController {
      * @return
      */
     @ApiOperation(value = "修改文件接口", notes = "修改文件接口")
-    @PostMapping(value = "/file/update")
+    @PostMapping(value = "/admin/file/update")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result fileUpdate(@RequestBody UploadFileUpdateCo uploadFileUpdateCo) {
         uploadFileService.update(uploadFileUpdateCo);
@@ -78,7 +78,7 @@ public class UploadFileController {
      * @return
      */
     @ApiOperation(value = "文件批量上传接口", notes = "swagger批量文件上传不好用请用postman等工具测试")
-    @PostMapping(value = "/files", headers = "content-type=multipart/form-data")
+    @PostMapping(value = "/admin/files", headers = "content-type=multipart/form-data")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result files(@ModelAttribute UploadFileMultiCo uploadFileMultiCo) {
         return ResultGenerator.genSuccessResult(uploadFileService.save(uploadFileMultiCo));
@@ -91,7 +91,7 @@ public class UploadFileController {
      */
     @ApiVersion
     @ApiOperation(value = "文件批量上传接口", notes = "swagger批量文件上传不好用请用postman等工具测试")
-    @PostMapping(value = "/v1/files", headers = "content-type=multipart/form-data")
+    @PostMapping(value = "/admin/v1/files", headers = "content-type=multipart/form-data")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result filesV1(@ModelAttribute UploadFileMultiCo uploadFileMultiCo) {
         return ResultGenerator.genSuccessResult(uploadFileService.saveV1(uploadFileMultiCo));
@@ -127,7 +127,7 @@ public class UploadFileController {
      * @return
      */
     @ApiOperation(value = "删除文件", notes = "删除文件")
-    @DeleteMapping("/{fileId}")
+    @DeleteMapping("/admin/{fileId}")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result delete(@PathVariable @ApiParam("文件id") String fileId) {
         uploadFileService.delete(fileId);
