@@ -229,7 +229,7 @@ public class UploadFileController {
      */
     @ApiOperation(value = "文件人脸信息列表", notes = "文件人脸信息列表")
     @GetMapping("/listFileFace")
-    @RequiredPermission
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result listFileFace(UploadFileFaceListCo uploadFileFaceListCo) {
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFileFace>builder()
                 .total(uploadFileService.totalFileFace(uploadFileFaceListCo))
