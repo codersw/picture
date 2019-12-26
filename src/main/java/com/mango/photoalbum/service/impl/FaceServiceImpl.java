@@ -190,7 +190,7 @@ public class FaceServiceImpl implements FaceService {
 
     @Override
     public void handleFace(UploadFile uploadFile) {
-        if(StringUtils.isNotEmpty(uploadFile.getFilePath())) {
+        if(StringUtils.isEmpty(uploadFile.getFilePath())) {
             throw new PhotoAlbumException("处理图片发生异常: uploadFile.getFilePath() is null or is empty");
         }
         List<UploadFileFace> uploadFileFaces = face.recognizeFace(FaceInfo.builder()
@@ -216,6 +216,7 @@ public class FaceServiceImpl implements FaceService {
                 .pageIndex(1)
                 .pageSize(1)
                 .userId(userId)
+                .order(OrderEnum.DESC.getValue())
                 .build());
         if(CollectionUtils.isNotEmpty(faceInfos)) {
             return faceInfos.get(0);
