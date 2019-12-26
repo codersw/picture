@@ -56,7 +56,7 @@ public class FaceServiceImpl implements FaceService {
                         .createUserId(faceInfoCo.getUserId())
                         .modifyUserId(faceInfoCo.getUserId())
                         .isDel(IsDelEnum.FALSE.getValue())
-                        .persons(faceInfoCo.getUserId().toString())
+                        .persons("")
                         .build();
                 String fileName = file.getOriginalFilename();
                 String fileType = FileUtils.getFileType(fileName);

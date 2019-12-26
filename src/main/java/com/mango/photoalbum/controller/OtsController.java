@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @RestController
 @RequestMapping("/ots")
-@RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+@RequiredPermission
 public class OtsController {
 
     @Resource
