@@ -734,6 +734,9 @@ public class OtsUtils {
                             if (type.equals("class java.lang.String")){
                                 field.set(result, columnValue.asString());
                             }
+                            if (type.equals("class java.lang.Double")){
+                                field.set(result, columnValue.asDouble());
+                            }
                             if (type.equals("class java.lang.Boolean")){
                                 field.set(result, columnValue.asBoolean());
                             }

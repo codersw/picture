@@ -200,6 +200,7 @@ public class FaceServiceImpl implements FaceService {
         if(! CollectionUtils.isEmpty(uploadFileFaces)) {
             uploadFileFaces.forEach(uploadFileFace -> {
                 uploadFileFace.setFileId(uploadFile.getFileId());
+                uploadFileFace.setCreateTime(new Date());
                 ots.creatRow(uploadFileFace);
             });
             List<String> persons = uploadFileFaces.stream().filter(x -> x.getScore() >= FaceConstant.SCORE).map(UploadFileFace::getPerson).collect(Collectors.toList());
