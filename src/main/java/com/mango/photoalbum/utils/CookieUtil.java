@@ -36,7 +36,8 @@ public class CookieUtil {
         if(map.containsKey(name)){
             return map.get(name).getValue();
         }else{
-            return null;
+            //cookie中没有去请求头中找
+            return request.getHeader(name);
         }
     }
 
