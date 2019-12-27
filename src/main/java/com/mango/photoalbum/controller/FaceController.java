@@ -35,8 +35,7 @@ public class FaceController {
             value = "文件", required = true)})
     @PostMapping(headers = "content-type=multipart/form-data")
     public Result save(@ModelAttribute FaceInfoCo faceInfoCo) {
-        faceService.save(faceInfoCo);
-        return ResultGenerator.genSuccessResult();
+        return ResultGenerator.genSuccessResult(faceService.save(faceInfoCo));
     }
 
     /**
