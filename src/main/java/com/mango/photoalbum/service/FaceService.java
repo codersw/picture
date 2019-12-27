@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface FaceService {
 
-    void save(FaceInfoCo faceInfoCo);
+    FaceInfo save(FaceInfoCo faceInfoCo);
 
     Integer total(FaceInfoListCo faceInfoListCo);
 

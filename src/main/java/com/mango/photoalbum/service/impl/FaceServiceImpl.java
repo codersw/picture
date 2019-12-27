@@ -43,7 +43,7 @@ public class FaceServiceImpl implements FaceService {
     private OssUtils oss;
 
     @Override
-    public void save(FaceInfoCo faceInfoCo) {
+    public FaceInfo save(FaceInfoCo faceInfoCo) {
         MultipartFile file = faceInfoCo.getFile();
         if(!CommonUtils.isNullOrEmpty(file)) {
             try {
@@ -89,6 +89,7 @@ public class FaceServiceImpl implements FaceService {
                 //ots保存人脸信息
                 ots.creatRow(faceInfo);
                 log.info("保存人脸信息成功:{}", faceInfo.toString());
+                return faceInfo;
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("保存人脸信息出错:{}", e.getMessage());
