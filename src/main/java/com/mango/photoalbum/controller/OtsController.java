@@ -1,7 +1,6 @@
 package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.annotation.RequiredPermission;
-import com.mango.photoalbum.constant.PermissionConst;
 import com.mango.photoalbum.model.Result;
 import com.mango.photoalbum.model.ResultGenerator;
 import com.mango.photoalbum.utils.OtsUtils;
@@ -10,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
