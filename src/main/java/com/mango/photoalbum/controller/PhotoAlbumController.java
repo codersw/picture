@@ -1,6 +1,7 @@
 package com.mango.photoalbum.controller;
 
 
+import com.mango.photoalbum.annotation.ApiVersion;
 import com.mango.photoalbum.annotation.RequiredPermission;
 import com.mango.photoalbum.constant.PermissionConst;
 import com.mango.photoalbum.model.*;
@@ -73,6 +74,18 @@ public class PhotoAlbumController {
     }
 
     /**
+     * 保存相册
+     * @return
+     */
+    @ApiOperation(value = "保存相册", notes = "保存相册")
+    @PostMapping("/v1/admin")
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+    @ApiVersion
+    public Result saveV1Admin(@RequestBody PhotoAlbumV1Co photoAlbumV1Co) {
+        return ResultGenerator.genSuccessResult(photoAlbumService.saveV1(photoAlbumV1Co));
+    }
+
+    /**
      * 相册列表
      * @return
      */
@@ -83,6 +96,21 @@ public class PhotoAlbumController {
         return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
                 .total(photoAlbumService.total(photoAlbumListCo))
                 .list(photoAlbumService.list(photoAlbumListCo))
+                .build());
+    }
+
+    /**
+     * 相册列表
+     * @return
+     */
+    @ApiOperation(value = "相册列表", notes = "相册列表")
+    @GetMapping("/v1/list")
+    @RequiredPermission
+    @ApiVersion
+    public Result v1list(PhotoAlbumListV1Co photoAlbumListV1Co){
+        return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
+                .total(photoAlbumService.totalV1(photoAlbumListV1Co))
+                .list(photoAlbumService.listV1(photoAlbumListV1Co))
                 .build());
     }
 

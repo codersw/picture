@@ -6,10 +6,8 @@ import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
 import com.mango.photoalbum.enums.IndexTypeEnum;
-import io.swagger.models.auth.In;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.util.Date;
 
 
@@ -64,14 +62,14 @@ public class PhotoAlbum {
      * 上传日期
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Date createTime;
 
     /**
      * 修改时间
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Date modifyTime;
 
     /**
@@ -79,7 +77,7 @@ public class PhotoAlbum {
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8")
     private Date shootTime;
 
     /**
@@ -87,6 +85,18 @@ public class PhotoAlbum {
      */
     @OTSColumn(indexType = IndexTypeEnum.TEXT)
     private String shootLocation;
+
+    /**
+     * 是否公开
+     */
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
+    private Integer isPublic;
+
+    /**
+     * 部门id
+     */
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
+    private Integer orgId;
 
     /**
      * 封面 图片url
