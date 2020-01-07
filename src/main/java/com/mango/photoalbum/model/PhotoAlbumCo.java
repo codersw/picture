@@ -25,9 +25,6 @@ public class PhotoAlbumCo {
     @NotNull(message = "创建人id不能为空")
     private Integer userId;
 
-    @ApiModelProperty(value = "封面")
-    private String cover;
-
     @ApiModelProperty(value = "拍摄时间格式yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
