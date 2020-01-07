@@ -243,6 +243,7 @@ public class FaceServiceImpl implements FaceService {
     public void handleFace(String albumId) {
         UploadFileListV2Co uploadFileListV2Co = UploadFileListV2Co.builder()
                 .albumId(albumId)
+                .order(OrderEnum.DESC.getValue())
                 .build();
         Integer total = uploadFileService.totalV2(uploadFileListV2Co);
         uploadFileListV2Co.setTotal(total);
