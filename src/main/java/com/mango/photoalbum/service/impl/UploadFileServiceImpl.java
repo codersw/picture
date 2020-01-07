@@ -321,10 +321,12 @@ public class UploadFileServiceImpl implements UploadFileService {
         query.setQuery(boolQuery);
         query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime", SortOrder.ASC))));
         Integer pageSize = uploadFileListCo.getPageSize();
-        if(pageSize == 0) {
-            query.setLimit(uploadFileListCo.getTotal());
+        Integer pageIndex = uploadFileListCo.getPageIndex();
+        Integer total = uploadFileListCo.getTotal();
+        if(!total.equals(0)) {
+            query.setLimit(total);
         } else {
-            int offset = (uploadFileListCo.getPageIndex() - 1) * pageSize;
+            Integer offset = (pageIndex - 1) * pageSize;
             query.setOffset(offset);
             query.setLimit(pageSize);
         }
@@ -388,23 +390,23 @@ public class UploadFileServiceImpl implements UploadFileService {
     }
 
     @Override
-    public List<UploadFile> listV1(UploadFileListV1Co uploadFileListCo) {
+    public List<UploadFile> listV1(UploadFileListV1Co uploadFileListV1Co) {
         List<UploadFile> result = new ArrayList<>();
         List<Query> mustQueries = new ArrayList<>();
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
         mustQueries.add(termQuery);
-        if(StringUtils.isNotEmpty(uploadFileListCo.getAlbumId())) {
+        if(StringUtils.isNotEmpty(uploadFileListV1Co.getAlbumId())) {
             TermQuery termQuery1 = new TermQuery();
             termQuery1.setFieldName("albumId");
-            termQuery1.setTerm(ColumnValue.fromString(uploadFileListCo.getAlbumId()));
+            termQuery1.setTerm(ColumnValue.fromString(uploadFileListV1Co.getAlbumId()));
             mustQueries.add(termQuery1);
         }
-        if(!CommonUtils.isNullOrEmpty(uploadFileListCo.getUserId())) {
+        if(!CommonUtils.isNullOrEmpty(uploadFileListV1Co.getUserId())) {
             MatchQuery matchQuery = new MatchQuery();
             matchQuery.setFieldName("persons");
-            matchQuery.setText(uploadFileListCo.getUserId().toString());
+            matchQuery.setText(uploadFileListV1Co.getUserId().toString());
             mustQueries.add(matchQuery);
         }
         SearchQuery query = new SearchQuery();
@@ -412,11 +414,17 @@ public class UploadFileServiceImpl implements UploadFileService {
         boolQuery.setMustQueries(mustQueries);
         query.setQuery(boolQuery);
         query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",
-                Objects.requireNonNull(EnumUtils.getByValue(OrderEnum.class, uploadFileListCo.getOrder())).getName()))));
-        Integer pageSize = uploadFileListCo.getPageSize();
-        int offset = (uploadFileListCo.getPageIndex() - 1) * pageSize;
-        query.setOffset(offset);
-        query.setLimit(pageSize);
+                Objects.requireNonNull(EnumUtils.getByValue(OrderEnum.class, uploadFileListV1Co.getOrder())).getName()))));
+        Integer pageSize = uploadFileListV1Co.getPageSize();
+        Integer pageIndex = uploadFileListV1Co.getPageIndex();
+        Integer total = uploadFileListV1Co.getTotal();
+        if(!total.equals(0)) {
+            query.setLimit(total);
+        } else {
+            Integer offset = (pageIndex - 1) * pageSize;
+            query.setOffset(offset);
+            query.setLimit(pageSize);
+        }
         query.setGetTotalCount(false);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))
@@ -503,9 +511,15 @@ public class UploadFileServiceImpl implements UploadFileService {
         query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",
                 Objects.requireNonNull(EnumUtils.getByValue(OrderEnum.class, uploadFileListV2Co.getOrder())).getName()))));
         Integer pageSize = uploadFileListV2Co.getPageSize();
-        int offset = (uploadFileListV2Co.getPageIndex() - 1) * pageSize;
-        query.setOffset(offset);
-        query.setLimit(pageSize);
+        Integer pageIndex = uploadFileListV2Co.getPageIndex();
+        Integer total = uploadFileListV2Co.getTotal();
+        if(!total.equals(0)) {
+            query.setLimit(total);
+        } else {
+            Integer offset = (pageIndex - 1) * pageSize;
+            query.setOffset(offset);
+            query.setLimit(pageSize);
+        }
         query.setGetTotalCount(false);// 设置返回总条数
         SearchRequest searchRequest = SearchRequest.newBuilder()
                 .tableName(ots.getTableName(UploadFile.class))

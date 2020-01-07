@@ -71,4 +71,12 @@ public class FaceController {
     public Result getFace(@PathVariable Integer userId) {
         return ResultGenerator.genSuccessResult(faceService.getFace(userId));
     }
+
+    @ApiOperation(value = "相册图片处理", notes = "相册图片处理")
+    @GetMapping("/handleFace/{albumId}")
+    @RequiredPermission
+    public Result handleFace(@PathVariable String albumId) {
+        faceService.handleFace(albumId);
+        return ResultGenerator.genSuccessResult();
+    }
 }

@@ -39,6 +39,6 @@ public class UploadFileListV2Co {
     private Integer orgId;
 
     @ApiModelProperty(hidden = true)
-    private Integer total;
+    private Integer total = 0;
 
 }

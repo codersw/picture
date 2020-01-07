@@ -18,4 +18,6 @@ public interface FaceService {
     void handleFace(UploadFile uploadFile);
 
     FaceInfo getFace(Integer userId);
+
+    void handleFace(String albumId);
 }

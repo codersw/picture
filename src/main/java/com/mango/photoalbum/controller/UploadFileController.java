@@ -197,31 +197,6 @@ public class UploadFileController {
      * @return
      */
     @ApiOperation(value = "文件列表", notes = "文件列表")
-    @GetMapping("/v2/list")
-    @RequiredPermission
-    @ApiVersion(ApiVersionConstant.V2)
-    public Result listV2(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
-        if (StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
-            PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
-            if(!CommonUtils.isNullOrEmpty(photoAlbum.getOrgId())
-                    && !CommonUtils.isNullOrEmpty(uploadFileListV2Co.getOrgId())
-                    && !photoAlbum.getOrgId().equals(uploadFileListV2Co.getOrgId())) {
-                throw new PhotoAlbumException("您没有该相册访问权限");
-            }
-        }
-        uploadFileListV2Co.setTotal(uploadFileService.totalV2(uploadFileListV2Co));
-        List<UploadFile> fileList = uploadFileService.listV2(uploadFileListV2Co);
-        return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
-                .total(uploadFileListV2Co.getTotal())
-                .list(fileList)
-                .build());
-    }
-
-    /**
-     * 文件列表
-     * @return
-     */
-    @ApiOperation(value = "文件列表", notes = "文件列表")
     @GetMapping("/admin/v1/list")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     @ApiVersion
@@ -234,6 +209,51 @@ public class UploadFileController {
                 .forEach(file -> file.setIsCover(IsCoverEnum.TRUE.getValue()));
         return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
                 .total(uploadFileListV1Co.getTotal())
+                .list(fileList)
+                .data(photoAlbum)
+                .build());
+    }
+
+    /**
+     * 文件列表
+     * @return
+     */
+    @ApiOperation(value = "文件列表", notes = "文件列表")
+    @GetMapping("/v2/list")
+    @RequiredPermission
+    @ApiVersion(ApiVersionConstant.V2)
+    public Result listV2(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
+        if (StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
+            PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
+            if(!CommonUtils.isNullOrEmpty(photoAlbum.getOrgId())
+                    && !CommonUtils.isNullOrEmpty(uploadFileListV2Co.getOrgId())
+                    && !photoAlbum.getOrgId().equals(uploadFileListV2Co.getOrgId())) {
+                throw new PhotoAlbumException("您没有该相册访问权限");
+            }
+        }
+        return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
+                .total(uploadFileService.totalV2(uploadFileListV2Co))
+                .list(uploadFileService.listV2(uploadFileListV2Co))
+                .build());
+    }
+
+    /**
+     * 文件列表
+     * @return
+     */
+    @ApiOperation(value = "文件列表", notes = "文件列表")
+    @GetMapping("/admin/v2/list")
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+    @ApiVersion(ApiVersionConstant.V2)
+    public Result listV2Admin(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
+        uploadFileListV2Co.setTotal(uploadFileService.totalV2(uploadFileListV2Co));
+        List<UploadFile> fileList = uploadFileService.listV2(uploadFileListV2Co);
+        PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
+        fileList.stream()
+                .filter(file -> file.getFileId().equals(photoAlbum.getCover()))
+                .forEach(file -> file.setIsCover(IsCoverEnum.TRUE.getValue()));
+        return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
+                .total(uploadFileListV2Co.getTotal())
                 .list(fileList)
                 .data(photoAlbum)
                 .build());

@@ -36,6 +36,6 @@ public class UploadFileListV1Co {
     private Integer order = OrderEnum.DESC.getValue();
 
     @ApiModelProperty(hidden = true)
-    private Integer total;
+    private Integer total = 0;
 
 }

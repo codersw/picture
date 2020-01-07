@@ -6,24 +6,27 @@ import com.alicloud.openservices.tablestore.model.search.SearchQuery;
 import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
 import com.alicloud.openservices.tablestore.model.search.query.BoolQuery;
+import com.alicloud.openservices.tablestore.model.search.query.MatchQuery;
 import com.alicloud.openservices.tablestore.model.search.query.Query;
 import com.alicloud.openservices.tablestore.model.search.query.TermQuery;
 import com.alicloud.openservices.tablestore.model.search.sort.FieldSort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
-import com.alicloud.openservices.tablestore.model.search.sort.SortOrder;
 import com.mango.photoalbum.constant.FaceConstant;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.enums.OrderEnum;
 import com.mango.photoalbum.exception.PhotoAlbumException;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.FaceService;
+import com.mango.photoalbum.service.UploadFileService;
 import com.mango.photoalbum.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.annotation.Resource;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -41,6 +44,16 @@ public class FaceServiceImpl implements FaceService {
 
     @Resource
     private OssUtils oss;
+
+    @Resource
+    @Lazy
+    private UploadFileService uploadFileService;
+
+    @Resource
+    private RocketMQTemplate template;
+
+    @Value("${alibaba.mq.topic}")
+    private String topic;
 
     @Override
     public FaceInfo save(FaceInfoCo faceInfoCo) {
@@ -224,5 +237,18 @@ public class FaceServiceImpl implements FaceService {
             return faceInfos.get(0);
         }
         return null;
+    }
+
+    @Override
+    public void handleFace(String albumId) {
+        UploadFileListV2Co uploadFileListV2Co = UploadFileListV2Co.builder()
+                .albumId(albumId)
+                .build();
+        Integer total = uploadFileService.totalV2(uploadFileListV2Co);
+        uploadFileListV2Co.setTotal(total);
+        List<UploadFile> uploadFiles = uploadFileService.listV2(uploadFileListV2Co);
+        if(CollectionUtils.isNotEmpty(uploadFiles)) {
+            uploadFiles.forEach(uploadFile -> template.convertAndSend(topic, uploadFile));
+        }
     }
 }
