@@ -238,28 +238,6 @@ public class UploadFileController {
     }
 
     /**
-     * 文件列表
-     * @return
-     */
-    @ApiOperation(value = "文件列表", notes = "文件列表")
-    @GetMapping("/admin/v2/list")
-    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
-    @ApiVersion(ApiVersionConstant.V2)
-    public Result listV2Admin(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
-        uploadFileListV2Co.setTotal(uploadFileService.totalV2(uploadFileListV2Co));
-        List<UploadFile> fileList = uploadFileService.listV2(uploadFileListV2Co);
-        PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
-        fileList.stream()
-                .filter(file -> file.getFileId().equals(photoAlbum.getCover()))
-                .forEach(file -> file.setIsCover(IsCoverEnum.TRUE.getValue()));
-        return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
-                .total(uploadFileListV2Co.getTotal())
-                .list(fileList)
-                .data(photoAlbum)
-                .build());
-    }
-
-    /**
      * 下载文件
      * @param fileId
      * @param response

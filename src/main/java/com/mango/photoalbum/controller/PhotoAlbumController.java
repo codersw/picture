@@ -104,13 +104,12 @@ public class PhotoAlbumController {
      * @return
      */
     @ApiOperation(value = "相册列表", notes = "相册列表")
-    @GetMapping("/v1/list")
-    @RequiredPermission
-    @ApiVersion
-    public Result v1list(PhotoAlbumListV1Co photoAlbumListV1Co){
+    @GetMapping("/admin/list")
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+    public Result listAdmin(PhotoAlbumListCo photoAlbumListCo){
         return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
-                .total(photoAlbumService.totalV1(photoAlbumListV1Co))
-                .list(photoAlbumService.listV1(photoAlbumListV1Co))
+                .total(photoAlbumService.total(photoAlbumListCo))
+                .list(photoAlbumService.list(photoAlbumListCo))
                 .build());
     }
 
@@ -119,12 +118,13 @@ public class PhotoAlbumController {
      * @return
      */
     @ApiOperation(value = "相册列表", notes = "相册列表")
-    @GetMapping("/admin/list")
-    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
-    public Result listAdmin(PhotoAlbumListCo photoAlbumListCo){
+    @GetMapping("/v1/list")
+    @RequiredPermission
+    @ApiVersion
+    public Result v1list(PhotoAlbumListV1Co photoAlbumListV1Co){
         return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
-                .total(photoAlbumService.total(photoAlbumListCo))
-                .list(photoAlbumService.list(photoAlbumListCo))
+                .total(photoAlbumService.totalV1(photoAlbumListV1Co))
+                .list(photoAlbumService.listV1(photoAlbumListV1Co))
                 .build());
     }
 }
