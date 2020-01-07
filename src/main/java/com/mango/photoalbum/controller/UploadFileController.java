@@ -2,13 +2,17 @@ package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.annotation.ApiVersion;
 import com.mango.photoalbum.annotation.RequiredPermission;
+import com.mango.photoalbum.constant.ApiVersionConstant;
 import com.mango.photoalbum.constant.PermissionConst;
 import com.mango.photoalbum.enums.IsCoverEnum;
+import com.mango.photoalbum.exception.PhotoAlbumException;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
 import com.mango.photoalbum.service.UploadFileService;
+import com.mango.photoalbum.utils.CommonUtils;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -172,13 +176,13 @@ public class UploadFileController {
     }
 
     /**
-     * 相册列表
+     * 文件列表
      * @return
      */
-    @ApiVersion
     @ApiOperation(value = "文件列表", notes = "文件列表")
     @GetMapping("/v1/list")
     @RequiredPermission
+    @ApiVersion
     public Result listV1(@ModelAttribute UploadFileListV1Co uploadFileListV1Co) {
         uploadFileListV1Co.setTotal(uploadFileService.totalV1(uploadFileListV1Co));
         List<UploadFile> fileList = uploadFileService.listV1(uploadFileListV1Co);
@@ -189,13 +193,38 @@ public class UploadFileController {
     }
 
     /**
-     * 相册列表
+     * 文件列表
      * @return
      */
-    @ApiVersion
+    @ApiOperation(value = "文件列表", notes = "文件列表")
+    @GetMapping("/v2/list")
+    @RequiredPermission
+    @ApiVersion(ApiVersionConstant.V2)
+    public Result listV2(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
+        if (StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
+            PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
+            if(!CommonUtils.isNullOrEmpty(photoAlbum.getOrgId())
+                    && !CommonUtils.isNullOrEmpty(uploadFileListV2Co.getOrgId())
+                    && !photoAlbum.getOrgId().equals(uploadFileListV2Co.getOrgId())) {
+                throw new PhotoAlbumException("您没有该相册访问权限");
+            }
+        }
+        uploadFileListV2Co.setTotal(uploadFileService.totalV2(uploadFileListV2Co));
+        List<UploadFile> fileList = uploadFileService.listV2(uploadFileListV2Co);
+        return ResultGenerator.genSuccessResult(PageResponse.<UploadFile>builder()
+                .total(uploadFileListV2Co.getTotal())
+                .list(fileList)
+                .build());
+    }
+
+    /**
+     * 文件列表
+     * @return
+     */
     @ApiOperation(value = "文件列表", notes = "文件列表")
     @GetMapping("/admin/v1/list")
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+    @ApiVersion
     public Result listV1Admin(@ModelAttribute UploadFileListV1Co uploadFileListV1Co) {
         uploadFileListV1Co.setTotal(uploadFileService.totalV1(uploadFileListV1Co));
         List<UploadFile> fileList = uploadFileService.listV1(uploadFileListV1Co);

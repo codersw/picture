@@ -442,6 +442,95 @@ public class UploadFileServiceImpl implements UploadFileService {
     }
 
     @Override
+    public Integer totalV2(UploadFileListV2Co uploadFileListV2Co) {
+        List<Query> mustQueries = new ArrayList<>();
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        mustQueries.add(termQuery);
+        if(StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
+            TermQuery termQuery1 = new TermQuery();
+            termQuery1.setFieldName("albumId");
+            termQuery1.setTerm(ColumnValue.fromString(uploadFileListV2Co.getAlbumId()));
+            mustQueries.add(termQuery1);
+        }
+        if(!CommonUtils.isNullOrEmpty(uploadFileListV2Co.getUserId())) {
+            MatchQuery matchQuery = new MatchQuery();
+            matchQuery.setFieldName("persons");
+            matchQuery.setText(uploadFileListV2Co.getUserId().toString());
+            mustQueries.add(matchQuery);
+        }
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(mustQueries);
+        query.setQuery(boolQuery);
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(UploadFile.class))
+                .indexName(ots.getTableName(UploadFile.class))
+                .searchQuery(query)
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return 0;
+        return (int) searchResponse.getTotalCount();
+    }
+
+    @Override
+    public List<UploadFile> listV2(UploadFileListV2Co uploadFileListV2Co) {
+        List<UploadFile> result = new ArrayList<>();
+        List<Query> mustQueries = new ArrayList<>();
+        TermQuery termQuery = new TermQuery();
+        termQuery.setFieldName("isDel");
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        mustQueries.add(termQuery);
+        if(StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
+            TermQuery termQuery1 = new TermQuery();
+            termQuery1.setFieldName("albumId");
+            termQuery1.setTerm(ColumnValue.fromString(uploadFileListV2Co.getAlbumId()));
+            mustQueries.add(termQuery1);
+        }
+        if(!CommonUtils.isNullOrEmpty(uploadFileListV2Co.getUserId())) {
+            MatchQuery matchQuery = new MatchQuery();
+            matchQuery.setFieldName("persons");
+            matchQuery.setText(uploadFileListV2Co.getUserId().toString());
+            mustQueries.add(matchQuery);
+        }
+        SearchQuery query = new SearchQuery();
+        BoolQuery boolQuery = new BoolQuery();
+        boolQuery.setMustQueries(mustQueries);
+        query.setQuery(boolQuery);
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("createTime",
+                Objects.requireNonNull(EnumUtils.getByValue(OrderEnum.class, uploadFileListV2Co.getOrder())).getName()))));
+        Integer pageSize = uploadFileListV2Co.getPageSize();
+        int offset = (uploadFileListV2Co.getPageIndex() - 1) * pageSize;
+        query.setOffset(offset);
+        query.setLimit(pageSize);
+        query.setGetTotalCount(false);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(UploadFile.class))
+                .indexName(ots.getTableName(UploadFile.class))
+                .searchQuery(query)
+                .returnAllColumns(true) // 设置返回所有列
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return result;
+        try {
+            List<Row> rows = searchResponse.getRows();
+            if(!CommonUtils.isNullOrEmpty(rows)){
+                for(Row row : rows) {
+                    result.add(ots.formatRow(row, UploadFile.class));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取列表出错：{}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+        return result;
+    }
+
+    @Override
     public void download(String fileId, HttpServletResponse response) {
         UploadFile file = get(fileId);
         if(file != null) {

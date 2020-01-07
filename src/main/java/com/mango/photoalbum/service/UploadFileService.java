@@ -31,6 +31,10 @@ public interface UploadFileService {
 
     List<UploadFile> listV1(UploadFileListV1Co uploadFileListV1Co);
 
+    Integer totalV2(UploadFileListV2Co uploadFileListV2Co);
+
+    List<UploadFile> listV2(UploadFileListV2Co uploadFileListV2Co);
+
     void download(String sourcePath, HttpServletResponse response);
 
     Integer totalFileFace(UploadFileFaceListCo uploadFileFaceListCo);
