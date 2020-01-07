@@ -276,15 +276,11 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         TermQuery termQuery = new TermQuery();
         termQuery.setFieldName("isDel");
         termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
-        if(!CommonUtils.isNullOrEmpty(photoAlbumListV1Co.getOrgId())) {
-            //设置公开的相册
-            TermQuery termQuery1 = new TermQuery();
-            termQuery1.setFieldName("isPublic");
-            termQuery1.setTerm(ColumnValue.fromLong(IsPublicEnum.PUBLIC.getValue()));
-            boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
-        } else {
-            boolQuery.setMustQueries(Collections.singletonList(termQuery));
-        }
+        //设置公开的相册
+        TermQuery termQuery1 = new TermQuery();
+        termQuery1.setFieldName("isPublic");
+        termQuery1.setTerm(ColumnValue.fromLong(IsPublicEnum.PUBLIC.getValue()));
+        boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
         List<Query> queries = new ArrayList<>();
         String keyword = photoAlbumListV1Co.getKeyword();
         if(StringUtils.isNotEmpty(keyword)){
@@ -308,9 +304,6 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
             //最少匹配一个搜索条件
             boolQuery.setMinimumShouldMatch(1);
             boolQuery.setShouldQueries(queries);
-        }
-        if(CommonUtils.isNullOrEmpty(photoAlbumListV1Co.getOrgId())) {
-            return boolQuery;
         }
         //第二个条件拼接 (orgId=22 and isPublic=1)
         BoolQuery boolQuery1 = new BoolQuery();
