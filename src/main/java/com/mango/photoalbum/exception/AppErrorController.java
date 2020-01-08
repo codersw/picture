@@ -1,4 +1,4 @@
-package com.mango.photoalbum.controller;
+package com.mango.photoalbum.exception;
 
 import com.mango.photoalbum.enums.ResultCodeEnum;
 import com.mango.photoalbum.model.Result;
@@ -6,9 +6,11 @@ import com.mango.photoalbum.model.ResultGenerator;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
-public class AppErrorUrlController implements ErrorController {
+@ApiIgnore
+public class AppErrorController implements ErrorController {
 
     private static final String PATH = "/error";
 
