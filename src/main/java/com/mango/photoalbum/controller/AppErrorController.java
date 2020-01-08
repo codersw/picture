@@ -1,4 +1,4 @@
-package com.mango.photoalbum.exception;
+package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.enums.ResultCodeEnum;
 import com.mango.photoalbum.model.Result;
