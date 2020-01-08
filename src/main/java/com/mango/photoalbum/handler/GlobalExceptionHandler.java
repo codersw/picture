@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
  * @author swen
  */
 @Slf4j
-@Order(value = Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
+@Order(value = Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
     private static final String DEFAULT_MESSAGE = "系统出错， 请稍后再试";
