@@ -63,10 +63,29 @@ public class ResultGenerator {
         return result;
     }
 
+    /**
+     * 自定义创建返回体
+     * @param codeEnum
+     * @param message
+     * @return
+     */
     public static Result<?> genResult(ResultCodeEnum codeEnum, String message) {
         Result<?> result = new Result<>();
         result.setCode(codeEnum.getValue());
         result.setMessage(message);
+        result.setRequestId(MDC.get(MdcConstant.REQUEST_ID));
+        return result;
+    }
+
+    /**
+     * 自定义创建返回体
+     * @param codeEnum
+     * @return
+     */
+    public static Result<?> genResult(ResultCodeEnum codeEnum) {
+        Result<?> result = new Result<>();
+        result.setCode(codeEnum.getValue());
+        result.setMessage(codeEnum.getName());
         result.setRequestId(MDC.get(MdcConstant.REQUEST_ID));
         return result;
     }
