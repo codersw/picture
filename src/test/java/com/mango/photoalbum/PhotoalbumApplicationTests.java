@@ -15,6 +15,7 @@ import com.mango.photoalbum.model.UploadFile;
 import com.mango.photoalbum.model.UploadFileFace;
 import com.mango.photoalbum.utils.CommonUtils;
 import com.mango.photoalbum.utils.FaceUtils;
+import com.mango.photoalbum.utils.FileUtils;
 import com.mango.photoalbum.utils.OtsUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
@@ -32,6 +33,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
@@ -221,5 +226,11 @@ public class PhotoalbumApplicationTests {
     public void testClass() throws ClassNotFoundException {
         log.info("{}", ClassLoader.getSystemClassLoader().loadClass("com.mango.photoalbum.model.UploadFile"));
         log.info("{}", Class.forName("com.mango.photoalbum.model.UploadFile"));
+    }
+
+    @Test
+    public void testImg() throws IOException {
+        InputStream inputStream = FileUtils.openInputStream(new File("C:\\Users\\shaowen\\Desktop\\lADPDgQ9rF4QY9LNAcDNAcA_448_448.jpg"));
+        log.info("{}", FileUtils.getImgInfo(inputStream));
     }
 }
