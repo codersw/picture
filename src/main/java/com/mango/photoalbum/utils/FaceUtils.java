@@ -41,7 +41,7 @@ public class FaceUtils {
     @Value("${alibaba.face.domain:face.cn-shanghai.aliyuncs.com}")
     private String domain;
 
-    private DefaultAcsClient face;
+    private DefaultAcsClient acs;
 
     private static final String ACTION_ADD_FACE = "AddFace";
 
@@ -57,10 +57,10 @@ public class FaceUtils {
     private void init() {
         try {
             DefaultProfile profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
-            face = new DefaultAcsClient(profile);
+            acs = new DefaultAcsClient(profile);
         } catch (Exception e){
             e.printStackTrace();
-            face = null;
+            acs = null;
             log.error("初始化face出错:{}", e.getMessage());
         }
     }
@@ -87,7 +87,7 @@ public class FaceUtils {
             if(!StringUtils.isEmpty(faceInfo.getContent())) {
                 request.putBodyParameter("Content", faceInfo.getContent()); //检测图片的内容，Base64编码
             }
-            CommonResponse response = face.getCommonResponse(request);
+            CommonResponse response = acs.getCommonResponse(request);
             log.info("添加face成功:{}", response.getData());
         } catch (ClientException e) {
             e.printStackTrace();
@@ -109,7 +109,7 @@ public class FaceUtils {
             request.putBodyParameter("Group", faceInfo.getGroup()); //添加人脸的分组
             request.putBodyParameter("Person", faceInfo.getPerson()); //添加人脸的姓名
             request.putBodyParameter("Image", faceInfo.getImage());   //添加人脸的编号
-            CommonResponse response = face.getCommonResponse(request);
+            CommonResponse response = acs.getCommonResponse(request);
             log.info("删除face成功:{}", response.getData());
         } catch (ClientException e) {
             e.printStackTrace();
@@ -129,7 +129,7 @@ public class FaceUtils {
             request.setVersion(version);
             request.setAction(ACTION_LIST_FACE);
             request.putBodyParameter("Group", groupName);
-            CommonResponse response = face.getCommonResponse(request);
+            CommonResponse response = acs.getCommonResponse(request);
             log.info("列举注册库中的face成功:{}", response.getData());
             JSONObject json = JSONObject.parseObject(response.getData());
             return JSONObject.parseObject(json.getString("Data"), Map.class);
@@ -150,7 +150,7 @@ public class FaceUtils {
             request.setDomain(domain);
             request.setVersion(version);
             request.setAction(ACTION_LIST_GROUP);
-            CommonResponse response = face.getCommonResponse(request);
+            CommonResponse response = acs.getCommonResponse(request);
             log.info("列举人脸组成功:{}", response.getData());
             JSONObject json = JSONObject.parseObject(response.getData());
             return JSONObject.parseArray(json.getString("Data"), String.class);
@@ -175,7 +175,7 @@ public class FaceUtils {
             request.setAction(ACTION_RECOGNIZE_FACE);
             request.putBodyParameter("Group", faceInfo.getGroup());
             request.putBodyParameter("ImageUrl", faceInfo.getImageUrl());
-            CommonResponse response = face.getCommonResponse(request);
+            CommonResponse response = acs.getCommonResponse(request);
             log.info("查找注册库中的人脸成功:{}", response.getData());
             JSONObject json = JSONObject.parseObject(response.getData());
             return JSONObject.parseArray(json.getString("Data"), UploadFileFace.class);
