@@ -97,6 +97,8 @@ public class FaceServiceImpl implements FaceService {
                         .fileId(uploadFile.getFileId())
                         .createTime(new Date())
                         .build();
+                //face图片清空
+                face.deleteFace(faceInfo);
                 //face图片注册
                 face.addFace(faceInfo);
                 //ots保存人脸信息
