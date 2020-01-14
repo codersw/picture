@@ -6,6 +6,8 @@ import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
 import com.mango.photoalbum.enums.IndexTypeEnum;
+import com.mango.photoalbum.enums.IsDelEnum;
+import com.mango.photoalbum.enums.IsPublicEnum;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
@@ -56,7 +58,7 @@ public class PhotoAlbum {
      * 是否删除
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
-    private Integer isDel;
+    private Integer isDel = IsDelEnum.FALSE.getValue();
 
     /**
      * 上传日期
@@ -90,7 +92,7 @@ public class PhotoAlbum {
      * 是否公开
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
-    private Integer isPublic;
+    private Integer isPublic = IsPublicEnum.PUBLIC.getValue();
 
     /**
      * 部门id
