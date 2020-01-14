@@ -268,9 +268,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
      * @return
      */
     private BoolQuery formatQueryV1(PhotoAlbumListV1Co photoAlbumListV1Co) {
-        //第一个条件拼接
-        // ((isDel=0 and isPublic=0) or (title like 'keyword')
-        // or (shootLocation like 'keyword') or (createUserId='keyword'))
+        //第一个条件拼接(isDel=0 and isPublic=0))
         BoolQuery boolQuery = new BoolQuery();
         //设置未删除
         TermQuery termQuery = new TermQuery();
@@ -281,30 +279,6 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         termQuery1.setFieldName("isPublic");
         termQuery1.setTerm(ColumnValue.fromLong(IsPublicEnum.PUBLIC.getValue()));
         boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
-        List<Query> queries = new ArrayList<>();
-        String keyword = photoAlbumListV1Co.getKeyword();
-        if(StringUtils.isNotEmpty(keyword)){
-            //设置标题
-            MatchPhraseQuery matchQuery1 = new MatchPhraseQuery();
-            matchQuery1.setFieldName("title");
-            matchQuery1.setText(keyword);
-            queries.add(matchQuery1);
-            //拍摄地点
-            MatchPhraseQuery  matchQuery2 = new MatchPhraseQuery();
-            matchQuery2.setFieldName("shootLocation");
-            matchQuery2.setText(keyword);
-            queries.add(matchQuery2);
-            //设置创建人
-            if(Pattern.compile("[0-9]*").matcher(keyword).matches()) {
-                TermQuery termQuery4 = new TermQuery();
-                termQuery4.setFieldName("createUserId");
-                termQuery4.setTerm(ColumnValue.fromString(keyword));
-                queries.add(termQuery4);
-            }
-            //最少匹配一个搜索条件
-            boolQuery.setMinimumShouldMatch(1);
-            boolQuery.setShouldQueries(queries);
-        }
         //第二个条件拼接 (orgId=22 and isPublic=1)
         BoolQuery boolQuery1 = new BoolQuery();
         //设置部门id
@@ -317,11 +291,44 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         termQuery3.setTerm(ColumnValue.fromLong(IsPublicEnum.NOPUBLIC.getValue()));
         boolQuery1.setMustQueries(Arrays.asList(termQuery2, termQuery3));
         //合并条件 (第一个条件) or (第二个条件)
-        List<Query> queries1 = new ArrayList<>();
-        queries1.add(boolQuery);
-        queries1.add(boolQuery1);
+        List<Query> queries = new ArrayList<>();
+        queries.add(boolQuery);
+        queries.add(boolQuery1);
         BoolQuery boolQuery2 = new BoolQuery();
-        boolQuery2.setShouldQueries(queries1);
+        boolQuery2.setShouldQueries(queries);
+        boolQuery2.setMinimumShouldMatch(1);
+        //第三个条件拼接 ((keyword like title) or (keyword like shootLocation)  or (keyword = createUserId))
+        String keyword = photoAlbumListV1Co.getKeyword();
+        if(StringUtils.isNotEmpty(keyword)){
+            BoolQuery boolQuery3 = new BoolQuery();
+            List<Query> queries1 = new ArrayList<>();
+            //设置标题
+            MatchPhraseQuery matchQuery1 = new MatchPhraseQuery();
+            matchQuery1.setFieldName("title");
+            matchQuery1.setText(keyword);
+            queries1.add(matchQuery1);
+            //拍摄地点
+            MatchPhraseQuery  matchQuery2 = new MatchPhraseQuery();
+            matchQuery2.setFieldName("shootLocation");
+            matchQuery2.setText(keyword);
+            queries1.add(matchQuery2);
+            //设置创建人
+            if(Pattern.compile("[0-9]*").matcher(keyword).matches()) {
+                TermQuery termQuery4 = new TermQuery();
+                termQuery4.setFieldName("createUserId");
+                termQuery4.setTerm(ColumnValue.fromString(keyword));
+                queries1.add(termQuery4);
+            }
+            boolQuery3.setShouldQueries(queries1);
+            boolQuery3.setMinimumShouldMatch(1);
+            //合并条件 ((第一个条件) or (第二个条件)) and (第三个条件)
+            List<Query> queries2 = new ArrayList<>();
+            queries2.add(boolQuery2);
+            queries2.add(boolQuery3);
+            BoolQuery boolQuery4 = new BoolQuery();
+            boolQuery4.setMustQueries(queries2);
+            return boolQuery4;
+        }
         return boolQuery2;
     }
 
