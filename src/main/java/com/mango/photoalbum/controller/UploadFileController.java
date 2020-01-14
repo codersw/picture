@@ -5,6 +5,7 @@ import com.mango.photoalbum.annotation.RequiredPermission;
 import com.mango.photoalbum.constant.ApiVersionConstant;
 import com.mango.photoalbum.constant.PermissionConst;
 import com.mango.photoalbum.enums.IsCoverEnum;
+import com.mango.photoalbum.enums.IsPublicEnum;
 import com.mango.photoalbum.exception.PhotoAlbumException;
 import com.mango.photoalbum.model.*;
 import com.mango.photoalbum.service.PhotoAlbumService;
@@ -225,7 +226,7 @@ public class UploadFileController {
     public Result listV2(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
         if (StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
             PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
-            if(!CommonUtils.isNullOrEmpty(photoAlbum.getOrgId())
+            if(photoAlbum.getIsPublic().equals(IsPublicEnum.NOPUBLIC.getValue()) && !CommonUtils.isNullOrEmpty(photoAlbum.getOrgId())
                     && !CommonUtils.isNullOrEmpty(uploadFileListV2Co.getOrgId())
                     && !photoAlbum.getOrgId().equals(uploadFileListV2Co.getOrgId())) {
                 throw new PhotoAlbumException("您没有该相册访问权限");
