@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>相 册</title>
+    <link rel="stylesheet" href="https://g.517cdn.com/plugjavascriptjq/tamlliconfont/iconfont.css?v=20191015-a">
+    <link rel="stylesheet" href="common/css/common.css">
+    <link rel="stylesheet" href="common/css/index.css">
+</head>
+<body>
+<div id="container">
+    <div class="headers">
+        <div class="user_msg">
+            <div class="avatar_box">
+
+            </div>
+            <span class="msg">未知部门-未知</span>
+        </div>
+        <div class="operate">
+            <div class="operate_cell">
+                <a target="_blank" href="views/search/search.html"><i class="iconfont icon-search"></i></a>
+            </div>
+            <div class="operate_cell">
+                <a target="_blank" href="views/mine/mine.html"><i class="iconfont icon-peoplefill"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="content_bg">
+        <div class="list">
+
+        </div>
+        <div class="empty_data">
+            <img src="common/img/sad.png" alt="">
+            <p>暂无数据</p>
+        </div>
+    </div>
+</div>
+<div class="un_login">
+    请示用MisApp扫码登陆
+</div>
+<div class="loading">
+    加载中...
+</div>
+<div class="tips">
+    <div class="tips_msg">
+        这是提示的消息呀
+    </div>
+</div>
+<!--[if lt IE 9]>
+
+<script src="common/js/html5shiv.js"></script>
+
+<![endif]-->
+<script src="common/js/jquery-1.11.0.min.js"></script>
+<script src="common/js/common.js"></script>
+<script src="common/js/index.js"></script>
+<script>
+    $(function () {
+        // 数据请求参数
+        var params = {
+                keyword: '',
+                pageIndex: 1,
+                pageSize: 10,
+                orgId : orgId
+            };
+        doingFlag = false;
+        getListData(params);
+
+        if (id) {
+            // 请求用户信息
+            $.ajax({
+                url: 'https://mis.517.cn/mangoapi/UserNoLogin/GetUserName?userid=' + id,
+                async: true,
+                success: function (res) {
+                    if (res.result) {
+                        $(".msg").text(res.result.OrgName + '-' + res.result.UserName);
+                        $(".avatar_box").css('background-image', 'url(' + res.result.userphoto + ')');
+                        orgId = res.result.OrgId;
+                        params.orgId = orgId;
+                    }
+                }
+            })
+        }else {
+            $("#container").hide();
+            $(".unLogin").show();
+        }
+
+        // 上拉加载
+
+        function callback() {
+            var _list = document.getElementsByClassName("list")[0];
+            var top = _list.getBoundingClientRect().top;
+            var windowHeight = window.screen.height;
+            var cuHeight = $('.list').height();
+            if (top && cuHeight <= windowHeight - top) {
+                loadMoreFn()
+            }
+        }
+
+        window.addEventListener('scroll', function () {
+            if (doingFlag) {
+                return
+            }
+            if (timeoutId) {
+                clearTimeout(timeoutId)
+            }
+            timeoutId = setTimeout(callback, 50)
+        }.bind(this), false);
+
+        function loadMoreFn() {
+
+            params.pageIndex++;
+            getListData(params);
+        }
+    })
+</script>
+</body>
+</html>

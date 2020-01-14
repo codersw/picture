@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>搜 索</title>
+    <link rel="stylesheet" href="https://g.517cdn.com/plugjavascriptjq/tamlliconfont/iconfont.css?v=20191015-a">
+    <link rel="stylesheet" href="../../common/css/common.css">
+    <link rel="stylesheet" href="search.css">
+</head>
+<body>
+<div id="container">
+    <div class="headers">
+        <div class="search">
+            <div class="search_input">
+                <input maxlength="10" id="search_input" placeholder="输入标题关键字" name="keyword" type="text">
+                <span class="btn_search"><i class="iconfont icon-search"></i></span>
+            </div>
+        </div>
+        <div class="search_history">
+            <p></p>
+            <i class="iconfont icon-deletefill del_word"></i>
+        </div>
+    </div>
+    <div class="content_bg">
+        <div class="list">
+
+        </div>
+        <div class="empty_data">
+            <img src="../../common/img/sad.png" alt="">
+            <p>暂无数据</p>
+        </div>
+    </div>
+
+</div>
+<div class="loading">
+    加载中...
+</div>
+<div class="tips">
+    <div class="tips_msg">
+        这是提示的消息呀
+    </div>
+</div>
+<!--[if lt IE 9]>
+
+<script src="../../common/js/html5shiv.js"></script>
+
+<![endif]-->
+<script src="../../common/js/jquery-1.11.0.min.js"></script>
+<script src="../../common/js/jquery.lazyload.min.js"></script>
+<script src="../../common/js/common.js"></script>
+<script src="search.js"></script>
+<script>
+    $(function () {
+
+        var params = {
+                keyword: '',
+                pageIndex: 1,
+                pageSize: 10,
+                orgId: orgId
+            },
+            searchFlag = true, // 搜索节流标识
+            $list = $(".list");
+        doingFlag = false;
+
+        // 请求第一页数据
+        getListData(params);
+
+        // 搜索功能
+
+        $('.btn_search').click(function () {
+            if (searchFlag) {
+                searchFlag = false;
+                setTimeout(function () {
+                    searchFlag = true
+                }, 1000);
+                var keyword = $("input[name='keyword']").val().trim();
+                if (keyword) {
+                    $list.children().remove();
+                    params.pageIndex = 1;
+                    params.keyword = keyword;
+                    getListData(params);
+                    setHistory(keyword, 3);
+                } else {
+                    params.pageIndex = 1;
+                    params.keyword = '';
+                    getListData(params);
+                    $list.children().remove();
+                }
+                doingFlag = false;
+            }
+
+        });
+
+        // 监听回车
+        $('#search_input').bind('keyup', function(event) {
+            if (event.keyCode == "13") {
+                //回车执行查询
+                $('.btn_search').click();
+            }
+        });
+
+        showHistory();
+
+        // 渲染搜索过的字段
+        function showHistory() {
+            var keywords = JSON.parse(localStorage.getItem('KEYWORD'));
+            $('.search_history p').empty();
+            if (keywords) {
+                $('.search_history').show();
+                var wordStr = '';
+                for (var i = 0; i < keywords.length; i++) {
+                    wordStr += '<span>' + keywords[i].word + '</span>\n'
+                }
+                $('.search_history p').append(wordStr);
+            } else {
+                $('.search_history').hide();
+            }
+        }
+
+        // 设置搜索历史
+        function setHistory(word, len) {
+            var historyWord = JSON.parse(localStorage.getItem('KEYWORD')),
+                wordObj = {word: '', date: ''},
+                data = [];
+            if (historyWord) {
+                for (var j = 0; j < historyWord.length; j++) {
+                    if (historyWord[j].word === word) {
+                        historyWord.splice(j, 1);
+                    }
+                }
+                wordObj.word = word;
+                wordObj.date = new Date();
+                historyWord.push(wordObj);
+                if (historyWord.length > len) {
+                    historyWord.splice(0, 1);
+                }
+                localStorage.setItem('KEYWORD', JSON.stringify(historyWord));
+            } else {
+                wordObj.word = word;
+                wordObj.date = new Date();
+                data.push(wordObj);
+                localStorage.setItem('KEYWORD', JSON.stringify(data));
+            }
+            showHistory();
+        }
+
+        // 清除搜索历史缓存
+        $('.del_word').click(function () {
+            localStorage.removeItem('KEYWORD');
+            showHistory();
+            $('.search_history').hide();
+            $("input[name='keyword']").val('');
+            params.keyword = '';
+            $list.children().remove();
+            getListData(params);
+        });
+
+        // 点击搜索历史
+        $(document).on('click', '.search_history p span', function () {
+            var _this = $(this),
+                word = _this.text();
+            if (searchFlag) {
+                searchFlag = false;
+                setTimeout(function () {
+                    searchFlag = true
+                }, 1000);
+                $list.children().remove();
+                params.pageIndex = 1;
+                params.keyword = word;
+                getListData(params);
+                setHistory(word, 3);
+                $("input[name='keyword']").val(word)
+            }
+            doingFlag = false;
+        });
+
+
+        // 上拉加载
+
+        function callback() {
+            var list = document.getElementsByClassName("list")[0];
+            var top = list.getBoundingClientRect().top;
+            var windowHeight = window.screen.height;
+            var cuHeight = $('.list').height();
+            if (top && cuHeight <= windowHeight - top) {
+                loadMoreFn()
+            }
+        }
+        // 监听滚动
+        window.addEventListener('scroll', function () {
+            if (doingFlag) {
+                return
+            }
+            if (timeoutId) {
+                clearTimeout(timeoutId)
+            }
+            timeoutId = setTimeout(callback, 50)
+        }.bind(this), false);
+        // 请求下一页
+        function loadMoreFn() {
+            params.pageIndex++;
+            getListData(params);
+        }
+    })
+</script>
+</body>
+</html>

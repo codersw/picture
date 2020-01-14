@@ -1,0 +1,25 @@
+.box {
+    padding: 17px;
+}
+
+.box_cell a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 48px;
+    color: #333;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.box_cell span {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+}
+
+.box_cell i {
+    font-size: 16px;
+    color: #cfcfcf;
+}
