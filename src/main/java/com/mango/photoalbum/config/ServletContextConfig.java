@@ -16,9 +16,6 @@ public class ServletContextConfig extends WebMvcConfigurationSupport {
     @Resource
     private AuthorizationInterceptor authorizationInterceptor;
 
-    @Value("${spring.profiles.active}")
-    private String active;
-
     /**
      * 发现如果继承了WebMvcConfigurationSupport，则在yml中配置的相关内容会失效。
      * 需要重新指定静态资源
@@ -27,11 +24,8 @@ public class ServletContextConfig extends WebMvcConfigurationSupport {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-        //生产环境不暴露swagger
-        if(!active.contains("prod")) {
-            registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-            registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-        }
+        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
         super.addResourceHandlers(registry);
     }
 
