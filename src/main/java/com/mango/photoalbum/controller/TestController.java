@@ -1,7 +1,6 @@
 package com.mango.photoalbum.controller;
 
 import com.mango.photoalbum.utils.CookieUtil;
-import io.swagger.models.auth.In;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
