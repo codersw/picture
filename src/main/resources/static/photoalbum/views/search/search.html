@@ -63,7 +63,8 @@
             },
             searchFlag = true, // 搜索节流标识
             $list = $(".list");
-        params.orgId = getOrigId();
+        params.orgId = getOrigId().origId;
+        params.orgIdAll = getOrigId().orgIdAll;
         doingFlag = false;
         // 请求第一页数据
         getListData(params);

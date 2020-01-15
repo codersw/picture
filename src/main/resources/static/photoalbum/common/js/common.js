@@ -17,7 +17,7 @@ function showTips(tips) {
 
 // 获取本地用户信息
 function getOrigId() {
-    return JSON.parse(localStorage.getItem('USERS')).origId;
+    return JSON.parse(localStorage.getItem('USERS'));
 }
 
 // 获取登陆状态

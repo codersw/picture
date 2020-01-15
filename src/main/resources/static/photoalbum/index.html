@@ -77,9 +77,10 @@
                         $(".msg").text(res.data.orgName + '-' + res.data.userName);
                         $(".avatar_box").css('background-image', 'url(' + res.data.userPhoto + ')');
                         params.orgId = res.data.orgId;
+                        params.orgIdAll = res.data.orgIdAll;
                         getListData(params);
                         // 设置本地用户信息
-                        localStorage.setItem('USERS', JSON.stringify({id: id,origId: params.orgId}))
+                        localStorage.setItem('USERS', JSON.stringify({id: id,origId: params.orgId,orgIdAll: params.orgIdAll}))
                     }
                 }
             });
