@@ -98,13 +98,13 @@ public class PhotoAlbum {
     /**
      * orgId
      */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
     private Integer orgId;
 
     /**
      * orgIdAll
      */
-    @OTSColumn(indexType = IndexTypeEnum.TEXT, analyzer = AnalyzerEnum.Split, splitAnalyzerDelimiter = ",")
+    @OTSColumn
     private String orgIdAll;
 
     /**
