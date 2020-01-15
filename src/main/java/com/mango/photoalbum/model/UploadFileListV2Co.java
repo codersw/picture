@@ -5,6 +5,7 @@ import com.mango.photoalbum.enums.PageEnum;
 import com.mango.photoalbum.enums.TypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,7 +37,10 @@ public class UploadFileListV2Co {
     private Integer order = OrderEnum.DESC.getValue();
 
     @ApiModelProperty(value = "部门id")
-    private String orgId;
+    private Integer orgId;
+
+    @ApiModelProperty(value = "全部部门id")
+    private String orgIdAll;
 
     @ApiModelProperty(hidden = true)
     private Integer total = 0;

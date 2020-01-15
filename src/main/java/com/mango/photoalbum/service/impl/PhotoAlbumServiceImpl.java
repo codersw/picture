@@ -285,7 +285,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         //设置部门id
         MatchQuery matchQuery = new MatchQuery();
         matchQuery.setFieldName("orgIdAll");
-        matchQuery.setText(photoAlbumListV1Co.getOrgId().toString());
+        matchQuery.setText(photoAlbumListV1Co.getOrgIdAll());
         //设置不公开的相册
         TermQuery termQuery3 = new TermQuery();
         termQuery3.setFieldName("isPublic");

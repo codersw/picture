@@ -231,7 +231,15 @@ public class UploadFileController {
         if (StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
             PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
             List<String> orgIdAll = Arrays.asList(photoAlbum.getOrgIdAll().split(","));
-            if(photoAlbum.getIsPublic().equals(IsPublicEnum.NOPUBLIC.getValue()) && orgIdAll.contains(uploadFileListV2Co.getOrgId())) {
+            String[] orgIdAllCo = uploadFileListV2Co.getOrgIdAll().split(",");
+            boolean flag = false;
+            for(String orgId : orgIdAllCo) {
+                if(orgIdAll.contains(orgId)) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(photoAlbum.getIsPublic().equals(IsPublicEnum.NOPUBLIC.getValue()) && !flag) {
                 throw new PhotoAlbumException("您没有该相册访问权限");
             }
         }
