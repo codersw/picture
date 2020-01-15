@@ -50,10 +50,9 @@ public class UserController {
             result.put("orgName", userInfo.getString("OrgName"));
             String orgId = userInfo.getString("OrgId");
             String orgIdAll = userInfo.getString("OrgParentIDALL");
-            orgIdAll = orgIdAll.replaceAll("/|", "");
+            orgIdAll = orgIdAll.replaceAll("\\|", "");
             orgIdAll = orgIdAll + "," + orgId;
-            result.put("orgId", orgId);
-            result.put("orgIdAll", orgIdAll);
+            result.put("orgId", orgIdAll);
             return ResultGenerator.genSuccessResult(result);
         } else {
             return ResultGenerator.genFailResult(json.getString("message"));

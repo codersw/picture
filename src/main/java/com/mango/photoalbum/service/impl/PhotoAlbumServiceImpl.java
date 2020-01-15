@@ -284,7 +284,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         BoolQuery boolQuery1 = new BoolQuery();
         //设置部门id
         MatchQuery matchQuery = new MatchQuery();
-        matchQuery.setFieldName("orgIdAll");
+        matchQuery.setFieldName("orgId");
         matchQuery.setText(photoAlbumListV1Co.getOrgId().toString());
         //设置不公开的相册
         TermQuery termQuery3 = new TermQuery();

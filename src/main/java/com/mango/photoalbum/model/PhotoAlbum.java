@@ -96,16 +96,10 @@ public class PhotoAlbum {
     private Integer isPublic = IsPublicEnum.PUBLIC.getValue();
 
     /**
-     * 部门id
-     */
-    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
-    private Integer orgId;
-
-    /**
-     * 所有orgId
+     * orgId
      */
     @OTSColumn(indexType = IndexTypeEnum.TEXT, analyzer = AnalyzerEnum.Split, splitAnalyzerDelimiter = ",")
-    private String orgIdAll;
+    private String orgId;
 
     /**
      * 封面 图片url
