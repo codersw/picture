@@ -98,8 +98,14 @@ public class PhotoAlbum {
     /**
      * orgId
      */
+    @OTSColumn(definedColumnType = DefinedColumnType.INTEGER)
+    private Integer orgId;
+
+    /**
+     * orgIdAll
+     */
     @OTSColumn(indexType = IndexTypeEnum.TEXT, analyzer = AnalyzerEnum.Split, splitAnalyzerDelimiter = ",")
-    private String orgId;
+    private String orgIdAll;
 
     /**
      * 封面 图片url

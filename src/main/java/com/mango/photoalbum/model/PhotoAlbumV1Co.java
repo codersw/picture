@@ -3,6 +3,7 @@ package com.mango.photoalbum.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -37,5 +38,8 @@ public class PhotoAlbumV1Co {
     private Integer isPublic;
 
     @ApiModelProperty(value = "部门id")
-    private String orgId;
+    private Integer orgId;
+
+    @ApiModelProperty(value = "所有部门id")
+    private String orgIdAll;
 }

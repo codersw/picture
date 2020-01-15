@@ -230,10 +230,8 @@ public class UploadFileController {
     public Result listV2(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
         if (StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
             PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
-            List<String> orgIdCo = Arrays.asList(uploadFileListV2Co.getOrgId().split(","));
-            List<String> orgId = Arrays.asList(photoAlbum.getOrgId().split(","));
-            List<String> intersection = orgId.stream().filter(orgIdCo::contains).collect(toList());
-            if(photoAlbum.getIsPublic().equals(IsPublicEnum.NOPUBLIC.getValue()) && CollectionUtils.isEmpty(intersection)) {
+            List<String> orgIdAll = Arrays.asList(photoAlbum.getOrgIdAll().split(","));
+            if(photoAlbum.getIsPublic().equals(IsPublicEnum.NOPUBLIC.getValue()) && orgIdAll.contains(uploadFileListV2Co.getOrgId())) {
                 throw new PhotoAlbumException("您没有该相册访问权限");
             }
         }

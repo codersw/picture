@@ -19,5 +19,5 @@ public class PhotoAlbumListV1Co {
     private Integer pageSize = PageEnum.PAGESIZE.getValue();
 
     @ApiModelProperty(value = "部门id")
-    private String orgId;
+    private Integer orgId;
 }

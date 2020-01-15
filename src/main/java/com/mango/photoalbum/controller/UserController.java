@@ -29,6 +29,7 @@ public class UserController {
     @GetMapping("/test")
     public void test(HttpServletResponse response) {
         CookieUtil.set(response,"newframeuid", "11877", Integer.MAX_VALUE);
+        CookieUtil.set(response,"userId", "11877", Integer.MAX_VALUE);
     }
 
     /**
@@ -52,7 +53,8 @@ public class UserController {
             String orgIdAll = userInfo.getString("OrgParentIDALL");
             orgIdAll = orgIdAll.replaceAll("\\|", "");
             orgIdAll = orgIdAll + "," + orgId;
-            result.put("orgId", orgIdAll);
+            result.put("orgId", orgId);
+            result.put("orgIdAll", orgIdAll);
             return ResultGenerator.genSuccessResult(result);
         } else {
             return ResultGenerator.genFailResult(json.getString("message"));
