@@ -19,7 +19,7 @@ $(function () {
         }
         var albumId = location.href.substring(location.href.indexOf('=') + 1, titleAnd);
         $.ajax({
-            url: serverHost + '/upload/v2/list?albumId=' + albumId + '&orgId=' + getOrigId().orgId,
+            url: serverHost + '/upload/v2/list?albumId=' + albumId + '&orgId=' + getOrigId(),
             type: 'GET',
             headers: { 'userId': id },
             success: function (res) {
