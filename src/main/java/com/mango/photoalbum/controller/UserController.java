@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-@Api("获取用户信息")
+@Api(value = "获取用户信息", tags= "获取用户信息")
 @RestController
 @RequestMapping("/user")
 public class UserController {
