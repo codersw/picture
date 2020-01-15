@@ -23,12 +23,10 @@ function getListData(params) {
                         if (res.data.list[i].modifyTime || res.data.list[i].createTime) {
                             res.data.list[i].createTime = res.data.list[i].modifyTime.substr(0, 10) || res.data.list[i].createTime.substr(0, 10);
                         }
-                        // 根据图片地址获取图片尺寸
-                        var img = new Image();
-                        img.src = res.data.list[i].coverPath;
                         html += '<a target="_blank" href="./views/album_details/album_details.html?id=' + res.data.list[i].albumId + '&title=' + res.data.list[i].title + '" class="list_cell">\n' +
-                            '            <div class="left_img common_img">\n' +
-                            '                 <img src="' + (res.data.list[i].coverPath ? res.data.list[i].coverPath + "?x-oss-process=image/resize,h_200,w_200" : "https://g.517cdn.com/www517cn/2016v1/images/noimg_small.png") + '" alt="">\n ' +
+                            '            <div class="left_img common_img">' +
+                            '                <div class="img_bg" style="background-image: url(' + (res.data.list[i].coverPath ? res.data.list[i].coverPath + "?x-oss-process=image/resize,h_200,w_200" : "https://g.517cdn.com/www517cn/2016v1/images/noimg_small.png") + ')">' +
+                            '                </div>' +
                             '            </div>\n' +
                             '            <div class="right_msg">\n' +
                             '                <div class="title">\n' +

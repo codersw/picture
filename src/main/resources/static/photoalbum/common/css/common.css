@@ -13,6 +13,10 @@ body, input, textarea, code, select, button {
     outline: none;
 }
 
+body {
+    background-color: #fafafa;
+}
+
 #container {
     color: #505050;
 }
@@ -126,4 +130,13 @@ body, input, textarea, code, select, button {
 
 .common_img img {
     height: 100%;
+}
+
+.common_img .img_bg {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: 50%;
+    background-repeat: no-repeat;
+    pointer-events: none;
 }

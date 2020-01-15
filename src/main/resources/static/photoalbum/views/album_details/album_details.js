@@ -19,7 +19,7 @@ $(function () {
         }
         var albumId = location.href.substring(location.href.indexOf('=') + 1, titleAnd);
         $.ajax({
-            url: serverHost + '/upload/v2/list?albumId=' + albumId + '&orgId=' + orgId,
+            url: serverHost + '/upload/v2/list?albumId=' + albumId + '&orgId=' + getLocal().orgId,
             type: 'GET',
             headers: { 'userId': id },
             success: function (res) {
@@ -55,7 +55,7 @@ $(function () {
                         $(".empty_data").show();
                     }
                 }else {
-                    showTips(res.msg)
+                    showTips('暂无权限访问')
                 }
             }
         }).fail(function () {

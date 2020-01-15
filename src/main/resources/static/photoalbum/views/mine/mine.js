@@ -54,13 +54,10 @@ $(function () {
                 success: function (res) {
                     if (res.code === 200) {
                         if (res.data.list != '') {
-
-
                             if (res.data.list.length < 20) {
                                 reqFlag = false;
                                 $(".underline").show();
                             }
-
                             var generalList = '';
                             res.data.list.forEach(function (item, index) {
 
@@ -81,29 +78,39 @@ $(function () {
                                     if (JSON.stringify(dateData).indexOf(item.createTime) === -1) {
                                         midData.date = item.createTime;
                                         midData.url.push(item.filePath);
-                                        dateData.push(midData)
+                                        dateData.push(midData);
+                                        midData = {
+                                            date: '',
+                                            url: []
+                                        };
                                     }
                                 }
                                 if (index !== 0) {
                                     for (var k = 0; k < dateData.length; k++) {
-                                        if (dateData[k] && dateData[k].date === item.createTime) {
+                                        if (dateData[k] && dateData[k].date === item.createTime && JSON.stringify(dateData).indexOf(item.filePath) === -1) {
                                             dateData[k].url.push(item.filePath);
                                         }
                                         if (JSON.stringify(dateData).indexOf(item.createTime) === -1) {
                                             midData.date = item.createTime;
                                             midData.url.push(item.filePath);
                                             dateData.push(midData);
+                                            midData = {
+                                                date: '',
+                                                url: []
+                                            };
                                         }
                                     }
                                 }
                                 // 判断是否需要懒加载   15为预计铺满屏幕值
                                 if ($(".general_box img").length < 15) {
                                     generalList += ' <div class="list_cell common_img">' +
-                                        '   <img src="'+ item.filePath +'?x-oss-process=image/resize,h_200,w_200" alt="">' +
+                                        '                           <div class="img_bg lazy" data-src="' + item.filePath + '"  style="background-image: url(' + item.filePath + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
+                                        '                           </div>' +
                                         '</div>';
                                 } else {
                                     generalList += ' <div class="list_cell common_img">' +
-                                        '   <img class="lazy" data-original="'+ item.filePath +'?x-oss-process=image/resize,h_200,w_200" alt="">' +
+                                        '                           <div class="img_bg lazy" data-src="' + item.filePath + '"  style="background-image: url(' + item.filePath + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
+                                        '                           </div>' +
                                         '</div>';
                                 }
 
@@ -126,10 +133,12 @@ $(function () {
                                 for (var n = 0; n < dateData[j].url.length; n++) {
                                     dateImg += '<div class="img_box">\n' +
                                         '                        <div class="date_img common_img">\n' +
-                                        '                            <img class="lazy" data-original="'+ dateData[j].url[n] +'?x-oss-process=image/resize,h_200,w_200">' +
+                                        '                           <div class="img_bg lazy" data-src="' + dateData[j].url[n] + '" style="background-image: url(' + dateData[j].url[n] + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
+                                        '                           </div>' +
                                         '                        </div>\n' +
                                         '                    </div>';
                                 }
+
                                 // 不做兼容小屏 iPhone5
                                 dateIndex = 3 - dateData[j].url.length % 3;
                                 if (dateIndex === 3) {
@@ -152,7 +161,7 @@ $(function () {
                             }
                             $(".date_list").children().remove();
                             $(".date_list").append(dateList);
-                            $("img.lazy").lazyload({effect: "fadeIn"});
+                            $("div.lazy").lazyload({effect: "fadeIn"});
                         } else {
                             if (params.pageIndex === 1) {
                                 // 空数组
@@ -227,7 +236,7 @@ if (MGNative) {
     MGNative.setupWebViewJavascriptBridge(function (bridge) {
         $(document).on('click', '.list_cell img', function () {
             var _this = $(this),
-                currentUrl = _this.attr('src');
+                currentUrl = _this.attr('data-src');
             if (currentUrl && currentUrl.indexOf('https') !== -1) {
                 MGNative.previewImage(bridge, {
                     title: topTitle,
