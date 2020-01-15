@@ -104,12 +104,12 @@ $(function () {
                                 // 判断是否需要懒加载   15为预计铺满屏幕值
                                 if ($(".general_box img").length < 15) {
                                     generalList += ' <div class="list_cell common_img">' +
-                                        '                           <div class="img_bg lazy" data-src="' + item.filePath + '"  style="background-image: url(' + item.filePath + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
+                                        '                           <div class="img_bg lazy" data-src="' + item.filePath + '?x-oss-process=image/resize,h_200,w_200"  style="background-image: url(' + item.filePath + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
                                         '                           </div>' +
                                         '</div>';
                                 } else {
                                     generalList += ' <div class="list_cell common_img">' +
-                                        '                           <div class="img_bg lazy" data-src="' + item.filePath + '"  style="background-image: url(' + item.filePath + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
+                                        '                           <div class="img_bg lazy" data-src="' + item.filePath + '?x-oss-process=image/resize,h_200,w_200"  style="background-image: url(' + item.filePath + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
                                         '                           </div>' +
                                         '</div>';
                                 }
@@ -133,7 +133,7 @@ $(function () {
                                 for (var n = 0; n < dateData[j].url.length; n++) {
                                     dateImg += '<div class="img_box">\n' +
                                         '                        <div class="date_img common_img">\n' +
-                                        '                           <div class="img_bg lazy" data-src="' + dateData[j].url[n] + '" style="background-image: url(' + dateData[j].url[n] + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
+                                        '                           <div class="img_bg lazy" data-src="' + dateData[j].url[n] + '?x-oss-process=image/resize,h_200,w_200" style="background-image: url(' + dateData[j].url[n] + '?x-oss-process=image/resize,h_200,w_200' + ')">' +
                                         '                           </div>' +
                                         '                        </div>\n' +
                                         '                    </div>';
@@ -247,7 +247,7 @@ if (MGNative) {
         });
         $(document).on('click', '.date_img .img_bg', function () {
             var _this = $(this),
-                currentUrl = _this.attr('src');
+                currentUrl = _this.attr('data-src');
             if (currentUrl && currentUrl.indexOf('http') !== -1) {
                 MGNative.previewImage(bridge, {
                     title: topTitle,
