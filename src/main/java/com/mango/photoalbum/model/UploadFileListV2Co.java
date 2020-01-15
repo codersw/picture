@@ -36,7 +36,7 @@ public class UploadFileListV2Co {
     private Integer order = OrderEnum.DESC.getValue();
 
     @ApiModelProperty(value = "部门id")
-    private Integer orgId;
+    private String orgId;
 
     @ApiModelProperty(hidden = true)
     private Integer total = 0;

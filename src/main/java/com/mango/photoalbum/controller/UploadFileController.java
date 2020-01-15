@@ -13,11 +13,15 @@ import com.mango.photoalbum.service.UploadFileService;
 import com.mango.photoalbum.utils.CommonUtils;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * 文件接口
@@ -226,9 +230,10 @@ public class UploadFileController {
     public Result listV2(@ModelAttribute UploadFileListV2Co uploadFileListV2Co) {
         if (StringUtils.isNotEmpty(uploadFileListV2Co.getAlbumId())) {
             PhotoAlbum photoAlbum = photoAlbumService.get(uploadFileListV2Co.getAlbumId());
-            if(photoAlbum.getIsPublic().equals(IsPublicEnum.NOPUBLIC.getValue()) && !CommonUtils.isNullOrEmpty(photoAlbum.getOrgId())
-                    && !CommonUtils.isNullOrEmpty(uploadFileListV2Co.getOrgId())
-                    && !photoAlbum.getOrgId().equals(uploadFileListV2Co.getOrgId())) {
+            List<String> orgIdCo = Arrays.asList(uploadFileListV2Co.getOrgId().split(","));
+            List<String> orgId = Arrays.asList(photoAlbum.getOrgId().split(","));
+            List<String> intersection = orgId.stream().filter(orgIdCo::contains).collect(toList());
+            if(photoAlbum.getIsPublic().equals(IsPublicEnum.NOPUBLIC.getValue()) && CollectionUtils.isEmpty(intersection)) {
                 throw new PhotoAlbumException("您没有该相册访问权限");
             }
         }
