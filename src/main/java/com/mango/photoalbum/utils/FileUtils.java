@@ -1,21 +1,10 @@
 package com.mango.photoalbum.utils;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.exif.ExifIFD0Directory;
-import com.drew.metadata.exif.ExifSubIFDDirectory;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * file工具类
@@ -115,48 +104,5 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
         if (".xml".equalsIgnoreCase(fileExtension))
             return "text/xml";
         return "text/html";
-    }
-
-    /**
-     * 图片属性
-     * @param file
-     * @return
-     */
-    public static Map<String, Object> getImgInfo(InputStream file) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            Metadata metadata = ImageMetadataReader.readMetadata(file);
-            for (Directory directory : metadata.getDirectories()) {
-                if("ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getSimpleName())){
-                    //光圈F值=镜头的焦距/镜头光圈的直径
-                    result.put("fnumber", directory.getString(ExifSubIFDDirectory.TAG_FNUMBER));
-                    //曝光时间秒
-                    result.put("exposure_time", directory.getString(ExifSubIFDDirectory.TAG_EXPOSURE_TIME));
-                    //ISO速度
-                    result.put("iso_equivalent", directory.getString(ExifSubIFDDirectory.TAG_ISO_EQUIVALENT));
-                    //焦距毫米
-                    result.put("facal_length", directory.getString(ExifSubIFDDirectory.TAG_FOCAL_LENGTH));
-                    //拍照时间
-                    result.put("tdatetime_original", directory.getString(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL));
-                    //宽
-                    result.put("width", directory.getString(ExifSubIFDDirectory.TAG_EXIF_IMAGE_WIDTH));
-                    //高
-                    result.put("height", directory.getString(ExifSubIFDDirectory.TAG_EXIF_IMAGE_HEIGHT));
-                }
-                if("ExifIFD0Directory".equalsIgnoreCase(directory.getClass().getSimpleName())){
-                    //照相机制造商
-                    result.put("make", directory.getString(ExifIFD0Directory.TAG_MAKE));
-                    //照相机型号
-                    result.put("model", directory.getString(ExifIFD0Directory.TAG_MODEL));
-                    //水平分辨率
-                    result.put("x_resolution", directory.getString(ExifIFD0Directory.TAG_X_RESOLUTION));
-                    //垂直分辨率
-                    result.put("y_resolution", directory.getString(ExifIFD0Directory.TAG_Y_RESOLUTION));
-                }
-            }
-        } catch (ImageProcessingException | IOException e) {
-            e.printStackTrace();
-        }
-        return result;
     }
 }
