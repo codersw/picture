@@ -234,7 +234,7 @@ $(function () {
 // 照片详情
 if (MGNative) {
     MGNative.setupWebViewJavascriptBridge(function (bridge) {
-        $(document).on('click', '.list_cell img', function () {
+        $(document).on('click', '.list_cell .img_bg', function () {
             var _this = $(this),
                 currentUrl = _this.attr('data-src');
             if (currentUrl && currentUrl.indexOf('https') !== -1) {
@@ -245,7 +245,7 @@ if (MGNative) {
                 });
             }
         });
-        $(document).on('click', '.date_img img', function () {
+        $(document).on('click', '.date_img .img_bg', function () {
             var _this = $(this),
                 currentUrl = _this.attr('src');
             if (currentUrl && currentUrl.indexOf('http') !== -1) {
