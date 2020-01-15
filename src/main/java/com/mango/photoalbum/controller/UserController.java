@@ -52,7 +52,6 @@ public class UserController {
             String orgId = userInfo.getString("OrgId");
             String orgIdAll = userInfo.getString("OrgParentIDALL");
             orgIdAll = orgIdAll.replaceAll("\\|", "");
-            orgIdAll = orgIdAll + "," + orgId;
             result.put("orgId", orgId);
             result.put("orgIdAll", orgIdAll);
             return ResultGenerator.genSuccessResult(result);

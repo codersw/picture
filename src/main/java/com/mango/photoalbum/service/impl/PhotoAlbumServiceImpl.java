@@ -72,6 +72,10 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                 .orgIdAll(photoAlbumV1Co.getOrgIdAll())
                 .isPublic(photoAlbumV1Co.getIsPublic())
                 .build();
+        String[] orgIdAll = photoAlbumV1Co.getOrgIdAll().split(",");
+        if(orgIdAll.length > 2) {
+            photoAlbum.setOrgId(Integer.valueOf(orgIdAll[orgIdAll.length-1]));
+        }
         if(StringUtils.isBlank(photoAlbumV1Co.getAlbumId())){
             photoAlbum.setAlbumId(CommonUtils.UUID());
             photoAlbum.setCreateUserId(photoAlbumV1Co.getUserId());
@@ -282,15 +286,20 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery1));
         //第二个条件拼接 (orgId=22 and isPublic=1)
         BoolQuery boolQuery1 = new BoolQuery();
+        String[] orgIdAll = photoAlbumListV1Co.getOrgIdAll().split(",");
+        Integer orgId = photoAlbumListV1Co.getOrgId();
+        if(orgIdAll.length > 2) {
+            orgId = Integer.valueOf(orgIdAll[orgIdAll.length-1]);
+        }
         //设置部门id
-        MatchQuery matchQuery = new MatchQuery();
-        matchQuery.setFieldName("orgIdAll");
-        matchQuery.setText(photoAlbumListV1Co.getOrgIdAll());
+        TermQuery termQuery2 = new TermQuery();
+        termQuery2.setFieldName("orgId");
+        termQuery2.setTerm(ColumnValue.fromLong(orgId));
         //设置不公开的相册
         TermQuery termQuery3 = new TermQuery();
         termQuery3.setFieldName("isPublic");
         termQuery3.setTerm(ColumnValue.fromLong(IsPublicEnum.NOPUBLIC.getValue()));
-        boolQuery1.setMustQueries(Arrays.asList(matchQuery, termQuery3));
+        boolQuery1.setMustQueries(Arrays.asList(termQuery2, termQuery3));
         //合并条件 (第一个条件) or (第二个条件)
         List<Query> queries = new ArrayList<>();
         queries.add(boolQuery);
