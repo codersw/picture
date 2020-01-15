@@ -69,6 +69,7 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
                 .isDel(IsDelEnum.FALSE.getValue())
                 .modifyTime(new Date())
                 .orgId(photoAlbumV1Co.getOrgId())
+                .orgIdAll(photoAlbumV1Co.getOrgIdAll())
                 .isPublic(photoAlbumV1Co.getIsPublic())
                 .build();
         if(StringUtils.isBlank(photoAlbumV1Co.getAlbumId())){
@@ -282,14 +283,14 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         //第二个条件拼接 (orgId=22 and isPublic=1)
         BoolQuery boolQuery1 = new BoolQuery();
         //设置部门id
-        TermQuery termQuery2 = new TermQuery();
-        termQuery2.setFieldName("orgId");
-        termQuery2.setTerm(ColumnValue.fromLong(photoAlbumListV1Co.getOrgId()));
+        MatchQuery matchQuery = new MatchQuery();
+        matchQuery.setFieldName("orgIdAll");
+        matchQuery.setText(photoAlbumListV1Co.getOrgId().toString());
         //设置不公开的相册
         TermQuery termQuery3 = new TermQuery();
         termQuery3.setFieldName("isPublic");
         termQuery3.setTerm(ColumnValue.fromLong(IsPublicEnum.NOPUBLIC.getValue()));
-        boolQuery1.setMustQueries(Arrays.asList(termQuery2, termQuery3));
+        boolQuery1.setMustQueries(Arrays.asList(matchQuery, termQuery3));
         //合并条件 (第一个条件) or (第二个条件)
         List<Query> queries = new ArrayList<>();
         queries.add(boolQuery);

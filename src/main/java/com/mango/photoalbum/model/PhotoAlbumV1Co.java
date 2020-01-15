@@ -38,4 +38,7 @@ public class PhotoAlbumV1Co {
 
     @ApiModelProperty(value = "部门id")
     private Integer orgId;
+
+    @ApiModelProperty(value = "所有部门id")
+    private String orgIdAll;
 }

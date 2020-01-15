@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mango.photoalbum.annotation.OTSClass;
 import com.mango.photoalbum.annotation.OTSColumn;
 import com.mango.photoalbum.annotation.OTSPrimaryKey;
+import com.mango.photoalbum.enums.AnalyzerEnum;
 import com.mango.photoalbum.enums.IndexTypeEnum;
 import com.mango.photoalbum.enums.IsDelEnum;
 import com.mango.photoalbum.enums.IsPublicEnum;
@@ -99,6 +100,12 @@ public class PhotoAlbum {
      */
     @OTSColumn(definedColumnType = DefinedColumnType.INTEGER, indexType = IndexTypeEnum.LONG)
     private Integer orgId;
+
+    /**
+     * 所有orgId
+     */
+    @OTSColumn(indexType = IndexTypeEnum.TEXT, analyzer = AnalyzerEnum.Split, splitAnalyzerDelimiter = ",")
+    private String orgIdAll;
 
     /**
      * 封面 图片url
