@@ -7,6 +7,7 @@ import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
+import com.mango.photoalbum.exception.PhotoAlbumException;
 import com.mango.photoalbum.model.FaceInfo;
 import com.mango.photoalbum.model.UploadFileFace;
 import lombok.extern.slf4j.Slf4j;
@@ -178,6 +179,9 @@ public class FaceUtils {
             CommonResponse response = acs.getCommonResponse(request);
             log.info("查找注册库中的人脸成功:{}", response.getData());
             JSONObject json = JSONObject.parseObject(response.getData());
+            if(StringUtils.isEmpty(json.getString("Data"))) {
+                throw new PhotoAlbumException("人脸识别失败");
+            }
             return JSONObject.parseArray(json.getString("Data"), UploadFileFace.class);
         } catch (ClientException e) {
             e.printStackTrace();
