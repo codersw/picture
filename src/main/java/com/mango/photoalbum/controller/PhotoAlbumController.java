@@ -127,4 +127,19 @@ public class PhotoAlbumController {
                 .list(photoAlbumService.listV1(photoAlbumListV1Co))
                 .build());
     }
+
+    /**
+     * 相册列表
+     * @return
+     */
+    @ApiOperation(value = "相册列表", notes = "相册列表")
+    @GetMapping("/v1/admin/list")
+    @ApiVersion
+    @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
+    public Result v1listAdmin(PhotoAlbumListV1Co photoAlbumListV1Co){
+        return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
+                .total(photoAlbumService.totalV1(photoAlbumListV1Co))
+                .list(photoAlbumService.listV1(photoAlbumListV1Co))
+                .build());
+    }
 }
