@@ -22,4 +22,8 @@ public interface PhotoAlbumService {
     Integer totalV1(PhotoAlbumListV1Co photoAlbumListV1Co);
 
     List<PhotoAlbum> listV1(PhotoAlbumListV1Co photoAlbumListV1Co);
+
+    Integer totalAdmin(PhotoAlbumListV1Co photoAlbumListV1Co);
+
+    List<PhotoAlbum> listAdmin(PhotoAlbumListV1Co photoAlbumListV1Co);
 }

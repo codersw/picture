@@ -229,6 +229,64 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
         return result;
     }
 
+    @Override
+    public Integer totalAdmin(PhotoAlbumListV1Co photoAlbumListV1Co) {
+        SearchQuery query = new SearchQuery();
+        query.setQuery(formatQueryAdmin(photoAlbumListV1Co));
+        query.setLimit(0);// 如果只关心统计聚合的结果，返回匹配到的结果数量设置为0有助于提高响应速度。
+        query.setGetTotalCount(true);// 设置返回总条数
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(PhotoAlbum.class))
+                .indexName(ots.getTableName(PhotoAlbum.class))
+                .searchQuery(query)
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return 0;
+        return (int) searchResponse.getTotalCount();
+    }
+
+    @Override
+    public List<PhotoAlbum> listAdmin(PhotoAlbumListV1Co photoAlbumListV1Co) {
+        List<PhotoAlbum> result = new ArrayList<>();
+        SearchQuery query = new SearchQuery();
+        query.setQuery(formatQueryAdmin(photoAlbumListV1Co));
+        Integer pageSize = photoAlbumListV1Co.getPageSize();
+        int offset = (photoAlbumListV1Co.getPageIndex() - 1) * photoAlbumListV1Co.getPageSize();
+        query.setOffset(offset);
+        query.setLimit(pageSize);
+        query.setGetTotalCount(false);// 设置返回总条数
+        query.setSort(new Sort(Collections.singletonList(new FieldSort("modifyTime", SortOrder.DESC))));//排序
+        SearchRequest searchRequest = SearchRequest.newBuilder()
+                .tableName(ots.getTableName(PhotoAlbum.class))
+                .indexName(ots.getTableName(PhotoAlbum.class))
+                .searchQuery(query)
+                .returnAllColumns(true) // 设置返回所有列
+                .build();
+        SearchResponse searchResponse = ots.searchQuery(searchRequest);
+        if(searchResponse == null) return result;
+        try {
+            List<Row> rows = searchResponse.getRows();
+            if(rows.size() > 0) {
+                for(Row row : rows) {
+                    PhotoAlbum photoAlbum = ots.formatRow(row, PhotoAlbum.class);
+                    if(!StringUtils.isBlank(photoAlbum.getCover())){
+                        UploadFile uploadFile = ots.retrieveRow(UploadFile.builder()
+                                .fileId(photoAlbum.getCover())
+                                .build());
+                        if(uploadFile != null && uploadFile.getIsDel().equals(IsDelEnum.FALSE.getValue())){
+                            photoAlbum.setCoverPath(uploadFile.getFilePath());
+                        }
+                    }
+                    result.add(photoAlbum);
+                }
+            }
+        } catch (IllegalAccessException | InstantiationException | ParseException e) {
+            log.error("获取列表出错:{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     /**
      * 格式化查询条件
      * @param photoAlbumListCo
@@ -340,6 +398,48 @@ public class PhotoAlbumServiceImpl implements PhotoAlbumService {
             return boolQuery4;
         }
         return boolQuery2;
+    }
+
+    private BoolQuery formatQueryAdmin(PhotoAlbumListV1Co photoAlbumListV1Co) {
+        BoolQuery boolQuery = new BoolQuery();
+        TermQuery termQuery = new TermQuery(); // 设置查询类型为精确查找
+        termQuery.setFieldName("isDel");  // 设置针对哪个字段
+        termQuery.setTerm(ColumnValue.fromLong(IsDelEnum.FALSE.getValue()));
+        String[] orgIdAll = photoAlbumListV1Co.getOrgIdAll().split(",");
+        Integer orgId = photoAlbumListV1Co.getOrgId();
+        if(orgIdAll.length > 2) {
+            orgId = Integer.valueOf(orgIdAll[orgIdAll.length-1]);
+        }
+        //设置部门id
+        TermQuery termQuery2 = new TermQuery();
+        termQuery2.setFieldName("orgId");
+        termQuery2.setTerm(ColumnValue.fromLong(orgId));
+        boolQuery.setMustQueries(Arrays.asList(termQuery, termQuery2));
+        List<Query> queries = new ArrayList<>();
+        String keyword = photoAlbumListV1Co.getKeyword();
+        if(!StringUtils.isBlank(keyword)){
+            //条件1
+            MatchPhraseQuery matchQuery1 = new MatchPhraseQuery();
+            matchQuery1.setFieldName("title");
+            matchQuery1.setText(keyword);
+            queries.add(matchQuery1);
+            //条件2
+            MatchPhraseQuery  matchQuery2 = new MatchPhraseQuery();
+            matchQuery2.setFieldName("shootLocation");
+            matchQuery2.setText(keyword);
+            queries.add(matchQuery2);
+            //条件3
+            if(Pattern.compile("[0-9]*").matcher(keyword).matches()) {
+                TermQuery termQuery3 = new TermQuery();
+                termQuery3.setFieldName("createUserId");
+                termQuery3.setTerm(ColumnValue.fromString(keyword));
+                queries.add(termQuery3);
+            }
+            boolQuery.setShouldQueries(queries);
+            //最少匹配一个搜索条件
+            boolQuery.setMinimumShouldMatch(1);
+        }
+        return boolQuery;
     }
 
     /**

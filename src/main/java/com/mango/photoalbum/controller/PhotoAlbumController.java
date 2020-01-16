@@ -138,8 +138,8 @@ public class PhotoAlbumController {
     @RequiredPermission(PermissionConst.SUPPERUSERFLAGENUM)
     public Result v1listAdmin(PhotoAlbumListV1Co photoAlbumListV1Co){
         return ResultGenerator.genSuccessResult(PageResponse.<PhotoAlbum>builder()
-                .total(photoAlbumService.totalV1(photoAlbumListV1Co))
-                .list(photoAlbumService.listV1(photoAlbumListV1Co))
+                .total(photoAlbumService.totalAdmin(photoAlbumListV1Co))
+                .list(photoAlbumService.listAdmin(photoAlbumListV1Co))
                 .build());
     }
 }
