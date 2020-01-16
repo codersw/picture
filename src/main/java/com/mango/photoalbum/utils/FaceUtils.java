@@ -179,8 +179,8 @@ public class FaceUtils {
             CommonResponse response = acs.getCommonResponse(request);
             log.info("查找注册库中的人脸成功:{}", response.getData());
             JSONObject json = JSONObject.parseObject(response.getData());
-            if(StringUtils.isEmpty(json.getString("Data"))) {
-                throw new PhotoAlbumException("人脸识别失败");
+            if(StringUtils.isNotEmpty(json.getString("Code"))) {
+                throw new PhotoAlbumException("人脸识别失败手动抛出异常触发mq重试");
             }
             return JSONObject.parseArray(json.getString("Data"), UploadFileFace.class);
         } catch (ClientException e) {

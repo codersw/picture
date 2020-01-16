@@ -2,7 +2,7 @@
 // var serverHost = 'https://photoalbum.517api.cn';
 // var serverHost = 'http://192.168.4.169:8060';
 // 全局变量
-var serverHost = 'http://192.168.4.169:8060',
+var serverHost = 'http://192.168.4.162:8060',
     id = getLogin(),
     orgId = 0;
 // 提示框
